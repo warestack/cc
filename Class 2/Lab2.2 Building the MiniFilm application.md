@@ -1,4 +1,4 @@
-### Lab2.2: Building the MiniFilm application <img src="images/minifilm.png" alt="a" style="zoom:10%;" />
+### Lab2.2: Building the MiniFilm application
 
 #### What am I about to learn?
 
