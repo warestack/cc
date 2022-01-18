@@ -11,7 +11,7 @@ app.get('/', (req,res)=>{
     res.send('Homepage')
 })
 
-const MURL = 'mongodb+srv://username:passwors@cluster0.h0tys.mongodb.net/MiniFilms?retryWrites=true&w=majority'
+const MURL = 'mongodb+srv://student:1234@cluster0.h0tys.mongodb.net/MiniFilms?retryWrites=true&w=majority'
 
 mongoose.connect(MURL, ()=>{
     console.log('Your mongoDB connector is on...')
