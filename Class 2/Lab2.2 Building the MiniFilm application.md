@@ -1,4 +1,4 @@
-### Lab2.2: Building the MiniFilm application <img src="/Users/steliossotiriadis/Dropbox/AA-Birkbeck/A-Cloud Computing 22/Class 1/Git files/Class 2/images/minifilm.png" alt="a" style="zoom:10%;" />
+### Lab2.2: Building the MiniFilm application <img src="images/minifilm.png" alt="a" style="zoom:10%;" />
 
 #### What am I about to learn?
 
