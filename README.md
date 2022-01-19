@@ -6,8 +6,8 @@ Here you will find everything you need for our class, material will be weekly up
 
 The up to date material includes:
 
-* [Class 1: Using basic Linux commands](https://github.com/steliosot/cc/tree/master/Class%201)
-* [Class 2: Building the MiniFlim Node.js application using MongoDB](https://github.com/steliosot/cc/tree/master/Class%202)
+* [Class 1: Using basic Linux commands](https://github.com/steliosot/cc/tree/master/Class-1)
+* [Class 2: Building the MiniFlim Node.js application using MongoDB](https://github.com/steliosot/cc/tree/master/Class-2)
 
 Thanks!
 
