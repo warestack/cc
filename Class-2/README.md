@@ -7,4 +7,6 @@ Make sure you complete the following three tutorials:
 * [Lab2.1-Introduction-to-NodeJS](https://github.com/steliosot/cc/blob/master/Class-2/Lab2.1-Introduction-to-NodeJS.md)
 * [Lab2.2-Building-the-MiniFilm-application](https://github.com/steliosot/cc/blob/master/Class-2/Lab2.2-Building-the-MiniFilm-application.md)
 * [Lab2.3-MongoDB-tutorial-with-Python](https://github.com/steliosot/cc/blob/master/Class-2/Lab2.3-MongoDB-tutorial-with-Python.md)
+  * Python scripts in ipynb and py format can be found [here](https://github.com/steliosot/cc/tree/master/Class-2/Lab2.3-Python-files)!
+
 
