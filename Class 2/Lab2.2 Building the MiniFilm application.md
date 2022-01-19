@@ -8,11 +8,11 @@ Lab 2 part 2 focuses on how to:
 
 * Conceptualise an application development task
 * Deploy a free MongoDB instance on the MongoDB Atlas
-* Create a MiniFilm application using NodeJS
+* Create a MiniFilm application using Node.js
 
 #### Lab 2.2: Building the MiniFilm application with MongoDB
 
-You will need to watch the next video on how to install and run a NodeJS app.
+You will need to watch the next video on how to install and run a Node.js app.
 
 > Take your time, make sure you double-check the code and debug your code as you do.
 
@@ -22,7 +22,7 @@ You will need to watch the next video on how to install and run a NodeJS app.
 
 > You should run this tutorial on your personal computer :white_check_mark:
 
-2. Here, you will find the commands and scripts that I created in this video. Assuming that you already installed NodeJS on your personal computer, and you are already in your project folder, you can initialise a NodeJS application using the following script.
+2. Here, you will find the commands and scripts that I created in this video. Assuming that you already installed Node.js on your personal computer, and you are already in your project folder, you can initialise a Node.js application using the following script.
 
 ```shell
 $ npm init
@@ -51,7 +51,7 @@ $ npm install express nodemon mongoose
 
 > [Link](https://www.mongodb.com/cloud/atlas/lp/try2?utm_source=google&utm_campaign=gs_emea_united_kingdom_search_core_brand_atlas_desktop&utm_term=mongodb%20atlas%20login&utm_medium=cpc_paid_search&utm_ad=e&utm_ad_campaign_id=12212624581&adgroup=115749705303&gclid=CjwKCAiA55mPBhBOEiwANmzoQrRYt9_LM38WefyAApthSkD3j0I_soqf9RiNSKQnr2YL9oaLhXJEEhoChb4QAvD_BwE) to connect to the MongoDB cluster.
 
-6. This is an example of the data model that we insert in Mongo and we build in NodeJS. The data is in JSON format.
+6. This is an example of the data model that we insert in Mongo and we build in Node.js. The data is in JSON format.
 
 ```json
 {
@@ -151,6 +151,6 @@ module.exports = mongoose.model('films',FilmSchema)
 $ npm start
 ```
 
-9. Make sure you create a couple of extra routes and familiarise yourself with the NodeJS code.
+9. Make sure you create a couple of extra routes and familiarise yourself with the Node.js code.
 
 :checkered_flag: Well done! You completed part 1, now move to part 2 :clap:

@@ -1,23 +1,17 @@
-### Lab2.1: Introduction to NodeJS
+### Lab2.1: Introduction to Node.js
 
 #### What am I about to learn?
 
-Today's lab session focused on an introduction to NodeJS.
+Today's lab session focused on an introduction to Node.js.
 
 Lab 2 part 1 focuses on how to:
 
-* Install NodeJS
-* Create a simple application using NodeJS
+* Install Node.js
+* Create a simple application using Node.js
 
-####  Do you want to explore more the Linux command-line interface?
+#### Lab 2.1: Installing and running a simple Node.js application 
 
-Download the [Linux Pocket Guide](https://www.dropbox.com/s/roe59y2gyghyq7b/Linux Pocket Guide%2C 3rd Edition.pdf?dl=0) and explore the commands. 
-
-Do not copy and paste the commands as copying from this document and pasting into the terminal could turn text into gibberish (e.g. quotation marks etc.).
-
-#### Lab 2.1: Installing and running a simple NodeJS application 
-
-You will need to watch the next video on how to install and run a NodeJS app.
+You will need to watch the next video on how to install and run a Node.js app.
 
 > Take your time, make sure you double-check the code and debug your code as you do.
 
@@ -27,7 +21,7 @@ You will need to watch the next video on how to install and run a NodeJS app.
 
 > You should run this tutorial on your personal computer :white_check_mark:
 
-2. Here, you will find the commands and scripts that I created in this video. Assuming that you already installed NodeJS on your personal computer, and you are already in your project folder, you can initialise a NodeJS application using the following script.
+2. Here, you will find the commands and scripts that I created in this video. Assuming that you already installed Node.js on your personal computer, and you are already in your project folder, you can initialise a Node.js application using the following script.
 
 ```shell
 $ npm init
@@ -120,6 +114,6 @@ module.exports = router
 $ npm start
 ```
 
-8. Make sure you create a couple of extra routes and familiarise yourself with the NodeJS code.
+8. Make sure you create a couple of extra routes and familiarise yourself with the Node.js code.
 
 :checkered_flag: Well done! You completed part 1, now move to part 2 :clap:

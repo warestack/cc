@@ -67,11 +67,11 @@ print(col_films.find_one())
 ```
 
 
-```json
+```javascript
 {'_id': ObjectId('61e58433542e1cdb1fd4384a'), 'film_name': 'Umbrella', 'film_type': 'Animated Short Film', 'film_year': '2021', 'film_link': 'https://youtu.be/Bl1FOKpFY2Q'}
 ```
 
-> Note that we can use the same, `find_one` method in NodeJS as in Python. Check this [short tutorial on Mongoose | findOne() Function](https://www.geeksforgeeks.org/mongoose-findone-function/).
+> Note that we can use the same, `find_one` method in Node.js as in Python. Check this [short tutorial on Mongoose | findOne() Function](https://www.geeksforgeeks.org/mongoose-findone-function/).
 
 5. Let's try the pretty print `pprint`, it's a good idea to use `pprint` each time we have long JSON documents.
 
@@ -82,11 +82,13 @@ print(col_films.find_one())
 ```
 
 
-    {'_id': ObjectId('61e58433542e1cdb1fd4384a'),
-     'film_link': 'https://youtu.be/Bl1FOKpFY2Q',
-     'film_name': 'Umbrella',
-     'film_type': 'Animated Short Film',
-     'film_year': '2021'}
+```javascript
+{'_id': ObjectId('61e58433542e1cdb1fd4384a'),
+ 'film_link': 'https://youtu.be/Bl1FOKpFY2Q',
+ 'film_name': 'Umbrella',
+ 'film_type': 'Animated Short Film',
+ 'film_year': '2021'}
+```
 
 6. Let's connect to the `MiniFilms` database, but in this case, we will create a new collection called `users` to host the users of the MiniFilm app.
 
@@ -120,7 +122,7 @@ pprint(col_users.find_one())
 ```
 
 
-```json
+```javascript
 {'_id': ObjectId('61e6bb9530052a285f182647'),
  'user_age': 44,
  'user_location': 'London',
@@ -157,7 +159,7 @@ col_users.find_one({},{"user_name": 1, "user_location":1})
 ```
 
 
-```json
+```javascript
 {'_id': ObjectId('61e6bb9530052a285f182647'),
  'user_location': 'London',
  'user_name': 'Tom Jones'}
@@ -174,7 +176,7 @@ for record in col_users.find():
 ```
 
 
-```json
+```javascript
 {'_id': ObjectId('61e6bb9530052a285f182647'), 'user_name': 'Tom Jones', 'user_age': 44, 'user_location': 'London'}
 {'_id': ObjectId('61e6bc6830052a285f18264a'), 'user_name': 'Jane Williams', 'user_age': 50, 'user_location': 'London'}
 {'_id': ObjectId('61e6bc6830052a285f18264b'), 'user_name': 'Kate Johnson', 'user_age': 35, 'user_location': 'Brighton'}
@@ -192,7 +194,7 @@ for user in results:
 ```
 
 
-```json
+```javascript
 {'_id': ObjectId('61e6bc6830052a285f18264a'), 'user_name': 'Jane Williams', 'user_age': 50, 'user_location': 'London'}
 {'_id': ObjectId('61e6bb9530052a285f182647'), 'user_name': 'Tom Jones', 'user_age': 44, 'user_location': 'London'}
 {'_id': ObjectId('61e6bc6830052a285f18264b'), 'user_name': 'Kate Johnson', 'user_age': 35, 'user_location': 'Brighton'}
@@ -208,7 +210,7 @@ print(doc[0])
 ```
 
 
-```json
+```javascript
 {'_id': ObjectId('61e6bc6830052a285f18264a'), 'user_name': 'Jane Williams', 'user_age': 50, 'user_location': 'London'}
 ```
 
@@ -224,7 +226,7 @@ for user in results:
 ```
 
 
-```json
+```javascript
 {'_id': ObjectId('61e6bc6830052a285f18264a'), 'user_name': 'Jane Williams', 'user_age': 50, 'user_location': 'London'}
 ```
 
@@ -240,7 +242,7 @@ for user in results:
 ```
 
 
-```json
+```javascript
 {'user_name': 'Jane Williams', 'user_age': 50, 'user_location': 'London'}
 ```
 
@@ -254,7 +256,7 @@ for record in res:
 ```
 
 
-```json
+```javascript
 {'user_location': 'London', 'user_name': 'Tom Jones'}
 {'user_location': 'London', 'user_name': 'Jane Williams'}
 ```
@@ -276,7 +278,7 @@ for record in agg_result:
 ```
 
 
-```json
+```javascript
 {'_id': 'London', 'num_instances': 2}
 {'_id': 'Brighton', 'num_instances': 1}
 ```
@@ -313,7 +315,7 @@ for record in results:
 ```
 
 
-```json
+```javascript
 {'_id': ObjectId('61e6bb9530052a285f182647'), 'user_name': 'Tom Jones', 'user_age': 44, 'user_location': 'London'}
 {'_id': ObjectId('61e6bc6830052a285f18264a'), 'user_name': 'Jane Williams', 'user_age': 50, 'user_location': 'London'}
 ```
@@ -355,7 +357,7 @@ for record in results:
 ```
 
 
-```json
+```javascript
 {'_id': ObjectId('61e6bc6830052a285f18264a'), 'user_name': 'Jane Williams', 'user_age': 50, 'user_location': 'London'}
 ```
 
@@ -384,7 +386,7 @@ print(res)
 ```
 
 
-```json
+```javascript
 {'_id': ObjectId('61e6c0ca30052a285f18264c'), 'user_name': 'Dan Berry', 'user_age': 64, 'user_location': 'London'}
 ```
 
@@ -441,7 +443,7 @@ for i in res:
 ```
 
 
-```json
+```javascript
 {'FILMS': [{'_id': ObjectId('61e6c20230052a285f18264f'),
             'film_link': 'https://youtu.be/efGqe1j3RNk',
             'film_name=': 'WinDUP',
@@ -516,7 +518,7 @@ for record in results:
 ```
 
 
-```json
+```javascript
 User data:
 {'DATA': [],
  '_id': ObjectId('61e6bb9530052a285f182647'),
@@ -570,7 +572,7 @@ print(x.modified_count, "documents updated.")
 ```
 
 
-```json
+```javascript
 {'_id': ObjectId('61e6c0ca30052a285f18264c'), 'user_name': 'Dan Berry', 'user_location': 'London'}
 {'_id': ObjectId('61e6c0ca30052a285f18264c'), 'user_name': 'Dan Berry', 'user_location': 'Bournemouth'}
 1 documents updated.
@@ -589,7 +591,7 @@ for user in results:
 ```
 
 
-```json
+```javascript
 {'_id': ObjectId('61e6c0ca30052a285f18264c'), 'user_name': 'Dan Berry', 'user_age': 64, 'user_location': 'Bournemouth'}
 ```
 
@@ -612,7 +614,7 @@ for i in res:
 ```
 
 
-```json
+```javascript
 {'_id': ObjectId('61e6bb9530052a285f182647'), 'user_name': 'Tom Jones', 'user_age': 44, 'user_location': 'London'}
 {'_id': ObjectId('61e6bc6830052a285f18264a'), 'user_name': 'Jane Williams', 'user_age': 50, 'user_location': 'London'}
 {'_id': ObjectId('61e6bc6830052a285f18264b'), 'user_name': 'Kate Johnson', 'user_age': 35, 'user_location': 'Brighton'}
