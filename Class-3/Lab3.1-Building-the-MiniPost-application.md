@@ -49,7 +49,7 @@ $ npm install express nodemon mongoose body-parser dotenv
 
 4. Make sure you edit the `package.json` and adapt the `scripts` key to the following value (as shown in the video).
 
-```json
+```javascript
 ...
 "scripts": {
   "start":"nodemon app.js"
