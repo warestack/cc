@@ -311,7 +311,7 @@ Luke Skywalker was a Tatooine farmboy who rose from humble beginnings to become 
 29. Now let’s install new software and make a simple configuration. We will install (or we can say we will deploy) the **[Apache webserver](https://httpd.apache.org)** to host a website.
 
 * We will use the sudo apt install command.
-* The sudo keyword refers to the superuser, a particular user with privileges to install the software. In our case, the student user is also a sudo superuser. 
+* The sudo keyword refers to the superuser, a particular user with privileges to install the software. In our case, `yoda` is also a `sudo` superuser. 
 * We will need to run this command as sudo. Note that you need to enter your password when prompted.
 
 ```shell
