@@ -66,7 +66,7 @@ $ npm install express nodemon mongoose body-parser dotenv
 {
   "user":"Stelios",
   "title":"Hi!",
-  "text":"Hi I am Stelioa and this is my first post!",
+  "text":"Hi, I am Stelioa and this is my first post!",
   "hashtag":"#VideoGaming",
   "location":"London",
   "url":"https://stelios.com",
