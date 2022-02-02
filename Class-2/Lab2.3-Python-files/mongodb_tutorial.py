@@ -252,7 +252,7 @@ user_id = res['_id']
 
 
 film1 = {
-		"film_name=":"WinDUP",
+		"film_name":"WinDUP",
 		"film_type":"Animated Short Film",
 		"film_year":"2021",
     "film_link":"https://youtu.be/efGqe1j3RNk",
@@ -336,7 +336,7 @@ pipeline = [
 ]
 results = col_users.aggregate(pipeline)
 
-print("User data:")
+pprint("User data:")
 for record in results:
   pprint(record)
 
