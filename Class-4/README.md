@@ -4,5 +4,5 @@ Welcome to Lab 4!
 
 Make sure you complete the following tutorials:
 
-* [Lab4.1-Validation-Authentication-in-the-MiniFilm-microservice](https://github.com/steliosot/cc/blob/master/Class-4/Lab4.1-Building-the-MiniPost-application.md)
+* [[Lab4.1-Building-the-MiniFilm-application.md](https://github.com/steliosot/cc/blob/master/Class-4/Lab4.1-Building-the-MiniFilm-application.md)](https://github.com/steliosot/cc/blob/master/Class-4/Lab4.1-Building-the-MiniFilm-application.md)
 
