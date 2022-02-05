@@ -23,7 +23,7 @@ You will need to watch the next video on how to install and run a Node.js app.
 
 1. Firstly, watch the following video.
 
-[![Watch the video](https://i.ytimg.com/vi/rr2la-muxKM/hqdefault.jpg)](https://youtu.be/rr2la-muxKM)
+[![Watch the video](https://i.ytimg.com/vi/60SGb-CSB9Y/hqdefault.jpg)](https://youtu.be/60SGb-CSB9Y)
 
 > You should run this tutorial on your personal computer :white_check_mark:
 
