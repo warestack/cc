@@ -123,13 +123,13 @@ $ git clone --branch master https://<username>:<token>@repo
 ```bash
 $ ls
 
-lab5-auth-minifilm
+lab5-test-app
 ```
 
 10. Enter in the repo folder.
 
 ```bash
-$ cd lab5-auth-minifilm
+$ cd lab5-test-app
 ```
 
 11. Create a new Dockerfile as follows (e.g. using `pico`)
