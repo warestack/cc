@@ -108,7 +108,7 @@ $ git clone --branch master https://<username>:<token>@repo
 > Link to repo: 
 >
 > ```
-> https://steliosot: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@github.com/steliosot/lab5-auth-minifilm.git
+> LINK IS ON MOODLE
 > ```
 
 9. Your repo should be now in your VM; run `ls` to check it out.
@@ -116,13 +116,13 @@ $ git clone --branch master https://<username>:<token>@repo
 ```bash
 $ ls
 
-mini-test-app
+lab5-test-app
 ```
 
 10. Enter in the repo folder.
 
 ```bash
-$ cd mini-test-app
+$ cd lab5-test-app
 ```
 
 11. Create a new Dockerfile as follows (e.g. using `pico`)
@@ -153,5 +153,9 @@ $ docker container run -d --name stelios-web --publish 80:3000 mini-test-app-ima
 > `-d` run process in the background. 
 
 14. Try to access your service in the browser; you just created your first containerised app!
+15. Make sure you follow the second part of the video to containarise the **lab5-auth-minifilm** microservice. Please follow the steps on the video, and you might need to reuse the same steps of this tutorial (8-13) to create and run the service.
 
-15. Now rerun the same process using the MiniPost application.
+> In this example, I used Postman to interact with the service, as we did in week 4.
+
+14.  :checkered_flag: Well done! You completed lab 5.2! 
+15. Now follow the same process to containerise the MiniPost application.
