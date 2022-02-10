@@ -105,10 +105,10 @@ $ git push -f origin master
 $ git clone --branch master https://<username>:<token>@repo
 ```
 
-> Link to repo: 
+> This is the link to the **lab5-auth-minifilm**: 
 >
 > ```
-> LINK IS ON MOODLE
+> FOR SECURITY REASONS THE LINK IS ON MOODLE, PLEASE DO NOT PUBLISH THIS LINK!
 > ```
 
 9. Your repo should be now in your VM; run `ls` to check it out.
@@ -156,6 +156,9 @@ $ docker container run -d --name stelios-web --publish 80:3000 mini-test-app-ima
 15. Make sure you follow the second part of the video to containarise the **lab5-auth-minifilm** microservice. Please follow the steps on the video, and you might need to reuse the same steps of this tutorial (8-13) to create and run the service.
 
 > In this example, I used Postman to interact with the service, as we did in week 4.
+>
+> For the moment, I made the assumption that I can push the `.env` file, as it is in my private repository, but this is a bad practice and we will need to deal with this! We will explore best practices for such (configuration) files in the next classes.
 
-14.  :checkered_flag: Well done! You completed lab 5.2! 
-15. Now follow the same process to containerise the MiniPost application.
+16. :checkered_flag: Well done! You completed lab 5.2!
+
+17. Now follow the same process to containerise the MiniPost application! Can you do it in less than 5 minutes? :timer_clock:
