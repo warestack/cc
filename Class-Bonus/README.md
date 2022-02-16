@@ -1,5 +1,5 @@
 ### Cloud Computing and Cloud Computing Concepts Bonus Lab
-
+ 
 Welcome to Bonus Lab!
 
 Make sure you complete the following tutorials:
