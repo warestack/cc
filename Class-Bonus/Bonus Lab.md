@@ -17,7 +17,7 @@ You will need to watch the following video to follow the step by step commands.
 
 * The following video demonstrates the commands used in this tutorial. 
 
-[![Watch the video](https://i.ytimg.com/vi/92s-4lxr3Gw/hqdefault.jpg)](https://youtu.be/92s-4lxr3Gw)
+[![Watch the video](https://i.ytimg.com/vi/LS0UvkbA9Pw/hqdefault.jpg)](https://youtu.be/LS0UvkbA9Pw)
 
 > **You should run this tutorial on your GCP VM and the  Google Cloud Shell :white_check_mark:**
 
