@@ -29,7 +29,7 @@ You will need to watch the following video to follow the step by step commands.
 
 * The following video demonstrates the commands used in this tutorial. 
 
-[![Watch the video](https://i.ytimg.com/vi/MgPqctyXXmI/hqdefault.jpg)](https://youtu.be/MgPqctyXXmI)
+[![Watch the video](https://i.ytimg.com/vi/4fC0NvhhZrM/hqdefault.jpg)](https://youtu.be/4fC0NvhhZrM)
 
 > **You should run this tutorial on your GCP VM. :white_check_mark:**
 
