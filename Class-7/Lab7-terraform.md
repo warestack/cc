@@ -74,7 +74,7 @@ $ cd cc-terraform
 * Then run the `mirror` command. 
 
 ```bash
-$ git push --mirror https://<user-name>:<token>:<repo>
+$ git push --mirror https://<user-name>:<token>@<repo>
 ```
 
 > An example of my command is the next:
@@ -93,7 +93,7 @@ $ cd ..
 7. Let's `clone` it, run the next command:
 
 ```bash
-$ git clone https://<user-name>:<toke>:<repo>
+$ git clone https://<user-name>:<toke>@<repo>
 ```
 
 * Then enter in your repo folder:
@@ -209,7 +209,7 @@ $ git commit -m "change workflow"
 20. Then `push`! Remember, this is your private repo, so make sure you use your token.
 
 ```bash
-$ git push https://<user-name>:<token>:<repo>
+$ git push https://<user-name>:<token>@<repo>
 ```
 
 > * Part 1 is now completed; your VM should be up and running and ready to accept code!
@@ -233,7 +233,7 @@ $ git clone https://github.com/steliosot/cc-terraform-node.git
 * Create a new repo and make a mirror copy of the repo to your folder, as we did at the beginning of Part 1.
 
 ```bash
-$ git push --mirror https://<user-name>:<token>:<repo>
+$ git push --mirror https://<user-name>:<token>@<repo>
 ```
 
 * :rotating_light: In your new repo-add your secret in base64 format.
@@ -277,12 +277,12 @@ $ git commit -m "add node app"
 ```
 
 ```bash
-$ git push https://<user-name>:<token>:<repo>
+$ git push https://<user-name>:<token>@<repo>
 ```
 
 28. Go to your browser and find your VM IP; your app should be up and running (at port 80).
 
-29. Let's make a minor update; let's update your code (v1` to `v2`)!
+29. Let's make a minor update; let's update your code (`v1` to `v2`)!
 
 ```javascript
 const express = require('express')
@@ -301,7 +301,7 @@ app.listen(3000)
 
 31. **Appendix**
 
-* Here is presenting the configuration of the `script.sh`.
+* Here you can see the configuration included in the `script.sh`.
 
 ```bash
 #!/bin/bash
