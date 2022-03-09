@@ -458,13 +458,12 @@ INSERT INTO music_store.music_by_category
  (type, category, id, name, title)
 VALUES
   ('LP record', 'Rock', uuid(), 'Pink Floyd', 'The Dark Side of the Moon');
-
 ```
 
 29. Let's select data using the `SELECT` command.
 
-```bash
-$ SELECT * FROM music_store.music_by_category;
+```cassandra
+SELECT * FROM music_store.music_by_category;
 ```
 
 30. Delete the table using `DROP TABLE` command (like in SQL)
@@ -604,7 +603,7 @@ for i in rows:
 44. Let's run it.
 
 ```bash
-python test-cassandra.py
+$ python test-cassandra.py
 ```
 
 > The output should be the two data points from Cassandra
