@@ -252,7 +252,7 @@ $ docker run --name cassandra-2 -d --link cassandra-1:cassandra cassandra:3.11
 17. Let us check the status of the containers.
 
 ```bash
-$ docker ps -a
+$ docker exec -i -t cassandra-1 bash -c 'nodetool status' 
 ```
 
 > * The output is:
@@ -791,7 +791,7 @@ $ docker exec -i -t cas-c1 bash -c 'nodetool status'
 $ docker run --name cas-c2 -d -e CASSANDRA_BROADCAST_ADDRESS=<internal-ip-address-vm2> -e CASSANDRA_SEEDS=<internal-ip-address-vm1> -p 7000:7000 cassandra:3.11
 ```
 
-66. Run the `nodetool`command.
+66. Run the `nodetool`command in the first VM.
 
 ```bash
 $ docker exec -i -t cas-c1 bash -c 'nodetool status'
