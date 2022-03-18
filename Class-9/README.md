@@ -1,4 +1,4 @@
-### Lab9: Introduction to Apache Cassandra
+### Lab9: Introduction to Apache Hadoop MapReduce
 
 #### What am I about to learn?
 
