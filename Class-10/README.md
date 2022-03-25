@@ -600,7 +600,7 @@ services:
 worker3:
     image: mjhea0/spark:2.4.1
     command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://master:7077
-    hostname: worker2
+    hostname: worker3
     environment:
       SPARK_CONF_DIR: /conf
       SPARK_WORKER_CORES: 2
