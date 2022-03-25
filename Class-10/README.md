@@ -4,7 +4,7 @@
 
 Today's lab session focused on Apache Spark. We will install and run Python applications on Spark.
 
-Lab 9focuses on how to:
+Lab 10 focuses on how to:
 
 * Configure a Spark container on a GCP VM using Dockerfiles
 * Run Spark jobs
