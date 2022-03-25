@@ -301,6 +301,12 @@ $ docker exec $CONTAINER_ID \
 25. Now, create a copy of the **docker-compose-EXTRA-WORKER.yml** file, as `docker-compose` file.
 
 > Let's examine this file. As you can see it is exactly the same as the previous compose file, but this one has an extra worker (`worker2`).
+>
+> ```bash
+> $ cp docker-compose-EXTRA-WORKER.yml docker-compose.yml
+> ```
+>
+> The docker file looks like this:
 
 ```dockerfile
 version: '3.3'
