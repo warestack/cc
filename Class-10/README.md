@@ -536,3 +536,83 @@ $ docker cp example3.py $CONTAINER_ID:/tmp
 ```bash
 $ docker exec $CONTAINER_ID bin/spark-submit --master spark://master:7077 --class endpoint /tmp/example3.py
 ```
+
+#### Appendix
+
+> This is an example of a third worker, we have to replace the old docker-compose with the new script (`docker-compose.yml`) 
+>
+> Feel free to add an extra worker (make sure you have available RAM)
+
+```
+version: '3.3'
+services:
+  master:
+    image: mjhea0/spark:2.4.1
+    command: bin/spark-class org.apache.spark.deploy.master.Master -h master
+    hostname: master
+    environment:
+      MASTER: spark://master:7077
+      SPARK_CONF_DIR: /conf
+      SPARK_PUBLIC_DNS: ${EXTERNAL_IP}
+    expose:
+      - 7077
+      - 6066
+    ports:
+      - 4040:4040
+      - 6066:6066
+      - 7077:7077
+      - 8080:8080
+  worker1:
+    image: mjhea0/spark:2.4.1
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://master:7077
+    hostname: worker1
+    environment:
+      SPARK_CONF_DIR: /conf
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 1g
+      SPARK_WORKER_PORT: 8881
+      SPARK_WORKER_WEBUI_PORT: 8081
+      SPARK_PUBLIC_DNS: ${EXTERNAL_IP}
+    depends_on:
+      - master
+    expose:
+      - 8881
+    ports:
+      - 8081:8081
+  worker2:
+    image: mjhea0/spark:2.4.1
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://master:7077
+    hostname: worker2
+    environment:
+      SPARK_CONF_DIR: /conf
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 1g
+      SPARK_WORKER_PORT: 8882
+      SPARK_WORKER_WEBUI_PORT: 8082
+      SPARK_PUBLIC_DNS: ${EXTERNAL_IP}
+    depends_on:
+      - master
+    expose:
+      - 8882
+    ports:
+      - 8082:8082
+      
+worker3:
+    image: mjhea0/spark:2.4.1
+    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://master:7077
+    hostname: worker2
+    environment:
+      SPARK_CONF_DIR: /conf
+      SPARK_WORKER_CORES: 2
+      SPARK_WORKER_MEMORY: 1g
+      SPARK_WORKER_PORT: 8883
+      SPARK_WORKER_WEBUI_PORT: 8083
+      SPARK_PUBLIC_DNS: ${EXTERNAL_IP}
+    depends_on:
+      - master
+    expose:
+      - 8883
+    ports:
+      - 8083:8083
+```
+
