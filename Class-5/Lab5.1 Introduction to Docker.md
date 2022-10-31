@@ -538,7 +538,7 @@ $ docker build -f Dockerfile . -t mini-python3-image
 43. Let's run it; I will create a new container called `test-python3-container`; I will still use the interactive `-it` shorthand to enter  the bash.
 
 ```bash
-$ docker run --name test-python3-container -it mini-python3-image /bin/bash
+$ docker run --name test-python3-container mini-python3-imag
 ```
 
 :checkered_flag: Well done! You completed lab 5.1! 
