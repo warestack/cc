@@ -537,7 +537,8 @@ exit
 38. Let's install the required packages.
 
 ```bash
-$ sudo apt install python-pip
+$ sudo apt install python3-pip
+
 ```
 
 > Type `Y` when prompted.
@@ -547,6 +548,7 @@ $ sudo apt install python-pip
 ```bash
 $ pip install cassandra-driver
 ```
+> If this command does not work, try `pip3` instead.
 
 41. We should be ready, first let us inspect the IP addresses of our cluster as we will need to define our cluster in Python.
 
