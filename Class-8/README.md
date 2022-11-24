@@ -680,6 +680,8 @@ $ npm init
 $ npm install cassandra-driver
 ```
 
+> If the command failed, try the next `npm install cassandra-driver@2.1.2 --save`
+
 55. Let's create a script `cassandra-app.js` to select data.
 
 56. Edit a file using `pico` and then edit as follows.
