@@ -48,19 +48,6 @@ You will need to watch the videos posted in preparation for the first class to r
 
 > You should be able now to create a new VM :white_check_mark:
 
-2. Then, watch the following video configuring Visual Studio Code (VSC) and connecting to the GCP VM.
-
-[![Watch the video](https://img.youtube.com/vi/gBF9cEmecnI/sddefault.jpg)](https://youtu.be/gBF9cEmecnI)
-
-> You should be able now to connect using VSC :white_check_mark:
-
-> :rotating_light: If you move keys in another computer, you might need to adjust the permissions; if so, run the following command in the keys folder.
-
-```
-$ chmod 400 *  
-```
-
-
 
 #### Lab 1.1 Part B: Deploying a Cloud application
 
