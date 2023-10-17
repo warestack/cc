@@ -13,9 +13,8 @@ app.get('/', (req,res)=>{
 
 const MURL = 'mongodb+srv://user:password@cluster0.h0tys.mongodb.net/MiniFilms?retryWrites=true&w=majority'
 
-mongoose.connect(MURL, ()=>{
-    console.log('Your mongoDB connector is on...')
-})
+mongoose.connect(MURL).then(() => { console.log('Your mongoDB connector is on...')})
+
 
 app.listen(3000, ()=>{
     console.log('Your server is up and running...')
