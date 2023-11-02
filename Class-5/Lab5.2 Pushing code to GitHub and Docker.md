@@ -116,13 +116,13 @@ $ git clone https://<username>:<token>@repo
 ```bash
 $ ls
 
-lab5-test-app
+mini-hi
 ```
 
 10. Enter in the repo folder.
 
 ```bash
-$ cd lab5-test-app
+$ cd mini-hi
 ```
 
 11. Create a new Dockerfile as follows (e.g. using `pico`)
