@@ -102,13 +102,13 @@ $ git push -f origin master
 8. Let's clone our GitHub repo.
 
 ```bash
-$ git clone --branch master https://<username>:<token>@repo
+$ git clone https://<username>:<token>@repo
 ```
 
 > This is the link to the **lab5-auth-minifilm**: 
 >
 > ```
-> FOR SECURITY REASONS THE LINK IS ON MOODLE, PLEASE DO NOT PUBLISH THIS LINK!
+> git clone https://github.com/steliosot/mini-hi
 > ```
 
 9. Your repo should be now in your VM; run `ls` to check it out.
