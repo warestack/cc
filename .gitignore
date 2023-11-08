@@ -1,1 +1,134 @@
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Node.js
+node_modules/
+
+# Dist directory
+/dist
+
+# Environment configuration
+.env
+
+# Python
+*.pyc
+*.pyo
+*.egg
+*.egg-info
+dist/
+build/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.log
+*.ctxt
+*.properties
+*.settings/
+*.metadata/
+*.loadpath
+*.recommenders/
+
+# IntelliJ IDEA
+*.iml
+*.iws
+*.ipr
+.idea/
+
+# Eclipse
+*.project
+*.metadata/
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+
+# Visual Studio Code
+.vscode/
+
+# macOS
+*.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode
+xcuserdata/
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# VS Code directories
+.vscode/
+!**/.vscode/settings.json
+!**/.vscode/tasks.json
+!**/.vscode/launch.json
+!**/.vscode/extensions.json
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+# JetBrains IDE
+.idea/
+
+# TextMate
+*.tmproj
+*.tmproject
+tmtags
+
+# SublimeText
+*.sublime-project
+*.sublime-workspace
+
+# Atoms's icon
+.icon.iconset
+
+# Tmp files
+*.tmp
+*.swp
+*.swo
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+*.db
+
+# Lock files - this enables potential users to use their own dependency manager (npm, yarn, pnpm etc.)
+*.lock
+*-lock.json
