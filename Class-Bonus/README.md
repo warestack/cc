@@ -1,4 +1,4 @@
-###  Lab 6: Messaging in distributed systems using ZeroMQ
+###  Bonus Lab: Messaging in distributed systems using ZeroMQ
 
 #### What am I about to learn?
 

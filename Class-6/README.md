@@ -1,4 +1,4 @@
-###  Bonus Lab: Deploying on Kubernetes
+###  Lab6: Deploying on Kubernetes
 
 #### What am I about to learn?
 
