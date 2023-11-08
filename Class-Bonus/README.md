@@ -126,6 +126,10 @@ steliosot/mini-hi   A hello world container using node.js (cloud…   0
 
 12. Create a Kubernetes cluster (GKE Standard) using the GKE.
 
+Make sure you Switch to standard cluster.
+![image](https://github.com/warestack/cc/assets/5771453/267ac4e6-7872-44a4-a12c-b02f5a23519f)
+
+
 * You will only need to provide a meaningful name, e.g. *my-gke-cluster*
 * By default, we will deploy **3** nodes.
 * This might take some time, so sit tight!
