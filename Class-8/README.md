@@ -1,808 +1,549 @@
-### Lab8: Introduction to Apache Cassandra
+###  Bonus Lab: Messaging in distributed systems using ZeroMQ
 
 #### What am I about to learn?
 
-Today's lab session focused on Apache Cassandra! We will install and run the basic commands to containerise and create a cluster of Cassandra NoSQL nodes.
+Today's lab session focused on ZeroMQ. We will use Python to develop the different messaging patterns.
 
-Lab 8 focuses on how to:
+You will need to watch the following video to follow the step by step commands.
 
-* Configure Cassandra containers on GCP VMs
-* Run a Cassandra cluster
-* Run the basic commands to interact with Cassandra
-* Use Python and Node.js to interact with Cassandra.
+> Take your time; make sure you double-check the commands before you run them.
 
-You will need to watch the following video on installing and running Apache Cassandra on a VM.
+* The following video demonstrates the commands used in this tutorial. 
 
-> Take your time; make sure you double-check the commands before you run it
+[![Watch the video](https://i.ytimg.com/vi/MgPqctyXXmI/hqdefault.jpg)](https://youtu.be/MgPqctyXXmI)
 
-1. The following video demonstrates the commands used in this tutorial. 
+> **You should run this tutorial on your GCP VM :white_check_mark:**
 
-[![Watch the video](https://i.ytimg.com/vi/79JVL6N0kuk/hqdefault.jpg)](https://youtu.be/79JVL6N0kuk)
+1. This tutorial introduces the concepts of sockets in Python3 using ZeroMQ. ZeroMQ is an easy way to develop sockets to allow distributed processes to communicate with each other by sending messages. 
+   * In its simplest form, a socket (node) “listens” on a specific IP port, while another socket reaches out to form a connection. Using sockets, we can have on-to-one, one-to-many and many-to-many connection patterns. 
 
-> You should run this tutorial on your GCP VM :white_check_mark:**
+2. The patterns of messaging that we will examine today are the following:
 
-#### Phase 1: Setting up our environment
+   * **Pair:** Exclusive, one to one communication, where two peers communicate with each other. The communication is bidirectional and there is no specific state stored in the socket. The server listens on a certain port, and the client connects to it.
 
-2. To run this tutorial, you will need a GCP VM. If you don't remember creating a VM, please watch the video. For this tutorial, I used the following configuration.
-   * Zone: us-central1-a
-   * Machine type: e2-medium
-   * HTTP traffic: On
-   * HTTPS traffic: On
-   * Image: [ubuntu-1804-bionic-v20220131](https://console.cloud.google.com/compute/imagesDetail/projects/ubuntu-os-cloud/global/images/ubuntu-1804-bionic-v20220131?project=lab-7-270015)
-   * Size (GB): 30
-3. Open a new terminal connection and run the follow the following commands. Make sure you understand the process. You don't have to memorise the commands.
-4. Let's update our system.
+   <img src="images/pair.png" alt="git-token" style="zoom:50%;" />
+
+   * **Client – Server:** A client connects to one or more servers. This pattern allows REQUEST – RESPONSE mode. A client sends a request “zmq.REQ” and receives a reply. 
+
+   <img src="images/client-server.png" alt="git-token" style="zoom:50%;" />
+
+   * **Publish/Subscribe:** A traditional communication pattern where senders of messages, called publishers, send messages to specific receivers, called subscribers. Messages are published without the knowledge of what or if any subscriber of that knowledge exists. Multiple subscribers subscribe to messages/topics being published by a publisher or one subscriber can connect to multiple publishers.
+
+   <img src="images/ps.png" alt="git-token" style="zoom:50%;" />
+
+   * **Push and Pull sockets (aka Pipelines):** Let you distribute messages to multiple workers, arranged in a pipeline. A Push socket will distribute sent messages to its Pull clients evenly. This is equivalent to producer/consumer model, but the results computed by consumer are not sent upstream but downstream to another pull/consumer socket.
+
+   <img src="images/push-pull.png" alt="git-token" style="zoom:50%;" />
+
+   > :rotating_light: **Note:** Working with Sockets could be tricky, running again and again the same code, using the same port number/same socket, could lead to a connection that “hangs” (the server looks like it is running, but it cannot accept connections). This happens because we did not close and destroy the previous connections correctly. 
+   >
+   > The most appropriate way to address this is to close the socket and destroy the ZeroMQ context. Refer to try – catch blocks of Phase 2 and Phase 3 for more details. 
+   >
+   > In this tutorial, you might experience such issues, e.g., running multiple times the same server in the same port. If you face hanging problems, you are advised to kill the Python process, clean the TCP port number, and run the server once more (see step 11). 
+
+###### Phase 1: Pairing a server to a client
+
+3. Let us start by creating a new VM, then we will install Python3. 
+   * Keep a copy of the VM internal IP, for this tutorial we will use the internal IP address.
+4. Open a new terminal connection and run the following commands (one after the other). The last command installs [ZeroMQ](https://zeromq.org/).
 
 ```bash
-$ sudo apt-get update
-
-Hit:1 http://us-central1.gce.archive.ubuntu.com/ubuntu bionic InRelease
-Get:2 http://us-central1.gce.archive.ubuntu.com/ubuntu bionic-updates InRelease [88.7 kB]
-...
-Get:26 http://security.ubuntu.com/ubuntu bionic-security/multiverse Translation-en [4732 B]
-Fetched 23.7 MB in 5s (4972 kB/s)                           
-Reading package lists... Done
+$ sudo apt update
+$ sudo apt install software-properties-common
+$ sudo apt install python3.8
+$ sudo apt-get -y install python3-pip
+$ pip3 install pyzmq
 ```
 
->  Note that:
+
+
+> Type: Y when prompted.
 >
->  * The **sudo apt-get update** command downloads package information from all configured sources.
->
->  * The sources often defined in /etc/apt/sources.list file and other files located in /etc/apt/sources.list.d/ directory. 
->
->  * So when you run the update command, it downloads the package information from the Internet. It is helpful to get info on updated packages or their dependencies.
+> Many applications these days consist of components that stretch across networks, so messaging is essential. Today we will use TCP for message transferring.
 
-5. We can now install Docker; make sure you type `Y` for Yes when prompted.
+5. You can access your VM using VSC, or you can run the commands using the SSH and edit files with `pico`, in my case I will use SSH. 
 
-```bash
-$ sudo apt-get install docker.io
+> :rotating_light: Make sure you copy code carefully.
 
-Reading package lists... Done
-Building dependency tree       
-Reading state information... Done
-...
-Do you want to continue? [Y/n] Y
-...
-Processing triggers for man-db (2.8.3-2ubuntu0.1) ...
-Processing triggers for ureadahead (0.100.0-21) ...
-```
+6. We will need to create our first **ZeroMQ server**, the server will allow binding with only one client at a time.
 
-> Docker is now installed on our VM; we can start trying a couple of tasks.
->
-> We install docker once (in a VM), then we can use it.
+* Create a new file called `pair-server.py`, then enter the following code. 
 
-6. What is the Docker version? Run the next command
-
-```bash
-$ sudo docker --version
-
-Docker version 20.10.7, build 20.10.7-0ubuntu5~18.04.3
-```
-
-7. Let's create a new user called docker-user. You can use this user to run our containers.
-
-```bash
-$ sudo adduser docker-user
-
-Adding user `docker-user' ...
-Adding new group `docker-user' (1003) ...
-Adding new user `docker-user' (1002) with group `docker-user' ...
-Creating home directory `/home/docker-user' ...
-Copying files from `/etc/skel' ...
-Enter new UNIX password: 
-Retype new UNIX password: 
-passwd: password updated successfully
-Changing the user information for docker-user
-Enter the new value, or press ENTER for the default
-        Full Name []: 
-        Room Number []: 
-        Work Phone []: 
-        Home Phone []: 
-        Other []: 
-Is the information correct? [Y/n] Y
-```
-
-> Make sure you add a password, and you can leave the rest empty—type Y at the end (although you can press enter).
-
-8. We will need to give `sudo` access to our new `docker-user`, so let's add it to the `sudo` group.
-
-```bash
-$ sudo usermod -aG sudo docker-user
-```
-
-> If we don't add the user in the `sudo` group, we will not run `sudo` commands.
-
-9. Now, run the following command; this will allow us to give `sudo` permissions to docker to run our commands. 
-
-```bash
-$ sudo usermod -aG docker docker-user
-```
-
-> This command ensures that our new `docker-user` can run docker commands without using the `sudo` keyword. For example, instead of running always: 
->
-> ```bash
-> $ sudo docker <command> 
-> ```
->
-> we will be able to run:
->
-> ```bash
-> $ docker <command>
-> ```
-
-10. Let's switch users, type the following command.
-
-```bash
-$ su - docker-user
-```
-
-> The `-` symbol allows us to switch user (`su`) and change to the target user's home directory.
-
-* We should be ready now! Try the following command to see if everything works fine.
-
-```bash
-$ docker
-```
-
-* You should be able to see a list of available options and commands. We can always refer to this when we need to explore using commands and options.
-
-#### Phase 2: Running a Cassandra container
-
-11. Our next step is to create a create a Cassandra container.
-
-* Let us run a new Casandra node using Docker, we can name the new container `my-cassandra-1`.
-
-```bash
-$ docker run --name my-cassandra-1 -m 2g -d cassandra:3.11
-```
-
-> The option `-m 2g` will assign 2GB of memory in this container.
-
-12. We just created an Apache Cassandra container `my-cassandra-1; let us check the active containers running the following command.
-
-```bash
-$ docker ps -a
-```
-
-> The container is up and running!
-
-* Let's stop the container and create our first cluster.
-
-```bash
-$ docker stop my-cassandra-1 
-```
-
-* Then delete it.
-
-```bash
-$ docker rm my-cassandra-1 
-```
-
-#### Phase 3: Building a three-nodes Cassandra cluster
-
-13. We will create a cluster of three Cassandra nodes; the first Cassandra node will be called `cassandra-1`. For this tutorial, we will use Cassandra  3.11.
-
-* We will interact with the cluster using the `nodetool`.
-* The `nodetool` utility is a command-line interface for managing a Cassandra cluster. The Cassandra cluster will work as one unique database system to manipulate data.
-
-```bash
-$ docker run --name cassandra-1 -d cassandra:3.11
-```
-
-> Using the `docker ps -a command`, you can check if your container is up and running.
->
-> It is good to check if the container is up and running each time we create one. 
-
-* Let us inspect `cassandra-1`.
-
-```bash
-$ docker inspect cassandra-1
-```
-
->  The output shows the configuration parameters of our container; if we want to extract a particular value, we can use the following command.
->
-> * The command extracts the `IPAddress` of container `cassandra-1`
-
-```bash
-$ docker inspect --format='{{ .NetworkSettings.IPAddress }}' cassandra-1
-
-# The output is the container IP address
-# 172.17.0.2
-```
-
-14. There are different ways to create a cluster; the most common practice is to set up a cluster configuring the IP addresses of containers or VMs. Since we run everything in the same VM, we can use the container names rather than IPs.
-    * Before we proceed, let's make sure that our container is up and running. It should be up and running as we extracted the IP address.
-
-```bash
-$ docker ps -a
-```
-
-> :rotating_light: In some cases, container creation might fail for many reasons, e.g. something went wrong in docker. In this unlikely case, stop (`docker stop <container-name>`) and delete the container (`docker rm <container-name>`) ; then run it again. 
->
-> * If you are want to learn more about setting Cassandra clusters using IP addresses, make sure you complete Appendix A, where you can see how to connect containers running on different VMs or servers.
-
-15. Let's use the `nodetool` command in `cassandra-1` to check if our Cassandra node is up and running.
-
-```bash
-$ docker exec -i -t cassandra-1 bash -c 'nodetool status'
-```
-
-> * If you see `Error: The node does not have system_traces yet, probably still bootstrapping` , which means that the container is not yet up, Cassandra it is still in the installation process.
-> * The output should look like this:
->
-> ```bash
-> Datacenter: datacenter1
-> =======================
-> Status=Up/Down
-> |/ State=Normal/Leaving/Joining/Moving
-> --  Address     Load       Tokens       Owns (effective)  Host ID                               Rack
-> UN  172.17.0.2  100.22 KiB  256          100.0%            abc2a2ee-9bff-415f-8cd0-f8a19295e846  rack1
-> ```
->
-> * The output shows that our container is in `UN` status ( Up and Normal) :happy:
-
-16. Let's connect our second container. Run the following command to create the second Cassandra node `cassandra-2`. 
-
-```bash
-$ docker run --name cassandra-2 -d --link cassandra-1:cassandra cassandra:3.11
-```
-
-> * We used the `--link cassandra1:cassandra` option to link `cassandra-1` to `cassandra-2`. This will create our cluster.
-
-17. Let us check the status of the containers.
-
-```bash
-$ docker exec -i -t cassandra-1 bash -c 'nodetool status' 
-```
-
-> * The output is:
->
-> ```
-> Datacenter: datacenter1
-> =======================
-> Status=Up/Down
-> |/ State=Normal/Leaving/Joining/Moving
-> --  Address     Load       Tokens       Owns (effective)  Host ID                               Rack
-> UJ  172.17.0.3  30.47 KiB  256          ?                 bff8c5c1-8af3-4eb9-bfce-a6f90c049972  rack1
-> UN  172.17.0.2  70.9 KiB   256          100.0%            abc2a2ee-9bff-415f-8cd0-f8a19295e846  rack1
-> ```
->
-> * If you see a question mark (**?**) in **Owns**, that’s fine!
-> * You might notice that the status is `UJ` , which means Up and in Join (not yet in Normal status).
-> * Wait for the containers to get synchronised; this will take a minute or two, then rerun the same command; the output should look like this:
->
-> ```
-> Datacenter: datacenter1
-> =======================
-> Status=Up/Down
-> |/ State=Normal/Leaving/Joining/Moving
-> --  Address     Load       Tokens       Owns (effective)  Host ID                               Rack
-> UN  172.17.0.3  70.92 KiB  256          100.0%            bff8c5c1-8af3-4eb9-bfce-a6f90c049972  rack1
-> UN  172.17.0.2  75.93 KiB  256          100.0%            abc2a2ee-9bff-415f-8cd0-f8a19295e846  rack1
-> ```
->
-> * Both containers are up and running in normal state (`UN`) as part of the same datacenter.
-
-18. Now let's create the third container! Before we proceed, let's see the resource usage of our VM. Run the `free` command to see the available/used memory.
-
-```bash
-$ free
-```
-
-> * It seems that we already used a lot of memory for the two first containers!
->
-> ```bash
->               total        used        free      shared  buff/cache   available
-> Mem:        4022808     3368560      117324        1076      536924      436672
-> Swap:             0           0           0
-> ```
->
-> * We used 3.36GB of a total of 4GB
-> * If we create a new container, we might run out of resources, so let's scale! :happy:
-> * Stop and edit the VM; let's assign 8GB of space.
-> * Start the VM once more, connect (`SSH` and change the user to the `docker-user` using `su - docker-user`.
-> * Now, run `free` once more.
->
-> ```bash
->               total        used        free      shared  buff/cache   available
-> Mem:        8145440      220364     7533836         936      391240     7694936
-> Swap:             0           0           0
-> ```
->
-> * We have 8GB memory now; the amount `used` is dropped since the containers are not running, so let's start both.
-
-19. We can start both containers.
-
-```bash
-$ docker start cassandra-1 cassandra-2
-```
-
-20. Let's run the `nodetool` command once more.
-
-```bash
-$ docker exec -i -t cassandra-1 bash -c 'nodetool status'
-```
-
-> * The output shows both containers in `UN` status.
->
-> ```bash
-> Datacenter: datacenter1
-> =======================
-> Status=Up/Down
-> |/ State=Normal/Leaving/Joining/Moving
-> --  Address     Load       Tokens       Owns (effective)  Host ID                            
->    Rack
-> UN  172.17.0.3  137.64 KiB  256          100.0%            624f33b5-10b0-4231-b101-a5a2d07d17
-> fa  rack1
-> UN  172.17.0.2  137.47 KiB  256          100.0%            3bba3a8b-c072-4991-93f7-780b3a0071
-> 81  rack1
-> ```
-
-21. Let's start the third container
-
-```bash
-$ docker run --name cassandra-3 -d --link cassandra-1:cassandra cassandra:3.11
-```
-
-* Let's see the active containers.
-
-```bash
-$ docker ps -a 
-```
-
-> The output shows three running containers :smile:
->
-> ```bash
-> CONTAINER ID   IMAGE            COMMAND                  CREATED          STATUS         PORT
-> S                                         NAMES
-> 40c75887c93f   cassandra:3.11   "docker-entrypoint.s…"   2 minutes ago    Up 2 minutes   7000
-> -7001/tcp, 7199/tcp, 9042/tcp, 9160/tcp   cassandra-3
-> 2fad620a2e2b   cassandra:3.11   "docker-entrypoint.s…"   12 minutes ago   Up 5 minutes   7000
-> -7001/tcp, 7199/tcp, 9042/tcp, 9160/tcp   cassandra-2
-> ae96e2e67b8e   cassandra:3.11   "docker-entrypoint.s…"   12 minutes ago   Up 5 minutes   7000
-> -7001/tcp, 7199/tcp, 9042/tcp, 9160/tcp   cassandra-1
-> ```
->
-> * If one or more containers are in `exited` then something went wrong... In this case, delete the `exited` container and build your cluster again.
-
-22. Then run the `nodetool` again in `cassandra-2`. Note you can run this command to any node, as this refers to the cluster, rather than the node.
-
-```bash
-$ docker exec -i -t cassandra-2 bash -c 'nodetool status'
-```
-
-> We should be able to see our cluster:
->
-> ```bash
-> Datacenter: datacenter1
-> =======================
-> Status=Up/Down
-> |/ State=Normal/Leaving/Joining/Moving
-> --  Address     Load       Tokens       Owns (effective)  Host ID                            
->    Rack
-> UN  172.17.0.3  113.1 KiB  256          66.1%             624f33b5-10b0-4231-b101-a5a2d07d17f
-> a  rack1
-> UN  172.17.0.2  137.47 KiB  256          66.8%             3bba3a8b-c072-4991-93f7-780b3a0071
-> 81  rack1
-> UN  172.17.0.4  30.47 KiB  256          67.1%             ce5d8e84-8f62-44e4-a97e-453e55b7ace
-> a  rack1
-> ```
->
-> * Again, you might need to wait for the status to be `UN`, so dont worry about the `?` in `STATUS`.
-> * The gossip protocol runs in all the containers and is responsible for controlling information about our cluster (racks, tokens etc.).
-> * You can add more nodes in the cluster by running similar commands. Note, that each Cassandra container allocates an amount of computational resources, so you need to monitor if the container fails or not due to insufficient memory or space.
-
-23. Great! We have a Cassandra cluster up and running! 
-
-#### Phase 4: Using Cassandra's cli `sqlsh` 
-
-24. Now it is time to learn the basic Cassandra commands.
-
-* We will interact with the cluster using the `cqlsh` command line interface (cli). The tool will allow me to run commands to create a database, tables and insert records.
-* We will run the tool inside `cassandra-1`.
-
-```bash
-$ docker exec -it cassandra-1 bash -c 'cqlsh'
-```
-
-> By running this command you are inside the `sqlsh` cli. This might remind you SQL stuff!
->
-> ```cassandra
-> cqlsh>
-> ```
-
-25. Let us create a database (in Cassandra it is called a `KEYSPACE`). My keyspace will be called `music_store`.
-    * Run these commands in the `sqlsh`
-
-```cassandra
-CREATE KEYSPACE music_store
-  WITH REPLICATION = { 
-   'class' : 'SimpleStrategy', 
-   'replication_factor' : 3 
-  };
-```
-
-> * We use a `SimpleStrategy` and a replication factor `3`. 
-> * SimpleStrategy: It is **a basic replication strategy**. It's used when using a single datacenter. This method is rack unaware. It places replicas on subsequent nodes in a clockwise order.
-
-26. Let's `USE` the keyspace. This will be our active keyspace (aka database)
-
-```cassandra
-USE music_store;
-```
-
-> * Now, you should be inside the new keystone
->
-> ```cassandra
-> cqlsh:music_store> 
-> ```
-
-27. Let us create a table and insert some data.
-
-```cassandra
-CREATE TABLE music_store.music_by_category (
-   type text, 
-   category text, 
-   id UUID, 
-   name text, 
-   title text,
-   PRIMARY KEY (type, id));
-```
-
-> * The `UUID` will allow us to generate automatically IDs for our example table.
-
-28. Now, time to add data
-
-```cassandra
-INSERT INTO music_store.music_by_category 
- (type, category, id, name, title)
-VALUES
-  ('LP record', 'Rock', uuid(), 'Pink Floyd', 'The Dark Side of the Moon');
-```
-
-29. Let's select data using the `SELECT` command.
-
-```cassandra
-SELECT * FROM music_store.music_by_category;
-```
-
-30. Delete the table using `DROP TABLE` command (like in SQL)
-
-```cassandra
-DROP TABLE music_store.music_by_category;
-```
-
-31. Now let us adapt our table and insert data in terms of different data structures e.g., key-value data.
-    * We will use the map **<int,text>** to set my key-value data entry (similar to a Python dictionary).
-
-```cassandra
-CREATE TABLE music_store.music_by_category (
-   type text, 
-   category text, 
-   id UUID, 
-   name text, 
-   title map<int,text>,
-   PRIMARY KEY (type, id));
-```
-
-32. Then run the following commands
-
-* First, insert a record with some key value data {key1:value1, ...}.
-
-```cassandra
-INSERT INTO music_store.music_by_category 
- (type, category, id, name, title) VALUES
- ('LP record', 'Rock', uuid(), 'Pink Floyd', 
-	{1975: 'Wish you were here', 1979: 'The Wall'});
-```
-
-* Then insert another record.
-
-```cassandra
-INSERT INTO music_store.music_by_category 
-(type, category, id, name, title) VALUES
-('LP record', ' Reggae', uuid(), 'Bob Marley', {1984: 'The legend'});
-```
-
-33. Select all data
-
-```cassandra
-SELECT * FROM music_store.music_by_category; 
-```
-
-34.  If we want to search in the `title` field, we will need to create an index. The index will allow us to search inside a key for a particular value. Let us create an index for the title column.
-
-```cassandra
-CREATE INDEX ON music_store.music_by_category (title);
-```
-
-35. Then, run the following command to search for records with title ‘**The legend**’. This will allow us to search inside our key-value data structure.
-
-```cassandra
-SELECT * FROM music_store.music_by_category  WHERE title CONTAINS 'The legend' ;
-```
-
-36. That is all for now, exit the cqlsh using the “exit” command.
-
-```cassandra
-exit
-```
-
-> Want to learn more about Cassandra? Check [this](https://docs.datastax.com/en/cql-oss/3.3/cql/cql_reference/cqlInsert.html).
-
-#### Phase 5: Cassandra and Python
-
-37. Let's create a Python applciation to connect and extract data!
-38. The script will connect to our cluster and select  data from a table, for this we will need a `cassandra-driver`.
-38. Let's install the required packages.
-
-```bash
-$ sudo apt install python3-pip
-
-```
-
-> Type `Y` when prompted.
-
-40. Then we need to install the `cassandra-driver`.
-
-```bash
-$ pip install cassandra-driver
-```
-> If this command does not work, try `pip3` instead.
-
-41. We should be ready, first let us inspect the IP addresses of our cluster as we will need to define our cluster in Python.
-
-```bash
-$ docker inspect --format='{{ .NetworkSettings.IPAddress }}' cassandra-1 cassandra-2 cassandra-3
-```
-
-> The command will show the  `IP` addresses of the containers
->
-> ```bash
-> 172.17.0.2
-> 172.17.0.3
-> 172.17.0.4
-> ```
-
-42. Let us create a new python called `test-cassandra.py`.
-
-```bash
-$ pico test-cassandra.py
-```
-
-43. Then add the following code.
-
-> You might notice that Cassandra does not apply any authentication. By default, Cassandra is configured with AllowAllAuthenticator which performs no authentication checks and therefore requires no credentials. 
->
-> * If you want to setup authentication you could follow the next tutorial: [Configuring Authentication (Cassandra)](https://docs.datastax.com/en/cassandra-oss/3.0/cassandra/configuration/secureConfigNativeAuth.html)
-> * For the moment, we will procees without authentication, assuming that our Cassandra node is under the GCP VPC.
+* The code creates a new socket using the **zmq.PAIR** pattern, then binds the server to a particular IP port (that we already openned in GCP). Note that the server will not stop running until we stop it. 
+* Have a look at the comments to understand how this works.
+* Make sure that you change the <INTERNAL_VM_ADDRESS>; that is the **internal IP address** of the GCP VM; the client port should be the same with the server.
 
 ```python
-# Import the driver
-from cassandra.cluster import Cluster 
-
-# Create a new cluster
-cluster = Cluster() 
-
-# Connect to the cluster's default port
-cluster = Cluster(['172.17.0.2','172.17.0.3','172.17.0.4'], port=9042)
-
-# Connect to music_store
-session = cluster.connect('music_store') 
-session.set_keyspace('music_store')
-
-# Use the preffered keyspace
-session.execute('USE music_store') 
-
-# Run a query
-rows = session.execute('SELECT * FROM music_store.music_by_category')
-
-# Iterate and show the query response
-for i in rows: 
-     print(i)
+# import the library
+import zmq
+import time
+# Initialize a new context that is the way to create a socket
+context = zmq.Context()
+# We will build a PAIR connection
+socket = context.socket(zmq.PAIR) # We create a PAIR server
+# Do not worry about this for the moment...
+socket.setsockopt(zmq.LINGER, 0) 
+# Create a new socket and "bind" it in the following address
+# Make sure you update the address
+socket.bind("tcp://<INTERNAL_VM_ADDRESS>:5555") # IP:PORT
+# Keep the socket alive for ever...
+while True:
+    # Send a text message to the client (send_string)
+    socket.send_string("Server message to Client")
+    # Receive a message, store it in msg and then print it
+    msg = socket.recv()
+    print(msg)
+    # Sleep for 1 second, so when we run it, we can see the results
+    time.sleep(1)
 ```
 
-44. Let's run it.
+7. Do not run the server yet, first let us create the client.
 
-```bash
-$ python test-cassandra.py
-```
+8. Create the client and take a minute to examine the comments. I will call it `pair-client.py`.
 
-> The output should be the two data points from Cassandra
->
-> ```bash
-> Row(type=u'LP record', id=UUID('a53b00fb-8748-48ea-b6f5-1afcf1f4716e'), category=u' Reggae', 
-> name=u'Bob Marley', title=OrderedMapSerializedKey([(1984, u'The legend')]))
-> Row(type=u'LP record', id=UUID('ed98a0d9-0fc0-4cb9-a6d7-173e667d0727'), category=u'Rock', nam
-> e=u'Pink Floyd', title=OrderedMapSerializedKey([(1975, u'Wish you were here'), (1979, u'The W
-> all')]))
-> ```
-
-45. If you like, you can adapt your `test-cassandra.py` to pass data to a query using a Python variable, in this case I pass a string.
+> Make sure that you change the <INTERNAL_VM_ADDRESS>; the port should be the same as in the server.
 
 ```python
-search = 'The Wall'
-rows = session.execute('SELECT * FROM music_store.music_by_category WHERE title CONTAINS %s',[search])
+import zmq
+import time
+# Same as before, initialize a socket
+context = zmq.Context()
+socket = context.socket(zmq.PAIR) # We create a PAIR server
+socket.setsockopt(zmq.LINGER, 0)
+# Connect to the IP that we already bind in the server
+socket.connect("tcp://<INTERNAL_VM_ADDRESS>:5555")
+# A counter will help us control our connection
+# For example connect until you send 10 messages, then disconnect...
+count = 0
+while count<10:
+    msg = socket.recv()
+    print(msg)
+    socket.send_string("Hello from Client")
+    socket.send_string("This is a client message to server")
+    print("Counter: ",count)
+    count+=1
+    time.sleep(1)
+# Destroy the context socket and then close the connection
+context.destroy()
+socket.close()
 ```
 
-> This query should bring only data about `The Wall`.
+9. We will need **two** terminal windows to run the **PAIR** example. We will run the server on one window and the client on the other. Now, run it as follows.
+
+* Run the server
+
+```bash
+$ python3 pair-server.py
+```
+
+* Run the client
+
+```bash
+$ python3 pair-client.py
+```
+
+10. Examine the output, we just created a new **PAIR** socket.
+
+* The script will terminate when the client completes its connection. Then stop the server (ctrl + c) and kill it.
+
+11. We will need to clear the TCP connection before we run it again. To do this, use the following command.
+
+```bash
+$ sudo fuser -k 5555/tcp # 5555 refers to your port number
+```
+
+> :rotating_light: Notes:
 >
-> ```bash
-> Row(type=u'LP record', id=UUID('ed98a0d9-0fc0-4cb9-a6d7-173e667d0727'), category=u'Rock', name=u'Pink Floyd', title=OrderedMapSerializedKey([(1975
-> , u'Wish you were here'), (1979, u'The Wall')]))
-> ```
-
-46. Let's try something... Let's stop `cassandra-1` and then run the python scirpt once more. Even a node is down, we should be able to get our data.
-
-```bash
-$ docker stop cassandra-1
-```
-
-47. Now run the Python script! I can still access my data, the cluster is still working :happy: ; data is replicated! 
-
-> You can start the container (`docker start cassandra-1`).                                                                                                         
-
-#### Phase 6: Cassandra and Node.js 
-
-48. What about node.js? Let's keep going!
-
-49. We will create a new node.js app to connect and extract data from Cassandra.
-
-50. Firstly, create a new folder.
-
-```bash
-$ mkdir node-cassandra
-```
-
-51. Then enter in the folder.
-
-```bash
-$ cd node-cassandra
-```
-
-52. Let's install npm.
-
-```bash
-$ sudo apt install npm
-```
-
-53. Now initialise the project.
-
-```bash
-$ npm init
-```
-
-> Press enter...
-
-54. Let's install the cassandra driver for node.js
-
-```bash
-$ npm install cassandra-driver
-```
-
-> If the command failed, try the next `npm install cassandra-driver@3.5`
-
-55. Let's create a script `cassandra-app.js` to select data.
-
-56. Edit a file using `pico` and then edit as follows.
-
-```javascript
-//npm install cassandra-driver
-let cassandra = require('cassandra-driver');
-const keyspace="music_store";
-let contactPoints = ['172.17.0.2','172.17.0.3','172.17.0.4'];
-let client = new cassandra.Client({
-  contactPoints: contactPoints, 
-  keyspace:keyspace,localDataCenter: 
-  'datacenter1'
-});
-let query = 'SELECT * FROM music_store.music_by_category'; 
-client.execute(query, function(error, result) {
-  if(error!=undefined){
-    console.log('Error:', error);
-  }else{
-    console.log(result.rows);
-  }
-});
-```
-
-57. Save and exit, then run it!
-
-```bash
-$ node cassandra-app.js 
-```
-
-> The results should look like this:
+> *  We can run **only one PAIR at a time**, this mean that we cannot have multiple clients, remember this is a **PAIR**, the first client will lock the socket.
 >
-> ```bash
-> [ Row {
->     type: 'LP record',
->     id: Uuid: a53b00fb-8748-48ea-b6f5-1afcf1f4716e,
->     category: ' Reggae',
->     name: 'Bob Marley',
->     title: { '1984': 'The legend' } },
->   Row {
->     type: 'LP record',
->     id: Uuid: ed98a0d9-0fc0-4cb9-a6d7-173e667d0727,
->     category: 'Rock',
->     name: 'Pink Floyd',
->     title: { '1975': 'Wish you were here', '1979': 'The Wall' } } ]
-> ```
+> * If we run the server once, and the client twice, the second client will “hang”, this means that the second client it will wait for a new server to connect.
+> * If we want to run the pair more than once, we will need to kill the server and clear the TCP connection.
+> * **PAIRs** are ideal when a client needs to have exclusive access to a server.
+> * We can have multiple servers to multiple clients as PAIRs, but we will need to use different PORT numbers for the connections. 
+
+12. **Each phase is independent of each other, so, stop the server, clear the TCP ports, and move to the next phase.** 
+
+###### Phase 2: Pairing a server to multiple clients
+
+13. Let us create a client-server connection, where multiple clients will connect to a single server. This is the most popular messaging pattern.
+
+* Let’s create a server in the context of **REP-REQ** (reply to a request) pattern. 
+* We will call the server `rep-server.py`, using port `5555`.
+
+```python
+import zmq
+import time
+try: # Try to create a new connection
+    context = zmq.Context()
+    socket = context.socket(zmq.REP) # We create a REP server
+    # Here we set a linger period for the socket
+    # Linger 0: no waiting period for new messages
+    socket.setsockopt(zmq.LINGER, 0)
+    socket.bind("tcp://<INTERNAL_VM_ADDRESS>:5555")
+    while True: # Wait for next request from client
+        message = socket.recv()
+        print("Received request: ", message)
+        time.sleep (1)  
+        socket.send_string("Hi from Server")
+except KeyboardInterrupt: # “ctr+c” to break and close the socket!
+    context.destroy()
+    socket.close()
+```
+
+14. Now we will develop two Clients that will be identical in terms of their functionality. 
+
+    * **Client 1** will send a “Client 1 Hello world” request
+
+    * **Client 2** will send a “Client 2 Hello world” request to the server. 
+    * Let us create a file called `req-client1.py`, then edit as follows, again make sure you change the <INTERNAL_VM_ADDRESS>.
+
+```python
+import zmq
+import time
+context = zmq.Context()
+socket = context.socket(zmq.REQ) # We create a REQ client (REQUEST)
+socket.setsockopt(zmq.LINGER, 0)
+socket.connect("tcp://<INTERNAL_VM_ADDRESS>:5555")
+for request in range (1,10):
+    print("Sending request Client 1 ", request,"...")
+    socket.send_string("Hello from client 1")
+    message = socket.recv()
+    print("Received reply ", request, "[", message, "]")
+socket.close()
+context.destroy()
+```
+
+15. Let us create a copy of this client and edit it accordingly. Run the following command to make a new copy.
+
+```bash
+$ cp req-client1.py req-client2.py
+```
+
+16. Then edit the `req-client2.py` and change `client 1` to `client 2`.
+
+> Let's edit the print and socket messages (lines 8 and 9)
+
+```python
+import zmq
+import time
+context = zmq.Context()
+socket = context.socket(zmq.REQ) # We create a REQ client (REQUEST)
+socket.setsockopt(zmq.LINGER, 0)
+socket.connect("tcp://<INTERNAL_VM_ADDRESS>:5555")
+for request in range (1,10):
+    print("Sending request Client 2 ", request,"...")
+		socket.send_string("Hello from client 2")
+    message = socket.recv()
+    print("Received reply ", request, "[", message, "]")
+socket.close()
+context.destroy()
+```
+
+17. To run this example, we will need **three** terminal windows, one for the server and two for the clients. Run the following in the first terminal.
+
+* Let's start the server
+
+```bash
+$ python3 rep-server.py
+```
+
+* Let's start the first client
+
+```bash
+$ python3 req-client1.py
+```
+
+* Let's start the second client
+
+```bash
+$ python3 req-client2.py
+```
+
+18. Check the output of the windows, we just created two clients talking to one server. You can have as many clients as you want, you will need to make clients, even with different functionalities that connect to one server.
+
+> :rotating_light: **Notes:**
 >
-> * Break the server (ctrl+C)
+> *  Client – Server is the most widely used pattern, we already used it in class 1 when we installed and ran the Apache HTTP server.
+>
+> * **Stop the server and clean TCP port 5555** 
+>
+>   * Kill the server: 
+>
+>     ```bash
+>     $ sudo fuser -k 5555/tcp 
+>     ```
 
-58. If you want to pass data into the query, you can use the following script.
+###### Phase 3: Pairing a server to a client
 
-```bash
-//npm install cassandra-driver
-let cassandra = require('cassandra-driver');
-const keyspace="music_store";
-let contactPoints = ['172.17.0.2','172.17.0.3','172.17.0.4'];
-let client = new cassandra.Client({
-  contactPoints: contactPoints, 
-  keyspace:keyspace,localDataCenter: 
-  'datacenter1'
-});
-let query = 'SELECT * FROM music_store.music_by_category WHERE title CONTAINS ?'; 
-let parameter =['The Wall'];
-client.execute(query, parameter,(error, result)=> {
-  console.log('in');
-  if(error!=undefined){
-    console.log('Error:', error);
-  }else{
-    console.log(result.rows);
-  }
-});
-console.log('end');
-```
+19. The publish – subscribe pattern is a very common way to control broadcasting of data to many clients that are subscribed to a context, in a way that servers send data to one or more clients. 
 
-59. :checkered_flag: Well done! You completed lab 8! 
+    * To run multiple servers, we need to map each server to a PORT number.
 
-#### Appendix: Cassandra cluster in different VMs
+    * In this pattern, messages are published (broadcasted) without knowing that subscribers exist, or if there are any subscribers of this context. 
 
-60.  Do you want to explore the configuration of Apache Cassandra in different VMs? 
+    * It is the task of the subscribers to make connections and filter out the incoming data.
 
-61. To run this tutorial:
+    * We usually say: Subscribers, subscribe to a specific context.
 
-* You will need to have two VMs up and running with Docker installed.
+20. Let us first create a simple example. 
 
-* Make sure you stop and delete all the containers (e.g. cassandra-1 etc.). 
-* Open port 7000 in the GCP firewall. 
+    * We will create two servers that generate weather data, and one client that it is subscribed to both instances to collect data about a particular context:
 
-62. To create a Cassandra cluster, we will need to use the internal IP addresses of the VMs. These are the addresses in the GCP console interface. In my case:
-    * **<internal-ip-address-vm1>** is the first VM
-    * **<internal-ip-address-vm2>** is the second VM.
+    * The context is: **Client will only “listen” the context related to New York City weather data (postal code 10001)**.
 
-63. In the first VM: 
-    * Connect and change to your desired user, then run the following command,.
-    * Make syre you change the internal IP address.
+    * The first instance of our server will run in port `5555`.
 
-```bash
-$ docker run --name cas-c1 -d -e CASSANDRA_BROADCAST_ADDRESS=<internal-ip-address-vm1> -p 7000:7000 cassandra:3.11
-```
+      * This instance generates a topic with an ID.
 
-64. Wait for a minute for the container to be up and running.
+      * For testing purposes, the topic represents a postcode (in our example, that is a random value between 9999 and 10005).
+      * Each time a topic is generated the server also generates weather data e.g., temperature, that actual forms our message.
+
+    * The second instance of our server will run in port `5556` and will provide the same functionality.
+
+    * This instance generates similar topics and messages. 
+
+    * **The assumption here is that both instances represent sensors that send weather data from various areas in different cities.**
+
+    * We will create the server code and make it easy to replicate, as you might noticed the only parameter to change is the PORT number.
+
+21. Let us create a new file, call it `pub_server.py`.
+
+    * The server will accept two arguments from the command line, that will be the IP and the PORT value.
+      * For accepting command line arguments we use the `sys` Python library.
+
+    * By this way we can run multiple servers, and each time we run the script we will just have to pass IP and PORT number as arguments to the code. For example: 
 
 ```bash
-$ docker exec -i -t cas-c1 bash -c 'nodetool status'
+$ python3 pub_server.py <internal-ip> <port>
 ```
 
-65. Then run the following command in the **second VM**, make sure you update the IP addresses.
+* This command will instruct python to run a server in specific <internal-ip> and <port>
 
-* The `CASSANDRA_SEEDS` sets the IP address from the first VM.
+```python
+import zmq
+import random
+import sys
+import time
+try:
+    # Port value is the first argument from the command line
+    ip = sys.argv[1]
+    port = sys.argv[2]
+    context = zmq.Context()
+    socket = context.socket(zmq.PUB)
+    socket.bind("tcp://"+ip+":"+port) 
+    while True:
+        # Topic is the post code, randomly generated 9999-10005
+        topic = random.randrange(9999,10005)
+        # Let us generate the message data (temperature)
+        messagedata = random.randrange(1,215)-80
+        # Print the data
+        print("%d %d" % (topic, messagedata))
+        socket.send_string("%d %d %d" % (topic, messagedata, int(port)))
+         # Each sensor generates data each second
+        time.sleep(1)
+except KeyboardInterrupt:
+    context.destroy()
+    socket.close()
+```
+
+22. Create a new file `pub_client.py`. 
+    * The script accepts three arguments from the command line (that are the IP and the two ports).
+
+```python
+import sys, zmq
+try:
+    ip = sys.argv[1]
+    port1 =  sys.argv[2] # Take port1 from command line
+    port2 =  sys.argv[3] # Take port2 from command line
+    context = zmq.Context()
+    socket = context.socket(zmq.SUB)
+    print("Collecting updates from weather servers...")
+    socket.connect ("tcp://"+ip+":"+port1) 
+    socket.connect ("tcp://"+ip+":"+port2)
+    topicfilter = "10001"  # Subscribe to postal code e.g. NYC, 10001
+    # Subscribe to topicfilter: 10001, WE CARE ONLY FOR NYC!
+    socket.setsockopt_string(zmq.SUBSCRIBE, topicfilter)
+    total_value = 0
+    # Lets collect up to 5 subscriptions 
+    # Then we will calculate the average of 5 temperatures from NYC
+    for update_nbr in range (1,10):
+        data = socket.recv()
+        topic, messagedata,port = data.split()
+        total_value += int(messagedata)
+        print("Topic: '%s', message: '%d' on port '%d' "%
+              (topic, int(messagedata), int(port)))
+        print("Average messagedata value for topic '%s' was %dF" % 
+                 (topicfilter, total_value / update_nbr))
+except KeyboardInterrupt:
+    context.destroy()
+    socket.close()
+```
+
+23. We are ready to run our **pub-sub** application! We will need **three** terminal windows. In the first terminal run:
 
 ```bash
-$ docker run --name cas-c2 -d -e CASSANDRA_BROADCAST_ADDRESS=<internal-ip-address-vm2> -e CASSANDRA_SEEDS=<internal-ip-address-vm1> -p 7000:7000 cassandra:3.11
+$ python3 pub_server.py <internal-ip> 5555
 ```
 
-66. Run the `nodetool`command in the first VM.
+*  In the second terminal run:
 
 ```bash
-$ docker exec -i -t cas-c1 bash -c 'nodetool status'
+$ python3 pub_server.py <internal-ip> 5556
 ```
 
-67. You just deployed a Cassandra cluster using two VMs.
+* Each server generates weather data. For example:
+  * The postal code, e.g.: 10001
+  * The temperate, e.g.: -68
 
-68. Note that you have just 2 nodes! Apple has 75.000 nodes of Cassandra running in their systems (CI/CD could speed up this process...)!
+24. Let’s run the client to connect and subscribe to data by postal code e.g., 10001 (NYC). Remember the client script subscribes to both server instances. Run the next command:
 
-69. :checkered_flag: You can interact with the cluster using the same commands from the previous phases.
+```bash
+$ python3 pub_client.py <internal-ip> 5555 5556 
+```
+
+* When you finish kill the servers (ctrl+z) and clear the TCP ports running the next commands:
+
+  ```bash
+  $ sudo fuser -k 5555/tcp
+  ```
+
+  ```bash
+  $ sudo fuser -k 5556/tcp
+  ```
+
+###### Phase 4: Push/Pull: Using a Pipeline pattern**
+
+25. Push/Pull sockets let you distribute messages to multiple workers, arranged in a pipeline. This is very useful for running code in parallel. A Push socket will distribute messages to its Pull clients evenly, and the clients will send a response to another server, called collector.
+
+![git-token](images/push-pull.png)
+
+* This is equivalent to producer/consumer model, but the results computed by consumer are not sent upstream but downstream to another pull/consumer socket.
+
+* We will implement the following functionality.
+* The producer will PUSH random numbers from 0 to 10 to the consumers.
+* Two instances of the same consumer will PULL the numbers and will perform a heavy task.
+* The task could be any heavy calculation e.g., matrix multiplication.
+* For simplicity, our “heavy task” will just return the same number.
+* The consumers will PUSH the individual results (heavy task calculations) to a **Result Collector**, that will aggregate the results.
+* For simplicity, an instance of the **Result Collector** will PULL the results and calculate the partial sum of each consumer. We can easily sum the two partial sums if needed.
+* Let us see a simple example.
+  * Producer generates [1,2,3,4,5].
+  * Consumer 1 receives [2,4], then calculates a heavy task and forwards results to the Result Collector.
+  * Consumer 2 receives [1,3,5], then calculates a heavy task and forwards results to the Result Collector.
+  * The result collector calculates the counts and partial sums e.g.:
+    * Consumer1[2,4], this means **2** numbers received from Consumer1 and their sum is **6**.
+    * Consumer2[1,3,5], that means **3** numbers received from this Consumer2 and their sum is **9**.
+
+* This example demonstrates the potential of distributed processing for parallel processing.
+
+26. Firstly, let us create the producer called `producer.py` running on port `5555` make sure you adapt your <internal-ip>.
+
+```python
+import time
+import zmq
+import random
+
+def producer():
+    mysum = 0
+    context = zmq.Context()
+    zmq_socket = context.socket(zmq.PUSH)
+    zmq_socket.bind("tcp://<internal-ip>:5555") # UPDATE THE IP!
+    # Generates 10 numbers
+    for num in range(10):
+        val = random.randint(1,5) # Random numbers: 1 to 5
+        work_message = {'num' : val}
+        zmq_socket.send_json(work_message)
+        print(work_message)
+        mysum = mysum+val
+        time.sleep(1)
+    return mysum
+
+print(producer())
+```
+
+27. Then create the `consumer.py` is as follows. Do not forget to change the two <internal-ip>s in code.
+
+```python
+import time
+import zmq
+import random
+def heavyTask(i):
+    # Perform a heavy task
+    # Here we can perform any heavy calculation e.g. i**100+i*200
+    return i # For simplicity we return the same value...
+def consumer():
+    consumer_id = random.randrange(1,10005)
+    print("I am consumer #%s" % (consumer_id))
+    context = zmq.Context()
+    # receive work from producer (port 5555)
+    consumer_receiver = context.socket(zmq.PULL)
+    # UPDATE THE IP!
+    consumer_receiver.connect("tcp://<internal-ip>:5555")
+    # send work to collector (port 5556)
+    consumer_sender = context.socket(zmq.PUSH)
+    # UPDATE THE IP!
+    consumer_sender.connect("tcp://<internal-ip>:5556") 
+    while True:
+        work = consumer_receiver.recv_json()
+        data = work['num']
+        result = {'consumer' : consumer_id, 'num' : heavyTask(data)}
+        print(result)
+        consumer_sender.send_json(result)
+consumer() # Run the consumer
+```
+
+28. Finally, let us develop the `collector.py`, again change the <internal-ip>.
+
+```python
+import zmq
+import pprint
+context = zmq.Context()
+# Pull the results from port 5556 (consumers)
+results_receiver = context.socket(zmq.PULL)
+results_receiver.bind("tcp://<internal-ip>:5556") # UPDATE THE IP!
+collecter_data = {}
+data = {}
+asum=0
+for x in range(10):
+   result = results_receiver.recv_json()
+   print(result['num'])
+   if result['consumer'] in collecter_data:
+      # This is how to count and sum items in a dictionary...
+      collecter_data[result['consumer']][0] = collecter_data[result['consumer']][0] + 1
+      collecter_data[result['consumer']][1] = collecter_data[result['consumer']][1]+result['num']
+   else:
+      collecter_data[result['consumer']] = [1, result['num']]
+pprint.pprint(collecter_data)
+```
+
+29. Make sure you don’t have an indentation error!
+
+    * Let us run it and examine how the pipeline works.
+
+    * We will need **four** terminal windows.
+
+30. Firstly, we need to run the `collector.py`, the collector will be waiting for data to be collected until we start the producer.
+
+```bash
+$ python3 collector.py
+```
+
+* Then, we will start the **consumers one by one**, run each command in a different terminal window.
+
+```bash
+$ python3 consumer.py
+```
+
+* Run the same command in another terminal.
+
+```bash
+$ python3 consumer.py
+```
+
+* Finally, we will start our producer that will start sending data to our pipeline.
+
+```bash
+$ python3 producer.py
+```
+
+31. Well done! :checkered_flag: You used ZeroMQ to develop messaging patterns!
