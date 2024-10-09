@@ -93,8 +93,8 @@ app.get('/', (req,res) =>{
     res.send('Homepage')
 })
 
-mongoose.connect(process.env.DB_CONNECTOR, ()=>{
-    console.log('DB is now connected!')
+mongoose.connect(process.env.DB_CONNECTOR).then(()=>{
+    console.log('Your mongoDB connector is on...')
 })
 
 app.listen(3000, ()=>{
