@@ -84,8 +84,8 @@ const authRoute = require('./routes/auth')
 app.use('/api/film',filmsRoute)
 app.use('/api/user',authRoute)
 
-mongoose.connect(process.env.DB_CONNECTOR, ()=>{
-    console.log('DB is connected')
+mongoose.connect(process.env.DB_CONNECTOR).then(()=>{
+    console.log('Your mongoDB connector is on...')
 })
 
 app.listen(3000, ()=>{
