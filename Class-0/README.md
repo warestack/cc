@@ -86,4 +86,4 @@ Try running a command like `ls`, which lists files and folders (you’ll see not
 
 ![22](assets/23.png)
 
-🚀 You are now ready for the first class!
+**🚀 You’re all set for your first class!**
