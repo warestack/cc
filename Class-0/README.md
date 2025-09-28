@@ -16,7 +16,9 @@
 
 > [!IMPORTANT]
 >
-> **From this point forward, use your personal Gmail account. Do not use your work organization’s or Birkbeck email.**
+> **From this point forward, use your personal Gmail account. Do not use your work's, organization’s or Birkbeck email. **
+>
+> **Only your personal email. If you don't have a personal gmail account please create.**
 >
 > Your Google Cloud coupon will be linked to your personal Gmail account, so make sure you redeem it there. This way, the coupon will stay yours.
 
