@@ -42,9 +42,7 @@ Do not copy and paste the commands as copying from this document and pasting int
 
 You will need to watch the videos posted in preparation for the first class to run this tutorial.
 
-1. Firstly, watch the following video configuring GCP to create a new Virtual Machine (VM).
-
-[![Watch the video](https://img.youtube.com/vi/o8ys7Qt8h5w/sddefault.jpg)](https://youtu.be/o8ys7Qt8h5w)
+1. Firstly, follow `Week 0` tutorial on redeeming your coupon and then creating a new VM. Go go ahead and create a new VM. You will use this VM for today's tutorial.
 
 > You should be able now to create a new VM :white_check_mark:
 
