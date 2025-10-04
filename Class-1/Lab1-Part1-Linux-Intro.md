@@ -40,12 +40,9 @@ Do not copy and paste the commands as copying from this document and pasting int
 
 #### Lab 1.1 Part A: Preparing your workspace
 
-You will need to watch the videos posted in preparation for the first class to run this tutorial.
+1. Firstly, follow `Week 0` tutorial on redeeming your coupon and then creating a new VM.
 
-1. Firstly, follow `Week 0` tutorial on redeeming your coupon and then creating a new VM. Go go ahead and create a new VM. You will use this VM for today's tutorial.
-
-> You should be able now to create a new VM :white_check_mark:
-
+**Go go ahead and create a VM using the configuration as `Week 0`. You will use the VM for this tutorial.**
 
 #### Lab 1.1 Part B: Deploying a Cloud application
 
@@ -158,6 +155,17 @@ $ cd ..
 ```
 
 > Instead of `cd ..` we could use the `cd /home/yoda` command to navigate the desired directory.
+
+- Let's install `pico`, that is the terminal editor used in this tutorial. Before that, run the following command to update your system.
+
+```
+sudo apt update
+```
+- Now install `nano` that includes `pico`
+
+```
+   sudo apt install nano
+```
 
 13. Let’s create a file called `luke.txt` inside the `jedi` folder. We will use the `pico` text editor for Unix systems, preinstalled in our Ubuntu OS. 
 
