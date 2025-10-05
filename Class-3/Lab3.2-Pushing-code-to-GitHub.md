@@ -63,7 +63,7 @@ $ git commit -m "Pushing my app files"
 9. Upload the files in the repository.
 
 ```shell
-$ git push -f origin master
+$ git push -f origin main
 ```
 
 10. Done! You should be able to see your file online
