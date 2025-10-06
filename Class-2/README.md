@@ -1,12 +1,24 @@
-### Cloud Computing and Cloud Computing Concepts Lab 2
+### Lab 2
 
-Welcome to Lab 2!
+Welcome to **Lab 2** 🎉  
 
-Make sure you complete the following three tutorials:
+In this lab you’ll set up your coding environment, learn JavaScript basics, and build your first APIs with **Node.js** and **Express**.
 
-* [Lab2.1-Introduction-to-NodeJS](https://github.com/steliosot/cc/blob/master/Class-2/Lab2.1-Introduction-to-NodeJS.md)
-* [Lab2.2-Building-the-MiniFilm-application](https://github.com/steliosot/cc/blob/master/Class-2/Lab2.2-Building-the-MiniFilm-application.md)
-* [Lab2.3-MongoDB-tutorial-with-Python](https://github.com/steliosot/cc/blob/master/Class-2/Lab2.3-MongoDB-tutorial-with-Python.md)
-  * Python scripts in ipynb and py format can be found [here](https://github.com/steliosot/cc/tree/master/Class-2/Lab2.3-Python-files)!
+#### 📂 Lab Structure
 
+This lab is divided into 5 parts:
 
+- [**Part 0 – Preparing your workspace**](lab2-part0) 
+  Install Visual Studio Code and Node.js, then test that everything works.
+
+- [**Part 1 – JavaScript fundamentals**](lab2-part1) 
+  Write and run your first JavaScript programs with Node.js. Learn about variables, data types, objects, arrays, and JSON.
+
+- [**Part 2 – Introduction to Node.js with Express**](lab2-part2) 
+  Create your first Node.js project, install Express, and build a simple web server.
+
+- [**Part 3 – Using Routers**](lab2-part3) 
+  Organize your Express app with routers to keep your code clean and scalable.
+
+- [**Part 4 – Exercise**](lab2-part4) 
+  Put everything together: build a mini University API with routes for students.
