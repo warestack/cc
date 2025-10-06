@@ -27,7 +27,7 @@ These will be your main tools for building and running applications.
    
    VS Code is a free code editor widely used for web development.
 
-![Visual Studio Code download page](/Users/steliossotiriadis/Documents/lab2/assets/vsc.png "Visual Studio Code download page")
+![Visual Studio Code download page](assets/vsc.png "Visual Studio Code download page")
 
 2. Download the installer for your operating system:
    - **Windows**: `VSCodeSetup-x64.exe`  
@@ -46,11 +46,11 @@ These will be your main tools for building and running applications.
 
 2. For **Windows** users → download the `.msi` installer and install it.  
 
-![Node.js Windows installer](/Users/steliossotiriadis/Documents/lab2/assets/win.png "Node.js Windows installer")
+![Node.js Windows installer](assets/win.png "Node.js Windows installer")
 
 3. For **Mac** users → download the `.pkg` installer and install it.  
 
-![Node.js Mac installer](/Users/steliossotiriadis/Documents/lab2/assets/mac.png "Node.js Mac installer")
+![Node.js Mac installer](assets/mac.png "Node.js Mac installer")
 
 4. Accept the license agreement and keep the default installation options.
 
