@@ -188,7 +188,7 @@ console.log(students[1].id);   // s2
 
 Try it yourself: Loop through the array and log the title of every book.
 
-```json
+```js
 [
   { id: "b1", title: "1984", author: "George Orwell", year: 1949 },
   { id: "b2", title: "To Kill a Mockingbird", author: "Harper Lee", year: 1960 },

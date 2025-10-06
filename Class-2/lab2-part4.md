@@ -32,7 +32,7 @@ Here is a screenshot of the home `/students/s1` endpoint.
 
 Bellow is the data that the home `/` endpoint should return (copy it from here).
 
-```json
+```js
 {
     name: 'University API',
     version: '1.0.0',
@@ -49,7 +49,7 @@ Here is the student data that the `/students` endpoint should return.
 
 * Your task is to make sure the API can also return each student individually. For example, `/students/s1` should only return the student with ID `s1`."
 
-```json
+```js
 {
   s1: {
     name: 'John Smith',
@@ -70,6 +70,14 @@ Here is the student data that the `/students` endpoint should return.
     year: 1
   }
 }
+```
+
+* If a student is not present e.g. user `enters /students/s10` then return the following:
+
+```js
+if (!student) {
+    return res.status(404).json({ error: 'Student not found' });
+  }
 ```
 
 #### Boilerplate code
