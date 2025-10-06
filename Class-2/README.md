@@ -22,3 +22,5 @@ This lab is divided into 5 parts:
 
 - [**Part 4 – Exercise**](lab2-part4.md) 
   Put everything together: build a mini University API with routes for students.
+  
+  You can find the [exerice solution here](exercise-solution).
