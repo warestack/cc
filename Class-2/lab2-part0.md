@@ -31,7 +31,7 @@ These will be your main tools for building and running applications.
 
 2. Download the installer for your operating system:
    - **Windows**: `VSCodeSetup-x64.exe`  
-   - **MacOS**: `VSCode-darwin.zip` or `.dmg`
+   - **MacOS**: `VSCode-darwin.dmg`
 
 3. Run the installer and follow the setup wizard.
 
