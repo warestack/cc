@@ -8,7 +8,7 @@ You will need to **replicate the following API endpoints** using the appropriate
 
 Your API should support:
 
-GET` /` → Welcome page with API description.
+GET `/` → Welcome page with API description.
 
 GET `/students` → Returns all students.
 
