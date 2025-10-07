@@ -6,9 +6,9 @@ In this part of the lab, you will learn the basics of JavaScript and how to run 
 
 #### Step 1: JavaScipt fundamentals
 
-Go to your `Documents` (or any folder you prefer) and create a new folder called `js-tutorial`.  
+1. You will need to create a folder to store your project data. Go to your `Documents` (or any folder you prefer) in your computer and create a new folder called `js-tutorial`.
 
-2. Open **Visual Studio Code (VSC)** and open this folder as your project.
+2. Open **Visual Studio Code (VSC)** and then open the folder you just created as your project.
 
 ![vsc1](assets/vsc1.png)
 
@@ -217,4 +217,4 @@ for (let i = 0; i < books.length; i++) {
 }
 ```
 
-✅ Tutorial complete. Continue to the next part.
+✅ Tutorial is completed. Continue to the [next part](lab2-part2.md).
