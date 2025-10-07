@@ -35,7 +35,7 @@ console.log("Hello, world!");
 
 > `console.log()` prints text to the console.
 
-2. Open a new terminal, if it's not already openned. From the top menu select `Terminal` and then  `New Terminal` .  You can run the `app.js` by simply running `node app.js` in the terminal.
+2. Open a new terminal (if not already open). From the top menu select `Terminal` and then  `New Terminal` .  You can run the `app.js` by simply running `node app.js` in the terminal.
 
 ```shell
 node app.js
