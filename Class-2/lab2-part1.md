@@ -43,7 +43,7 @@ Let's run the `app.js` using the following command in the terminal.
 node app.js
 ```
 
-This is how my `app.js` file looks like.
+This is how my `app.js` and the terminal output looks like.
 
 ![js2](assets/js2.png)
 
