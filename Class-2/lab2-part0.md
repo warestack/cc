@@ -71,4 +71,4 @@ npm
 
 3. The outputs should confirm that node is now installed.
 
-✅ Tutorial is completed. Continue to the next part.
+✅ Tutorial is completed. Continue to the [next part](lab2-part1.md).
