@@ -81,8 +81,11 @@ if (!student) {
 ```
 
 res → the response object Express gives you to send something back to the client.
+
 .status(404) → sets the HTTP status code to 404 Not Found.
+
 .json({ error: 'Student not found' }) → sends a JSON response body with an error field.
+
 return → ensures the function stops executing after sending the response.
 
 👉 So in plain English:
