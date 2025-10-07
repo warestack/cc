@@ -19,6 +19,7 @@ Before we start coding, we need to install Visual Studio Code (VSC) and Node.js 
 #### Step 1: Install Visual Studio Code
 
 1. Open your browser and go to the official download page: [https://code.visualstudio.com/](https://code.visualstudio.com/)
+   Tip: Open in new tab → Ctrl+Click (Win/Linux) or ⌘+Click (Mac).
    
    VS Code is a free code editor widely used for web development.
 
