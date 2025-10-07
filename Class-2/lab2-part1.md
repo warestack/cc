@@ -225,6 +225,6 @@ for (const book of books) {
 }
 
 ```
-Close your folder from the top menu (`File` - `Close Folder`).
+From the top menu, go to `File` > `Close Folder` to close your folder.
 
 ✅ Tutorial is completed. Continue to the [next part](lab2-part2.md).
