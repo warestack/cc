@@ -136,4 +136,4 @@ Save it and then visit the URL and test that it works.
 
 You just learned how to create your first routers! 
 
-✅ Tutorial complete. Continue to the next part.
+✅ Tutorial is completed. Continue to the [next part](lab2-part4.md).
