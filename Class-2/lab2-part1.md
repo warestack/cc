@@ -12,7 +12,7 @@ In this part of the lab, you will learn the basics of JavaScript and how to run 
 
 ![vsc1](assets/vsc1.png)
 
-The folder `js-tutorial` is now open.
+3. The folder `js-tutorial` is now open.
 
 ![js1](assets/js1.png)
 
