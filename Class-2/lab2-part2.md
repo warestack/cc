@@ -7,8 +7,8 @@ By the end of this part, you will be able to:
 
 Let’s set up our very first Node.js server using Express.
 
-1. Go to your `Documents` folder (or anywhere you prefer) and create a new folder called `lab2-hello`.
-2. Open VSC and open a new folder.
+1. Let's start with a fresh project. Go to your `Documents` folder (or anywhere you prefer) and create a new folder called `lab2-hello`.
+2. In VSC, open a new folder.
 
 ![vsc1](assets/vsc1.png)
 
@@ -89,4 +89,4 @@ Try the `http://localhost:3000/hello` endpoint too.
 
 🎉 That’s it, we just built our very first Express server! This small app is the foundation for building APIs and web applications.
 
-✅ Tutorial complete. Continue to the next part.
+✅ Tutorial is completed. Continue to the [next part](lab2-part3.md).
