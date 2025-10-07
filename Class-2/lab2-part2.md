@@ -36,7 +36,9 @@ This file:
 npm install express nodemon
 ```
 
-5. Now, we need to tell Node how to start our server. So inside the `package.json` file, I’ll adapt the scripts section to look like this:
+5. Now, we need to tell Node how to start our server.
+
+Inside the `package.json` file, adapt the scripts section to look like this, by replacing the existing script:
 
 ```
 "scripts": {
@@ -46,16 +48,17 @@ npm install express nodemon
 
 ![vsc2](assets/vsc2.png)
 
->  That way, every time I run `npm start`, Nodemon will launch `app.js` and keep it running.
+> That way, every time you run npm start, Nodemon will launch app.js and keep it running.
+> Whenever you make a change in the code, Nodemon automatically restarts the server so you don’t have to stop and start it manually.
 
-6. Now let’s actually create the server. Create a new file called `app.js` and in the file, I’ll start by importing Express:
+6. Now let’s create the server. Create a new file called `app.js` and in the file, you’ll start by importing `express`:
 
 ```js
 const express = require('express')
 const app = express()
 ```
 
-Then I’ll define my first route, the home route, just `/`.
+Then you’ll define your first route, the home route, just `/`.
 
 ```js
 app.get('/', (req, res) => {
@@ -76,18 +79,21 @@ Finally, we need to make the server listen on a port. I’ll pick port `3000`.
 ```js
 app.listen(3000)
 ```
+> A port is like a numbered “door” on a computer that programs use to send and receive data over a network.
+> Example: websites usually use port `80` (HTTP) or `443` (HTTPS).
+> If you run a Node.js app on port `3000`, you open your browser at `http://localhost:3000`.
 
 Here is how it looks like.
 
 ![vsc3](assets/vsc3.png)
 
-7. Now if I go back to the terminal and type:
+7. Go back to the terminal and type:
 
 ```shell
 npm start
 ```
 
-The server is running. If I open my browser and visit `http://localhost:3000`, I’ll see the **Hello world!**
+The server is now running. Open a browser (I used Google Chrome) and visit `http://localhost:3000`, you’ll see the **Hello world!**
 
 Try the `http://localhost:3000/hello` endpoint too.
 
