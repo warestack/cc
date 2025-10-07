@@ -18,7 +18,17 @@ Let’s set up our very first Node.js server using Express.
 npm init -y
 ```
 
-This creates a package.json file, which keeps track of our project’s settings and dependencies.
+- `npm` → Node Package Manager, used to manage libraries (packages) in your project.
+- `init` → initializes a new Node.js project in the current folder.
+- `-y` → automatically answers “yes” to all setup questions (project name, version, entry point, etc.), so it skips the interactive wizard.
+👉 The result is a package.json file created in your folder.
+
+This file:
+
+- Stores project information (name, version, author, license, etc.).
+- Tracks dependencies (packages you install with npm install).
+- Can define scripts (e.g., "start": "node app.js") to run commands easily.
+- Helps others (or servers) install the exact same project setup with a single npm install.
 
 4. Next, let’s install Express, which is the framework we’ll use, and Nodemon, which will restart our server automatically whenever we make changes.
 
