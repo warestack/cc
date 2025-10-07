@@ -14,12 +14,7 @@ This setup is the foundation for all the coding you’ll do in the next steps of
 
 #### Prepare your workspace
 
-Before we start coding, we need to install two important tools:  
-
-- **Visual Studio Code (VS Code)** → our code editor  
-- **Node.js** → allows us to run JavaScript outside the browser and comes with **npm** (Node Package Manager) for installing extra libraries and tools.  
-
-These will be your main tools for building and running applications.
+Before we start coding, we need to install Visual Studio Code (VSC) and Node.js that allows us to run JavaScript outside the browser and comes with **npm** (Node Package Manager) for installing extra libraries and tools. These will be your main tools for building and running applications.
 
 #### Step 1: Install Visual Studio Code
 
