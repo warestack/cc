@@ -216,5 +216,6 @@ for (let i = 0; i < books.length; i++) {
   console.log("---");
 }
 ```
+Close your folder from the top menu (`File` - `Close Folder`).
 
 ✅ Tutorial is completed. Continue to the [next part](lab2-part2.md).
