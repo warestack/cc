@@ -217,6 +217,13 @@ for (let i = 0; i < books.length; i++) {
   console.log("Year:", books[i].year);
   console.log("---");
 }
+
+// Alternative solution
+
+for (const book of books) {
+  console.log(book.title);
+}
+
 ```
 Close your folder from the top menu (`File` - `Close Folder`).
 
