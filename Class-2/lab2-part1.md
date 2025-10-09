@@ -21,6 +21,7 @@ In this part of the lab, you will learn the basics of JavaScript and how to run 
 JavaScript (often called JS) is a programming language of the web. It was first created to make websites interactive (e.g. buttons, forms, animations).  
 
 Today, JavaScript is much more powerful:  
+
 - It runs in the browser (frontend) to control web pages.  
 - It runs on the server (backend) using Node.js.  
 - It’s used to build web apps, mobile apps, games, and even desktop software.  
@@ -32,7 +33,7 @@ Let's explore the basics.
 Add the following code and save it (Windows press `Ctrl` + `S`, Mac press `md + `S`.  
 
 ```js
-console.log("Hello, world!")
+console.log("Hello, world!");
 ```
 
 > `console.log()` prints text to the console.
@@ -59,19 +60,20 @@ This is how my `app.js` and the terminal output looks like.
 
 ```js
 // Using let (can change)
-let name = "John"
-console.log(name)
-name = "Kate"
-console.log(name)
+let name = "John";
+console.log(name);
+name = "Kate";
+console.log(name);
 
 // Using const (cannot change)
-const pi = 3.1415
-console.log(pi)
+const pi = 3.1415;
+console.log(pi);
 ```
 
 > In JavaScript, semicolons (`;`) are optional in most cases because of a feature called Automatic Semicolon Insertion (ASI).
 > You can either type `name = "Kate";` or `name = "Kate"`. For keeping this tutorial simple, I didn't include semicolons.
 > However, it’s still recommended to use semicolons because:
+>
 > - It makes your code clearer and more consistent.
 > - It prevents unexpected behavior in certain cases (like when a line starts with `(` or `[`).
 > - Most style guides (e.g., Google, Airbnb) prefer using them.  
@@ -102,14 +104,14 @@ console.log(person, ":", typeof person);       // will show "object"
 3. Basic operators in JavaScript look just like Python.
 
 ```js
-let x = 10
-let y = 3
+let x = 10;
+let y = 3;
 
-console.log(x + y) // 13
-console.log(x - y) // 7
-console.log(x * y) // 30
-console.log(x / y) // 3.333...
-console.log(x % y) // 1 (remainder)
+console.log(x + y); // 13
+console.log(x - y); // 7
+console.log(x * y); // 30
+console.log(x / y); // 3.333...
+console.log(x % y); // 1 (remainder)
 ```
 
 4. In JS, code blocks use the curly braces.
@@ -120,14 +122,14 @@ console.log(x % y) // 1 (remainder)
 Here is an example of a JS conditional block.
 
 ```js
-let score = 85
+let score = 85;
 
 if (score >= 90) {
-  console.log("A grade")
+  console.log("A grade");
 } else if (score >= 70) {
-  console.log("B grade")
+  console.log("B grade");
 } else {
-  console.log("C grade")
+  console.log("C grade");
 }
 ```
 
@@ -135,15 +137,15 @@ if (score >= 90) {
 
 ```js
 // For loop
-for (let i = 1 i <= 5 i++) {
-  console.log("Number " + i)
+for (let i = 1; i <= 5; i++) {
+  console.log("Number " + i);
 }
 
 // While loop
-let n = 1
+let n = 1;
 while (n <= 3) {
-  console.log("Count " + n)
-  n++
+  console.log("Count " + n);
+  n++;
 }
 ```
 
@@ -151,46 +153,47 @@ while (n <= 3) {
 
 ```js
 function greet(name) {
-  return "Hello " + name
+  return "Hello " + name;
 }
-console.log(greet("John")) // Hello John
-console.log(greet("Maria")) // Hello Maria
+console.log(greet("John")); // Hello John
+console.log(greet("Maria")); // Hello Maria
 ```
 
 7. This is a JavaScript object, which works very much like a Python dictionary.  
 
    * Objects are at the heart of modern APIs because they let us store data in key–value pairs (e.g., `name: "Mary"`, `age: 25`). 
+
 * Try the following code block.
 
-```python
+```js
 let student = {
   name: "Mary",
   age: 25,
   major: "Computer Science"
-}
+};
 
-console.log(student.name)      // Mary
-console.log(student["major"])  // Computer Science
+console.log(student.name);      // Mary
+console.log(student["major"]);  // Computer Science
 ```
 
 >  This structure makes it easy to organize and send data between applications, especially in JSON format, which is just a text version of objects.  
 >
-> 👉 In short: objects are the main way information is shared in web apps and APIs.
+>  👉 In short: objects are the main way information is shared in web apps and APIs.
 
 8. In JavaScript, an array is very similar to a list in Python. Both store a collection of values in order, and you can access them using an index that starts at `0`.  
 
 ```js
-let colors = ["red", "green", "blue"]
+let colors = ["red", "green", "blue"];
 
-console.log(colors[0]) // red
-console.log(colors.length) // 3
+console.log(colors[0]); // red
+console.log(colors.length); // 3
 
-colors.push("yellow") // add at end
-console.log(colors) 
+colors.push("yellow"); // add at end
+console.log(colors);
 ```
 
 9. Finally, let’s look at a **JSON array of objects**. 
-   
+
    This is very common in real-world APIs: you get a list (array) of objects, where each object has keys and values.  
 
 ```js
@@ -198,10 +201,10 @@ let students = [
   { id: "s1", name: "John Smith" },
   { id: "s2", name: "Maria Garcia" },
   { id: "s3", name: "Ali Khan" }
-]
+];
 
-console.log(students[0].name) // John Smith
-console.log(students[1].id)   // s2
+console.log(students[0].name); // John Smith
+console.log(students[1].id);   // s2
 ```
 
 ---
@@ -215,7 +218,7 @@ Try it yourself: Loop through the array and log the title of every book.
   { id: "b1", title: "1984", author: "George Orwell", year: 1949 },
   { id: "b2", title: "To Kill a Mockingbird", author: "Harper Lee", year: 1960 },
   { id: "b3", title: "The Hobbit", author: "J.R.R. Tolkien", year: 1937 }
-]
+];
 ```
 
 > 🚀 Avoid scrolling down to the solution until you’ve tried it.
@@ -228,23 +231,23 @@ let books = [
   { id: "b1", title: "1984", author: "George Orwell", year: 1949 },
   { id: "b2", title: "To Kill a Mockingbird", author: "Harper Lee", year: 1960 },
   { id: "b3", title: "The Hobbit", author: "J.R.R. Tolkien", year: 1937 }
-]
+];
 
-for (let i = 0 i < books.length i++) {
-  console.log("ID:", books[i].id)
-  console.log("Title:", books[i].title)
-  console.log("Author:", books[i].author)
-  console.log("Year:", books[i].year)
-  console.log("---")
+for (let i = 0; i < books.length; i++) {
+  console.log("ID:", books[i].id);
+  console.log("Title:", books[i].title);
+  console.log("Author:", books[i].author);
+  console.log("Year:", books[i].year);
+  console.log("---");
 }
 
 // Alternative solution
 
 for (const book of books) {
-  console.log(book.title)
+  console.log(book.title);
 }
-
 ```
+
 From the top menu, go to `File` > `Close Folder` to close your folder.
 
 ✅ Tutorial is completed. Continue to the [next part](lab2-part2.md).
