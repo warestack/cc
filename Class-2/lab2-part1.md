@@ -211,7 +211,7 @@ console.log(students[1].id);   // s2
 
 #### Exercise
 
-Try it yourself: Loop through the array and log the title of every book.
+Try it yourself: Loop through the array and print the title of every book.
 
 ```js
 [
