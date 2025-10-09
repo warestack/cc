@@ -40,7 +40,7 @@ Bellow is the data that the home `/` endpoint should return (copy it from here).
     endpoints: {
       root: 'GET /',
       allStudents: 'GET /students',
-      student1: 'GET /sid'
+      student1: 'GET /students/s1'
     }
 }
 ```
