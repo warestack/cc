@@ -32,7 +32,7 @@ Let's explore the basics.
 Add the following code and save it (Windows press `Ctrl` + `S`, Mac press `md + `S`.  
 
 ```js
-console.log("Hello, world!");
+console.log("Hello, world!")
 ```
 
 > `console.log()` prints text to the console.
@@ -59,39 +59,39 @@ This is how my `app.js` and the terminal output looks like.
 
 ```js
 // Using let (can change)
-let name = "John";
-console.log(name);
+let name = "John"
+console.log(name)
 name = "Kate"
 console.log(name)
 
 // Using const (cannot change)
-const pi = 3.1415;
-console.log(pi);
+const pi = 3.1415
+console.log(pi)
 ```
 
 2. Let's explore the basic JS data types.
 
 ```js
-let text = "Hello";      // String
-let number = 42;         // Number
-let isActive = true;     // Boolean
-let nothing = null;      // Null
-let notDefined;          // Undefined
-let fruits = ["apple", "banana", "orange"]; // Array
-let person = { name: "John", age: 25 };     // Object
+let text = "Hello"      // String
+let number = 42         // Number
+let isActive = true     // Boolean
+let nothing = null      // Null
+let notDefined          // Undefined
+let fruits = ["apple", "banana", "orange"] // Array
+let person = { name: "John", age: 25 }     // Object
 ```
 
 3. Basic operators in JavaScript look just like Python.
 
 ```js
-let x = 10;
-let y = 3;
+let x = 10
+let y = 3
 
-console.log(x + y); // 13
-console.log(x - y); // 7
-console.log(x * y); // 30
-console.log(x / y); // 3.333...
-console.log(x % y); // 1 (remainder)
+console.log(x + y) // 13
+console.log(x - y) // 7
+console.log(x * y) // 30
+console.log(x / y) // 3.333...
+console.log(x % y) // 1 (remainder)
 ```
 
 4. In JS, code blocks use the curly braces.
@@ -102,14 +102,14 @@ console.log(x % y); // 1 (remainder)
 Here is an example of a JS conditional block.
 
 ```js
-let score = 85;
+let score = 85
 
 if (score >= 90) {
-  console.log("A grade");
+  console.log("A grade")
 } else if (score >= 70) {
-  console.log("B grade");
+  console.log("B grade")
 } else {
-  console.log("C grade");
+  console.log("C grade")
 }
 ```
 
@@ -117,15 +117,15 @@ if (score >= 90) {
 
 ```js
 // For loop
-for (let i = 1; i <= 5; i++) {
-  console.log("Number " + i);
+for (let i = 1 i <= 5 i++) {
+  console.log("Number " + i)
 }
 
 // While loop
-let n = 1;
+let n = 1
 while (n <= 3) {
-  console.log("Count " + n);
-  n++;
+  console.log("Count " + n)
+  n++
 }
 ```
 
@@ -133,10 +133,10 @@ while (n <= 3) {
 
 ```js
 function greet(name) {
-  return "Hello " + name;
+  return "Hello " + name
 }
-console.log(greet("John")); // Hello John
-console.log(greet("Maria")); // Hello Maria
+console.log(greet("John")) // Hello John
+console.log(greet("Maria")) // Hello Maria
 ```
 
 7. This is a JavaScript object, which works very much like a Python dictionary.  
@@ -149,10 +149,10 @@ let student = {
   name: "Mary",
   age: 25,
   major: "Computer Science"
-};
+}
 
-console.log(student.name);      // Mary
-console.log(student["major"]);  // Computer Science
+console.log(student.name)      // Mary
+console.log(student["major"])  // Computer Science
 ```
 
 >  This structure makes it easy to organize and send data between applications, especially in JSON format, which is just a text version of objects.  
@@ -162,13 +162,13 @@ console.log(student["major"]);  // Computer Science
 8. In JavaScript, an array is very similar to a list in Python. Both store a collection of values in order, and you can access them using an index that starts at `0`.  
 
 ```js
-let colors = ["red", "green", "blue"];
+let colors = ["red", "green", "blue"]
 
-console.log(colors[0]); // red
-console.log(colors.length); // 3
+console.log(colors[0]) // red
+console.log(colors.length) // 3
 
-colors.push("yellow"); // add at end
-console.log(colors); 
+colors.push("yellow") // add at end
+console.log(colors) 
 ```
 
 9. Finally, let’s look at a **JSON array of objects**. 
@@ -180,10 +180,10 @@ let students = [
   { id: "s1", name: "John Smith" },
   { id: "s2", name: "Maria Garcia" },
   { id: "s3", name: "Ali Khan" }
-];
+]
 
-console.log(students[0].name); // John Smith
-console.log(students[1].id);   // s2
+console.log(students[0].name) // John Smith
+console.log(students[1].id)   // s2
 ```
 
 ---
@@ -210,20 +210,20 @@ let books = [
   { id: "b1", title: "1984", author: "George Orwell", year: 1949 },
   { id: "b2", title: "To Kill a Mockingbird", author: "Harper Lee", year: 1960 },
   { id: "b3", title: "The Hobbit", author: "J.R.R. Tolkien", year: 1937 }
-];
+]
 
-for (let i = 0; i < books.length; i++) {
-  console.log("ID:", books[i].id);
-  console.log("Title:", books[i].title);
-  console.log("Author:", books[i].author);
-  console.log("Year:", books[i].year);
-  console.log("---");
+for (let i = 0 i < books.length i++) {
+  console.log("ID:", books[i].id)
+  console.log("Title:", books[i].title)
+  console.log("Author:", books[i].author)
+  console.log("Year:", books[i].year)
+  console.log("---")
 }
 
 // Alternative solution
 
 for (const book of books) {
-  console.log(book.title);
+  console.log(book.title)
 }
 
 ```
