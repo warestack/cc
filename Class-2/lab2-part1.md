@@ -211,6 +211,11 @@ console.log(students[1].id);   // s2
 
 ---
 
+
+#### 🤓 Quiz
+
+[Try the quiz in **Learn** mode](https://kahoot.it/solo/?quizId=c41b5245-0de5-4f1c-9469-47a6e9133ae9)
+
 #### Exercise
 
 Try it yourself: Loop through the array and print the title of every book.
