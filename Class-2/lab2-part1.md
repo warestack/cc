@@ -69,6 +69,13 @@ const pi = 3.1415
 console.log(pi)
 ```
 
+> In JavaScript, semicolons (`;`) are optional in most cases because of a feature called Automatic Semicolon Insertion (ASI).
+> You can either type `name = "Kate";` or `name = "Kate"`. For keeping this tutorial simple, I didn't include semicolons.
+> However, it’s still recommended to use semicolons because:
+> - It makes your code clearer and more consistent.
+> - It prevents unexpected behavior in certain cases (like when a line starts with `(` or `[`).
+> - Most style guides (e.g., Google, Airbnb) prefer using them.  
+
 2. Let's explore the basic JS data types.
 
 ```js
