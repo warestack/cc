@@ -1,6 +1,7 @@
 ### Lab 2: Part 2 - Introduction to NodeJS with express
 
 By the end of this part, you will be able to:  
+
 - Set up a basic Node.js project with Express.  
 - Create simple routes and run your first web server.  
 - Start and stop the server from the terminal.  
@@ -21,7 +22,7 @@ npm init -y
 - `npm` → Node Package Manager, used to manage libraries (packages) in your project.
 - `init` → initializes a new Node.js project in the current folder.
 - `-y` → automatically answers “yes” to all setup questions (project name, version, entry point, etc.), so it skips the interactive wizard.
-👉 The result is a package.json file created in your folder.
+  👉 The result is a package.json file created in your folder.
 
 This file:
 
@@ -54,31 +55,32 @@ Inside the `package.json` file, adapt the scripts section to look like this, by 
 6. Now let’s create the server. Create a new file called `app.js` and in the file, you’ll start by importing `express`:
 
 ```js
-const express = require('express')
-const app = express()
+const express = require('express');
+const app = express();
 ```
 
 Then you’ll define your first route, the home route, just `/`.
 
 ```js
 app.get('/', (req, res) => {
-    res.send("Hello world!")
-})
+    res.send("Hello world!");
+});
 ```
 
 Let's define a second route.
 
 ```js
 app.get('/hello', (req, res) => {
-    res.send("world!")
-})
+    res.send("world!");
+});
 ```
 
 Finally, we need to make the server listen on a port. I’ll pick port `3000`.
 
 ```js
-app.listen(3000)
+app.listen(3000);
 ```
+
 > A port is like a numbered “door” on a computer that programs use to send and receive data over a network.
 > Example: websites usually use port `80` (HTTP) or `443` (HTTPS).
 > If you run a Node.js app on port `3000`, you open your browser at `http://localhost:3000`.
