@@ -1,6 +1,7 @@
 ### Lab 2: Part 3 - Running an app using `routers`
 
 By the end of this part, you will be able to:  
+
 - Organize your Express app using **routers**.  
 - Create separate route files and connect them to `app.js`.  
 - Build cleaner and more scalable APIs.  
@@ -38,16 +39,16 @@ Create the `app.js` file and add the boilerplate code.
 
 ```js
 // Import the Express library
-const express = require('express')
-const app = express()
+const express = require('express');
+const app = express();
 
 // Define a route for "/"
 app.get('/', (req, res) => {
-    res.send("Hello world!")
+    res.send("Hello world!");
 });
 
 // Start the server on port 3000
-app.listen(3000)
+app.listen(3000);
 ```
 
 ```shell
@@ -64,7 +65,7 @@ Create a folder `routes` and inside it create a file called `movies.js`
 
 ![vsc5](assets/vsc5.png)
 
-This will create an endpoint (URL) `http://localhost/movies`
+This will create an endpoint (URL) `http://localhost:3000/movies`
 
 5. Add the following code.
 
@@ -96,8 +97,8 @@ The final file should look like that.
 6. Go back to `app.js` and update the file by a) imporing the `movies` route and b) using it in the app.
 
 ```js
-const express = require('express')
-const app = express()
+const express = require('express');
+const app = express();
 
 // 1. Import the movies router
 const moviesRoute = require('./routes/movies');
@@ -106,10 +107,10 @@ const moviesRoute = require('./routes/movies');
 app.use('/movies', moviesRoute);
 
 app.get('/', (req, res) => {
-    res.send("Hello world!")
+    res.send("Hello world!");
 });
 
-app.listen(3000)
+app.listen(3000);
 ```
 
 Save the server and visit the appropriate endpoint `http://localhost/movies`.
@@ -118,7 +119,7 @@ Save the server and visit the appropriate endpoint `http://localhost/movies`.
 
 7. Head back to your `movies.js` and add another one. 
 
-This is a new endpoint `http://localhost/movies/hobbit`. Note that every route inside `movies.js` is prefixed with `/movies`.
+This is a new endpoint `http://localhost:3000/movies/hobbit`. Note that every route inside `movies.js` is prefixed with `/movies`.
 
 ```js
 router.get('/hobbit', (req, res) => {
