@@ -27,12 +27,11 @@ Today, JavaScript is much more powerful:
 
 Let's explore the basics.
 
-1. First create a new file called `app.js`, and add the following code inside your file.
+1. First create a file called `app.js`. Use menu `File` or a shortcut For Windows press `Ctrl` + `N`, for Mac press `Cmd` + `N`. Then add the following code inside your file. Make sure you save the file after each change. For Windows press `Ctrl` + `S`, for Mac press `Cmd` + `S`.
 
 ```js
 console.log("Hello, world!");
 ```
-Make sure you save the file after each change. For Windows press `Ctrl` + `S`, for Mac press `Cmd` + `S`.
 
 > `console.log()` prints text to the console.
 
