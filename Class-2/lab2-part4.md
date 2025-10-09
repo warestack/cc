@@ -12,11 +12,7 @@ GET `/` → Welcome page with API description.
 
 GET `/students` → Returns all students.
 
-GET `/students/s1` → Returns details of the first student.
-
-GET `/students/s2` → Returns details of the second student.
-
-GET `/students/s3` → Returns details of the third student.
+GET `/students/<id>` → Returns details of the student per id e.g. 's1`.
 
 Here is a screenshot of the home `/` endpoint.  
 
