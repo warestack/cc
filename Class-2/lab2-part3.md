@@ -100,7 +100,11 @@ The final file should look like that.
 
 ![vsc6](assets/vsc6.png)
 
-6. Go back to `app.js` and update the file by a) imporing the `movies` route and b) using it in the app.
+6. Go back to `app.js` and update the file by:
+
+a) imporing the `movies` route and 
+
+b) using it in the app.
 
 ```js
 const express = require('express');
@@ -119,7 +123,11 @@ app.get('/', (req, res) => {
 app.listen(3000);
 ```
 
-Save the server and visit the appropriate endpoint `http://localhost:3000/movies`.
+🔍 Explanation:
+- This line means: `const moviesRoute = require('./routes/movies')` means go to the folder routes, find the file movies.js, and load everything it exports (that's why you need the `module.exports = router;`. It’s like connecting your main app to another file that handles movie-related routes.
+- This line `app.use('/movies', moviesRoute)` creates a path in your `app: /movies`. Everything inside movies.js will now live under that path.
+
+Save the changes and open the endpoint in the browser `http://localhost:3000/movies`.
 
 ![hello-route](assets/hello-route.png)
 
