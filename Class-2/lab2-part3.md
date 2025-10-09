@@ -84,6 +84,12 @@ router.get('/', (req, res) => {
 });
 ```
 
+🔍 Explanation: 
+
+We use routers to keep our code organized and easy to manage.
+
+Without routers, all routes (like `/`, `/movies`, `/users`) would be in one big file, messy and hard to maintain. Other than keeping your code clean, you can reuse and test parts of your app more easily.
+
 Finally `export` the router and make it available to `app.js`.
 
 ```js
