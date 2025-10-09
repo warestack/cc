@@ -113,7 +113,7 @@ app.get('/', (req, res) => {
 app.listen(3000);
 ```
 
-Save the server and visit the appropriate endpoint `http://localhost/movies`.
+Save the server and visit the appropriate endpoint `http://localhost:3000/movies`.
 
 ![hello-route](assets/hello-route.png)
 
