@@ -131,6 +131,10 @@ router.get('/hobbit', (req, res) => {
 });
 ```
 
+> `res` → is the response object provided by Express.
+> `.json()` → sends data in JSON format (JavaScript Object Notation).
+> The { ... } → is a JavaScript object containing key–value pairs (like a small dataset).
+
 Save it and then visit the URL and test that it works.
 
 ![hobbit-route](assets/hobbit-route.png)
