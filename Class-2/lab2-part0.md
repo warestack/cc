@@ -41,7 +41,7 @@ Before we start coding, we need to install Visual Studio Code (VSC) and Node.js 
    >  Node.js allows you to run JavaScript on your computer. 
    >  It also installs **npm**, which lets you add extra tools and libraries (like the pip in Python).
 
-2. For **Windows** users → download the `.msi` installer and install it.  
+2. For **Windows** users → download the `.msi` installer and install it (Mac users keep scrolling). 
 
 ![Node.js Windows installer](assets/win.png "Node.js Windows installer")
 
