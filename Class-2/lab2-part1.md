@@ -70,7 +70,7 @@ const pi = 3.1415;
 console.log(pi);
 ```
 
-> In JavaScript, semicolons (`;`) are optional in most cases because of a feature called Automatic Semicolon Insertion (ASI).
+> 💡 In JavaScript, semicolons (`;`) are optional in most cases because of a feature called Automatic Semicolon Insertion (ASI).
 > You can either type `name = "Kate";` or `name = "Kate"`. For keeping this tutorial simple, I didn't include semicolons.
 > However, it’s still recommended to use semicolons because:
 >
@@ -99,7 +99,7 @@ console.log(fruits, ":", typeof fruits);       // will show "object"
 console.log(person, ":", typeof person);       // will show "object"
 ```
 
-> Note: In JavaScript, both null and Array are reported as type object, this is a long-standing quirk of the language.
+> 💡 In JavaScript, both null and Array are reported as type object, this is a long-standing quirk of the language.
 
 3. Basic operators in JavaScript look just like Python.
 
@@ -161,7 +161,7 @@ console.log(greet("Maria")); // Hello Maria
 
 7. This is a JavaScript object, which works very much like a Python dictionary.  
 
-   * Objects are at the heart of modern APIs because they let us store data in key–value pairs (e.g., `name: "Mary"`, `age: 25`). 
+> 💡 Objects are at the heart of modern APIs because they let us store data in key–value pairs (e.g., `name: "Mary"`, `age: 25`). 
 
 * Try the following code block.
 
