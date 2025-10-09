@@ -30,9 +30,9 @@ Let's explore the basics.
 
 1. Create a file named `app.js`.
    
-> For Windows press `Ctrl` + `N`, for Mac press `Cmd` + `N`, or go to File → New File from the top menu.
+> For Windows press `Ctrl + N`, for Mac press `Cmd + N`, or go to `File` → `New File` from the top menu.
 
-Add the following code and save it (Windows press `Ctrl` + `S`, Mac press `md + `S`.  
+Add the following code and save it (Windows press `Ctrl + S`, Mac press `Cmd + S`.  
 
 ```js
 console.log("Hello, world!");
