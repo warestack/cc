@@ -49,6 +49,13 @@ Inside the `package.json` file, adapt the scripts section to look like this, by 
 }
 ```
 
+> 💡 Note:
+> scripts → a list of shortcut commands for your project.
+> start → the name of the command you’ll run (npm start).
+> nodemon app.js → runs your app with Nodemon, which automatically restarts the server whenever you change the code.
+> In practice thi line tells Node.js how to run your app.
+> It says: when you type `npm start`, run `nodemon app.js`, and if you change your code, the server restarts automatically.
+
 ![vsc2](assets/vsc2.png)
 
 > That way, every time you run npm start, Nodemon will launch app.js and keep it running.
@@ -89,6 +96,7 @@ Finally, we need to make the server listen on a port. I’ll pick port `3000`.
 app.listen(3000);
 ```
 
+🔍 Explanation:
 This means: *“Start my server and wait for users to connect on port 3000”*.
 It creates the server at `http://localhost:3000`. 
 Based on the code, you now have two endpoints (URLs):
