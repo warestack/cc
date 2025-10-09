@@ -32,7 +32,7 @@ Let's explore the basics.
    
 > For Windows press `Ctrl + N`, for Mac press `Cmd + N`, or go to `File` → `New File` from the top menu.
 
-Add the following code and save it (Windows press `Ctrl + S`, Mac press `Cmd + S`.  
+Add the following code and save it (Windows press `Ctrl + S`, Mac press `Cmd + S`).  
 
 ```js
 console.log("Hello, world!");
