@@ -76,17 +76,28 @@ console.log(pi)
 > - It prevents unexpected behavior in certain cases (like when a line starts with `(` or `[`).
 > - Most style guides (e.g., Google, Airbnb) prefer using them.  
 
-2. Let's explore the basic JS data types.
+2. Let's explore the basic JS data types. We declare different types of variables and print their values and types in the console.
 
 ```js
-let text = "Hello"      // String
-let number = 42         // Number
-let isActive = true     // Boolean
-let nothing = null      // Null
-let notDefined          // Undefined
-let fruits = ["apple", "banana", "orange"] // Array
-let person = { name: "John", age: 25 }     // Object
+let text = "Hello";      // String
+let number = 42;         // Number
+let isActive = true;     // Boolean
+let nothing = null;      // Null
+let notDefined;          // Undefined
+let fruits = ["apple", "banana", "orange"]; // Array
+let person = { name: "John", age: 25 };     // Object
+
+// Print values and their types
+console.log(text, ":", typeof text);
+console.log(number, ":", typeof number);
+console.log(isActive, ":", typeof isActive);
+console.log(nothing, ":", typeof nothing);     // will show "object"
+console.log(notDefined, ":", typeof notDefined);
+console.log(fruits, ":", typeof fruits);       // will show "object"
+console.log(person, ":", typeof person);       // will show "object"
 ```
+
+> Note: In JavaScript, both null and Array are reported as type object, this is a long-standing quirk of the language.
 
 3. Basic operators in JavaScript look just like Python.
 
