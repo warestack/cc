@@ -18,7 +18,7 @@ Let’s set up our very first Node.js server using Express.
 ```shell
 npm init -y
 ```
-
+🔍 Explanation:
 - `npm` → Node Package Manager, used to manage libraries (packages) in your project.
 - `init` → initializes a new Node.js project in the current folder.
 - `-y` → automatically answers “yes” to all setup questions (project name, version, entry point, etc.), so it skips the interactive wizard.
@@ -69,6 +69,12 @@ app.get('/', (req, res) => {
 });
 ```
 
+🔍 Explanation:
+`app.get('/')` → listens for a GET request at the root URL (/).
+`req` → the request coming from the browser (what the user sends).
+`res` → the response the server sends back.
+The arrow function (req, res) => { ... } runs when the user visits the page.
+
 Let's define a second route.
 
 ```js
@@ -83,6 +89,13 @@ Finally, we need to make the server listen on a port. I’ll pick port `3000`.
 app.listen(3000);
 ```
 
+This means: *“Start my server and wait for users to connect on port 3000”*.
+It creates the server at `http://localhost:3000`. 
+Based on the code, you now have two endpoints (URLs):
+- `http://localhost:3000/` → sends “Hello world!” to the browser.
+- `http://localhost:3000/hello` → sends “world!”.
+
+> 💡 What is a port?
 > A port is like a numbered “door” on a computer that programs use to send and receive data over a network.
 > Example: websites usually use port `80` (HTTP) or `443` (HTTPS).
 > If you run a Node.js app on port `3000`, you open your browser at `http://localhost:3000`.
@@ -97,7 +110,7 @@ Here is how it looks like.
 npm start
 ```
 
-The server is now running. Open a browser (I used Google Chrome) and visit `http://localhost:3000`, you’ll see the **Hello world!**
+The server is now running. Open a browser (I used Google Chrome) and visit `http://localhost:3000`, you’ll see the `Hello world!` message.
 
 Try the `http://localhost:3000/hello` endpoint too.
 
