@@ -27,7 +27,9 @@ Today, JavaScript is much more powerful:
 
 Let's explore the basics.
 
-1. First create a file called `app.js`. Use menu `File` or a shortcut For Windows press `Ctrl` + `N`, for Mac press `Cmd` + `N`. Then add the following code inside your file. Make sure you save the file after each change. For Windows press `Ctrl` + `S`, for Mac press `Cmd` + `S`.
+1. Create a file named `app.js`. For Windows press `Ctrl` + `N`, for Mac press `Cmd` + `N`, or go to File → New File from the top menu.
+
+Add the following code and save it (Windows press `Ctrl` + `S`, Mac press `md + `S`.  
 
 ```js
 console.log("Hello, world!");
