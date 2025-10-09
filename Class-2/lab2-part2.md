@@ -36,6 +36,8 @@ This file:
 ```shell
 npm install express nodemon
 ```
+> `express` → a web framework for building servers and APIs.
+> `nodemon` → automatically restarts the server when you change the code.
 
 5. Now, we need to tell Node how to start our server.
 
