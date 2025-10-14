@@ -1,4 +1,4 @@
-### Lab3.1: Building the MiniPost REST microservice
+### Lab3: Building the MiniPost REST microservice
 
 #### What am I about to learn?
 
@@ -26,6 +26,32 @@ You will need to watch the next video on how to install and run a Node.js app.
 > Take your time, make sure you double-check the code and debug your code as you go.
 
 1. Firstly, watch the following video.
+
+**READ THIS FIRST:** 
+
+> Due to a recent Node.js update, the following script (used in the video) will no longer work:
+>
+> ```js
+> app.listen(3000, () => {
+>   console.log('Server is up and running...');
+> });
+> ```
+>
+> To fix this issue, please remove the callback or use the new Promise-based syntax.
+>
+> The correct options are:
+>
+> ```js
+> app.listen(3000);
+> ```
+>
+> **or**
+>
+> ```js
+> app.listen(3000)
+>   .then(() => console.log('Server is up and running...'))
+>   .catch(err => console.error('Failed to start server:', err));
+> ```
 
 [![Watch the video](https://i.ytimg.com/vi/CQAyWd-NlzA/hqdefault.jpg)](https://youtu.be/CQAyWd-NlzA)
 
