@@ -1,4 +1,4 @@
-#### Lab 3 – MongoDB & Node.js REST API Development
+### Lab 3 – MongoDB & Node.js REST API Development
 
 This lab series introduces how to build a **Node.js + MongoDB** application from the ground up — starting with a cloud database, then connecting it through Express and Mongoose, and finally creating a full REST API with CRUD operations.
 
