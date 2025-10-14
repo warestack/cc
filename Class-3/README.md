@@ -13,7 +13,7 @@ You’ll learn how to:
 - Add collections and documents (`DBFilms` → `ColFilms`).
 - Obtain and configure your database connection string for Node.js.
 
-📄 See file: [part 1.md](part 1.md)
+📄 See file: [part1.md](part1.md)
 
 #### Part 2 – Connecting Node.js to MongoDB
 
@@ -26,7 +26,7 @@ You’ll learn how to:
 - Define a Mongoose schema for films.
 - Fetch and display data from your MongoDB Atlas cluster.
 
-📄 See file: [part 2.md](part 2.md)
+📄 See file: [part2.md](part2.md)
 
 #### Part 3 – Building the MiniPost REST Microservice
 
@@ -37,4 +37,4 @@ You’ll create a fully functional CRUD microservice called MiniPost that perfor
 - Route handling with Express
 - Environment configuration using dotenv
 
-📄 See file: [part 3.md](part 3.md)
+📄 See file: [part3.md](part3.md)
