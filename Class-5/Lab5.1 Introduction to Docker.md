@@ -494,6 +494,7 @@ sudo apt update
 ```
    sudo apt install nano
 ```
+- And finally, let's create the `Dockerfile`.
 
 ```
 pico Dockerfile
