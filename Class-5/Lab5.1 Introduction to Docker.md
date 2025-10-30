@@ -21,9 +21,12 @@ You will need to watch the following video on installing and running a Docker on
 
 > **You should run this tutorial on your GCP VM :white_check_mark:**
 
-2. To run this tutorial, you will need a GCP VM. If you don't remember how to create a VM: **[Follow week's 0 material](https://github.com/warestack/cc/tree/main/Class-0)**.
-3. Open a new terminal connection and run the follow the following commands. Make sure you understand the process. You don't have to memorise the commands.
-4. Let's update our system.
+2. To run this tutorial, you will need a GCP VM.
+
+> If you don't remember how to create a VM: **[Follow week's 0 material](https://github.com/warestack/cc/tree/main/Class-0)**.
+
+4. Open a new terminal connection and run the follow the following commands. Make sure you understand the process. You don't have to memorise the commands.
+5. Let's update our system.
 
 ```bash
 $ sudo apt-get update
