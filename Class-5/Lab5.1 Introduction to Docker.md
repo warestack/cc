@@ -484,6 +484,17 @@ $ docker exec -it  mini-python-container python /home/test.py
 
 41. Let's create a new `Dockerfile` as follows.
 
+- Let's install `pico`, that is the terminal editor used in this tutorial. Before that, run the following command to update your system.
+
+```
+sudo apt update
+```
+- Now install `nano` that includes `pico`
+
+```
+   sudo apt install nano
+```
+
 ```
 pico Dockerfile
 ```
