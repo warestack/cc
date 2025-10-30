@@ -39,7 +39,7 @@ app.get('/', (req,res)=>{
 app.listen(3000)
 ```
 
-4. Before you continue, you will need to install GitHub on your local computer. Follow the following guide to download and install GitHub, then return to this tutorial.
+4. Before you continue, you will need to install `Git` on your local computer. Follow the following guide to download and install `Git`, then return to this tutorial.
 
 * [Installation guide for Windows, Mac and Linux users](https://github.com/git-guides/install-git)
 
@@ -50,8 +50,6 @@ app.listen(3000)
 > Then you can start a new GitBash to run the git commands as follows.
 >
 > ![vsc-win](images/vsc-win.png)
-
-* It might worth to revise [Lab3.2-Pushing-code-to-GitHub.md](https://github.com/steliosot/cc/blob/master/Class-3/Lab3.2-Pushing-code-to-GitHub.md)
 
 5. We will create a new Private repo in this tutorial, so make sure you follow the steps as presented in the video. The commands include:
 
