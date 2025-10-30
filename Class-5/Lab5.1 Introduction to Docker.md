@@ -68,7 +68,7 @@ Processing triggers for ureadahead (0.100.0-21) ...
 
 6. What is the Docker version? Run the next command
 
-> IF YOU SEE A `SUDO` ERROR, PLEASE CLOSE THE VM WINDOW AND `SSH` AGAIN.
+> ### IF YOU SEE A `SUDO` ERROR, PLEASE CLOSE THE VM WINDOW AND `SSH` AGAIN.
 
 ```bash
 $ sudo docker --version
