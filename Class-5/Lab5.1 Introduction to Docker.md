@@ -21,13 +21,7 @@ You will need to watch the following video on installing and running a Docker on
 
 > **You should run this tutorial on your GCP VM :white_check_mark:**
 
-2. To run this tutorial, you will need a GCP VM. If you don't remember creating a VM, please watch the video. For this tutorial, I used the following configuration.
-   * Zone: us-central1-a
-   * Machine type: e2-medium
-   * HTTP traffic: On
-   * HTTPS traffic: On
-   * Image: [ubuntu-1804-bionic-v20220131](https://console.cloud.google.com/compute/imagesDetail/projects/ubuntu-os-cloud/global/images/ubuntu-1804-bionic-v20220131?project=lab-7-270015)
-   * Size (GB): 25
+2. To run this tutorial, you will need a GCP VM. If you don't remember how to create a VM: **[Follow week's 0 material](https://github.com/warestack/cc/tree/main/Class-0)**.
 3. Open a new terminal connection and run the follow the following commands. Make sure you understand the process. You don't have to memorise the commands.
 4. Let's update our system.
 
