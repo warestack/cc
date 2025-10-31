@@ -1,5 +1,7 @@
 ### Lab 5
 
+*For these exercises, use your notes or online sources to complete them — do not copy and paste!*
+
 #### Exercise 1 – Docker basics: Hello Container
 
 **Task**
@@ -23,7 +25,7 @@ Recreate the "Hello World" Docker container setup from scratch on your GCP VM:
 
 Recreate the "Hello World" Docker container setup from scratch on your GCP VM:
 
-1. On your VM, create a simple file called `app.py` and implement a simple script to remove duplicated data from a list. Print the results.
+1. On your VM, create a simple file called `app.py` and implement a script to remove duplicated data from a list. Print the results.
 
 ```python
 data = [10, 20, 10, 30, 20, 40, 50, 30, 50]
