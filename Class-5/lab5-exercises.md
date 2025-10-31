@@ -17,7 +17,8 @@ Recreate the "Hello World" Docker container setup from scratch on your GCP VM:
 4. Run the official Docker hello-world image.
 
 5. List all containers and remove the exited one.
-6. Document your solution.
+
+7. Document your solution.
 
 #### Exercise 2 – Data cleaning with Python in a Docker container
 
@@ -42,16 +43,19 @@ data = [10, 20, 10, 30, 20, 40, 50, 30, 50]
 3. Build the image and run a container named `mini-python-app`.
 
 4. Verify that the container outputs the print message.
-5. Document your solution.
+
+6. Document your solution.
 
 #### Exercise 3 – Containireze the MiniFillm application (lab4)
 
 1. Containerize the MiniFilm app (implemented in Week 4).
 2. Push the code to your GitHub repository.
 3. Pull the repository to your VM and run the application.
-4. Send me a screenshot of the running instance with a few calls from postman (no code).
+4. Send a screenshot of the running instance with a few calls from postman (no code).
 
 > [Link to week 4](https://github.com/warestack/cc/tree/main/Class-4)
 
-#### When you complete the tasks, document your work and send your solutions to me via MS Teams.
+#### When you complete the tasks, document your work and send your solutions in our Teams channel - Advanced Cloud Computing (BBK_BUCI029H7_AAA_2526)
+
+
 
