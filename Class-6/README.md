@@ -39,6 +39,10 @@ $ docker login -u steliosot
 ```
 
 > In the VM, do not forget to switch to `docker-user`. The command is `su - docker-user`; we ensure that we log in and switch to the docker-user home directory using this option.
+> Important: Make sure you run Docker commands with the correct permissions.
+> 
+> Most Docker commands need elevated privileges — so either prefix them with sudo or add your user to the docker group and log out/in.
+> While some commands (like docker login) might work without sudo, mixing privileged and non-privileged Docker commands can cause confusing issues later — especially when running docker push.
 
 4. Feel free to use the mini-hi repo or create your own.
 
@@ -46,7 +50,7 @@ $ docker login -u steliosot
 * In my case, I used the public: `mini-hi.git`. If you like, go on and examine it.
 
 ```bash
-$ git clone --branch master https://github.com/steliosot/mini-hi.git
+$ git clone --branch main https://github.com/steliosot/mini-hi.git
 ```
 
 > If you want, you can install Docker on your own computer.
@@ -77,12 +81,29 @@ $ cd mini-hi/
 ```dockerfile
 $ cat Dockerfile
 
+# Use a lightweight base image
 FROM alpine
-RUN apk add --update nodejs npm
-COPY . /src
+
+# Install Node.js and npm
+RUN apk add --no-cache nodejs npm
+
+# Set working directory
 WORKDIR /src
+
+# Copy package files first (for efficient caching)
+COPY package*.json ./
+
+# Install dependencies (e.g., express and others)
+RUN npm install
+
+# Copy the rest of the application code
+COPY . .
+
+# Expose application port
 EXPOSE 3000
-ENTRYPOINT ["node", "./app.js"]
+
+# Start the application
+CMD ["node", "app.js"]
 ```
 
 > Usual stuff... 👍
@@ -131,6 +152,36 @@ steliosot/mini-hi   A hello world container using node.js (cloud…   0
 * You only need to provide a meaningful name, e.g., *my-gke-cluster*.
 * By default, we will deploy **3** nodes.
 * This might take some time, so sit tight!
+
+> **Follow the instructions on the video on how to create your cluster.**
+
+In Google Cloud Console, search for “Kubernetes Engine”.
+
+If prompted, click “Enable” to activate the API.
+
+Open Kubernetes Clusters Page
+
+Go to Kubernetes Engine → Clusters.
+
+Click “+ Create”.
+
+Choose the Cluster Mode
+
+By default, Google Cloud now suggests an Autopilot cluster.
+
+For manual control and settings (as shown in the video), click “Switch to Standard cluster”.
+
+Alternatively, from the clusters page, use the “+ Create → Standard” option.
+
+Configure the Cluster
+
+Set a name, region/zone, and other settings as shown in the tutorial (e.g. number of nodes, machine type).
+
+Create the Cluster
+
+Click “Create” and wait for Google Cloud to provision the cluster.
+
+Once ready, you’ll see its status as “Running”.
 
 13. Activate the Cloud Shell, and deploy our app in Kubernetes!
 
