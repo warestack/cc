@@ -155,33 +155,12 @@ steliosot/mini-hi   A hello world container using node.js (cloud…   0
 
 > **Follow the instructions on the video on how to create your cluster.**
 
-In Google Cloud Console, search for “Kubernetes Engine”.
-
-If prompted, click “Enable” to activate the API.
-
-Open Kubernetes Clusters Page
-
-Go to Kubernetes Engine → Clusters.
-
-Click “+ Create”.
-
-Choose the Cluster Mode
-
-By default, Google Cloud now suggests an Autopilot cluster.
-
-For manual control and settings (as shown in the video), click “Switch to Standard cluster”.
-
-Alternatively, from the clusters page, use the “+ Create → Standard” option.
-
-Configure the Cluster
-
-Set a name, region/zone, and other settings as shown in the tutorial (e.g. number of nodes, machine type).
-
-Create the Cluster
-
-Click “Create” and wait for Google Cloud to provision the cluster.
-
-Once ready, you’ll see its status as “Running”.
+Briefly the steps include: 
+- Enable the Kubernetes Engine API: In Google Cloud Console, search for “Kubernetes Engine”. If prompted, click “Enable” to activate the API.
+- Open Kubernetes Clusters Page: Go to Kubernetes Engine → Clusters. Click “+ Create”.
+- Choose the Cluster Mode: By default, Google Cloud now suggests an Autopilot cluster. For manual control and settings (as shown in the video), click “Switch to Standard cluster”. Alternatively, from the clusters page, use the “+ Create → Standard” option.
+- Configure the Cluster: Set a name, region/zone, and other settings as shown in the tutorial (e.g. number of nodes, machine type).
+- Create the Cluster: Click “Create” and wait for Google Cloud to provision the cluster. Once ready, you’ll see its status as “Running”.
 
 13. Activate the Cloud Shell, and deploy our app in Kubernetes!
 
@@ -247,7 +226,7 @@ IP:           10.104.2.7
 >
 > * This IP address is only accessible within Kubernetes.
 
-21. Let's create a deployment file called `nano mini-hi-deployment.yaml`. The file includes everything we need to deploy three replicas of our app called `minihi`; that is the name of our app! We will reuse this in a while, so make sure you remember this name.
+21. Let's create a deployment file called `mini-hi-deployment.yaml`. The file includes everything we need to deploy three replicas of our app called `minihi`; that is the name of our app! We will reuse this in a while, so make sure you remember this name.
 
 ```bash
 apiVersion: apps/v1
@@ -426,4 +405,14 @@ kubectl get pods
 
 37. Well done! 🏁 You deployed a Kubernetes app using Docker. 
 
-38. Kubernetes is expensive! Don't forget to delete your cluster!
+38. Kubernetes is expensive! Don't forget to delete your cluster and optionally any VMs created in this lab.
+
+#### 💡 Note: Using the latest Tag
+
+When working with container images, remember that if you don’t specify a tag, Docker automatically uses the latest tag. This can be convenient — for example, if you push updated images to Docker Hub and your Kubernetes deployment uses
+```
+imagePullPolicy: Always
+```
+then Kubernetes will always pull the most recent version of the image when creating or restarting Pods.
+
+However, this can also lead to inconsistency and confusion. If new Pods are started at different times, they might end up running different versions of your app (depending on when the image was updated). For reliable deployments, it’s usually better to use explicit version tags (e.g. :v1, :v2) so you know exactly which version of the image is running in your cluster.
