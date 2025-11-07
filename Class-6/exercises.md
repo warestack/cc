@@ -108,8 +108,6 @@ Why is using `rollout undo` safer than manually redeploying your previous image?
 
 ## Research-Based Exercises
 
----
-
 ### Exercise 4 — Kubernetes vs. Docker Swarm
 
 **Goal:** Compare container orchestration tools.
@@ -142,7 +140,7 @@ Why is using `rollout undo` safer than manually redeploying your previous image?
 
 ---
 
-### 🧠 Exercise 6 — The Role of Kubernetes in DevOps Pipelines
+### Exercise 6 — The Role of Kubernetes in DevOps Pipelines
 
 **Goal:** Explore how Kubernetes integrates into modern DevOps workflows.
 
