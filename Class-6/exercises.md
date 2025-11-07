@@ -119,8 +119,8 @@ Why is using `rollout undo` safer than manually redeploying your previous image?
    - Networking  
    - Load balancing  
    - Ease of setup
-2. Write a short paragraph (150–200 words) explaining **when you would choose one over the other**.
-3. Include at least **one academic or industry reference** (e.g., Google Cloud Docs, Red Hat Blog, IEEE paper).
+2. Write a short paragraph (150–200 words) explaining when you would choose one over the other.
+3. Include at least one academic or industry reference (e.g., Google Cloud Docs, Red Hat Blog, IEEE paper).
 
 **Hint:** Focus on how Kubernetes’ declarative model differs from Swarm’s simpler architecture.
 
