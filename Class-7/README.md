@@ -334,6 +334,16 @@ This sends your changes to GitHub so the workflow in your private repo can start
 
 :tada: Well done!
 
+> When you finish the lab, you must clean up your Google Cloud Platform resources so you don’t incur any costs.
+> Follow the clean-up steps shown in the video starting at 37:26: https://youtu.be/4fC0NvhhZrM?t=2246
+>
+> You must delete the following:
+> - Compute Engine VM instances
+> - Firewall rules created during the lab
+> - Any service accounts you created
+> - Any storage buckets used for Terraform state
+> - Any other temporary resources deployed by Terraform
+
 ------
 
 #### Appendix
