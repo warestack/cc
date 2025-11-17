@@ -8,8 +8,6 @@ Lab 1 part 2 focuses on how to:
 
 **Lab 1.2**    Learn how to use Linux commands to manage users of your VM.
 
-**Lab 1.4**    Develop a simple cloud service :cloud: using Python.
-
 #### Lab 1.2: **User management in Unix (Ubuntu 18.04)**
 
 This tutorial describes the steps to manage users with different security privileges. We will mainly use the `sudo` keyword, representing the system's superuser. We already used the `sudo` in lab 1.2 to run commands (for example, installing software). 
