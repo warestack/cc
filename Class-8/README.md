@@ -853,5 +853,11 @@ We will run one instance of the producer, two instances of consumer, and one ins
 ## Further Reading
 
 For further information and for information on other communication patterns supported by ZeroMQ, please refer to the ZeroMQ socket API documentation at https://zeromq.org/socket-api/.
-
 The full ZeroMQ API documentation for Python can be found at https://pyzmq.readthedocs.io/en/latest/api/index.html.
+
+---
+
+## Credits
+
+Special thanks to **Jara Jenner** for his contributions to this tutorial.
+If you’d like to learn more or connect with him, you can reach him on [LinkedIn](https://www.linkedin.com/in/darajenner/)
