@@ -9,6 +9,7 @@ ZeroMQ is a messaging library aimed for use in distributed systems, using *socke
 Using sockets, and the ability to listen, connect, and transmit messages via them, we can establish one-to-one, one-to-many, and many-to-many communication patterns between components of a distributed system (which may or may not reside on the same device).
 
 ## Communication Patterns Demonstrated in this Lab
+
 ### Overview
 
 In this lab, four different communication patterns between distributed system components will be demonstrated. These are summarised below.
@@ -45,11 +46,6 @@ Referred to as the *pipeline pattern* by ZeroMQ, with this pattern, unidirection
 
 With ZeroMQ, socket type `PUSH` and `PULL` are used for components that push data and components that pull data, respectively.
 
-
-## Further Reading
-
-For further information and for information on other communication patterns supported by ZeroMQ, please refer to the ZeroMQ socket API documentation at https://zeromq.org/socket-api/.
-
 ## :rotating_light: Important Note :rotating_light:
 
 Working with Sockets can be tricky. Once a socket is allocated/bound to a particular port, for a particular purpose, the port cannot be simultaneously used for another purpose. When running your code, if you do not explicitly destroy the connection context and close the sockets in use, or if you do not stop a running program that has established a socket connection, the port associated with the socket is unlikely to be released. If you subsequently run another program that attempts to establish a socket on the same port, this may fail and crash the program or your program may appear to run but will not exhibit the expected behaviour. For example, its clients may fail to establish a connection to it.
@@ -71,31 +67,30 @@ sudo fuser -k 5555/tcp
 
 2. Open a new SSH terminal connection to your VM and run the following commands to install the necessary development tools.
 
-    ```bash
-    sudo apt update
-    sudo apt install psmisc -y
-    sudo apt install software-properties-common -y
-    sudo apt install python3 -y
-    sudo apt install python3-pip -y
-    pip3 install pyzmq --break-system-packages
-    ```
-    
-    > :warning: Note that option `--break-system-packages` used with `pip3` causes the ZeroMQ Python package (`pyzmq`) to be installed system-wide. Usually, this would not be a good idea, as it could impact/break other Python programs used on the system. It is usually best to create Python virtual environments under which the relevant packages are installed and to then activate and use these virtual environments as required. However, as we will not be hosting any Python applications on the VM and will be destroying the VM at the end of the lab, there is no risk in installing Python packages on a system-wide basis.
-    
-    
+   ```bash
+   sudo apt update
+   sudo apt install psmisc -y
+   sudo apt install software-properties-common -y
+   sudo apt install python3 -y
+   sudo apt install python3-pip -y
+   pip3 install pyzmq --break-system-packages
+   ```
+
+   > :warning: Note that option `--break-system-packages` used with `pip3` causes the ZeroMQ Python package (`pyzmq`) to be installed system-wide. Usually, this would not be a good idea, as it could impact/break other Python programs used on the system. It is usually best to create Python virtual environments under which the relevant packages are installed and to then activate and use these virtual environments as required. However, as we will not be hosting any Python applications on the VM and will be destroying the VM at the end of the lab, there is no risk in installing Python packages on a system-wide basis.
+
 3. Check that you have `nano` installed by running the following command.
 
-    ```bash
-    nano --version
-    ```
-    
+   ```bash
+   nano --version
+   ```
+
 4. If you do not have `nano` installed, install it by running the following command.
 
-    ```bash
-    sudo apt install nano
-    ```
-    
-    > :information_source: Note that, alternatively, you may choose to use your personal machine for code editing and push your code to a GitHub repository, which you can then clone and pull onto the VM. Instructions below will assume that you will carry out your development activities on the VM itself.
+   ```bash
+   sudo apt install nano
+   ```
+
+   > :information_source: Note that, alternatively, you may choose to use your personal machine for code editing and push your code to a GitHub repository, which you can then clone and pull onto the VM. Instructions below will assume that you will carry out your development activities on the VM itself.
 
 ---
 
@@ -109,115 +104,117 @@ For this demonstration, we will produce a server and a client that can pair up, 
 
 1. Create a file named `pair-server.py` and open it for editing by running the following command.
 
-    ```bash
-    nano pair-server.py
-    ```
+   ```bash
+   nano pair-server.py
+   ```
+
 2. Enter the following code. Note that the special `localhost` machine name has been specified in the code, as all system components will run on the same VM.
 
-    ```python
-    # Import required modules
-    import zmq
-    import time
-    
-    # Initialise a new ZeroMQ context for creating a socket
-    context = zmq.Context()
-    
-    # Create a PAIR-type socket
-    socket = context.socket(zmq.PAIR)
-    
-    # Ensure that any pending messages are discarded when the socket is closed
-    socket.setsockopt(zmq.LINGER, 0)
-    
-    # Create a server connection on port 5555 of the machine on which the code is running
-    socket.bind("tcp://localhost:5555")
-    
-    # While the program is running:
-    while True:
-        
-        # Send a message to the connected client (if any)
-        socket.send_string("Server message to Client")
-        
-        # Await a message from the connected client and print it when received
-        message = socket.recv()
-        print(message)
-        
-        # Pause for one second
-        time.sleep(1)
-    ```
-    
+   ```python
+   # Import required modules
+   import zmq
+   import time
+   
+   # Initialise a new ZeroMQ context for creating a socket
+   context = zmq.Context()
+   
+   # Create a PAIR-type socket
+   socket = context.socket(zmq.PAIR)
+   
+   # Ensure that any pending messages are discarded when the socket is closed
+   socket.setsockopt(zmq.LINGER, 0)
+   
+   # Create a server connection on port 5555 of the machine on which the code is running
+   socket.bind("tcp://localhost:5555")
+   
+   # While the program is running:
+   while True:
+       
+       # Send a message to the connected client (if any)
+       socket.send_string("Server message to Client")
+       
+       # Await a message from the connected client and print it when received
+       message = socket.recv()
+       print(message)
+       
+       # Pause for one second
+       time.sleep(1)
+   ```
+
 3. Save and close the file by applying the `Ctrl+S` and then the `Ctrl+X` keyboard key combination.
 
 #### Defining the Client
 
 4. Create a file named `pair-client.py` and open it for editing by running the following command.
 
-    ```bash
-    nano pair-client.py
-    ```
-    
+   ```bash
+   nano pair-client.py
+   ```
+
 5. Enter the following code. Note that the special `localhost` machine name has been specified in the code, as all system components will run on the same VM.
 
-    ```python
-    # Import required modules
-    import zmq
-    import time
-    
-    # Initialise a new ZeroMQ context for creating a socket
-    context = zmq.Context()
-    
-    # Create a PAIR-type socket
-    socket = context.socket(zmq.PAIR)
-    
-    # Ensure that any pending messages are discarded when the socket is closed
-    socket.setsockopt(zmq.LINGER, 0)
-    
-    # Create a client connection on port 5555 of the machine on which the code is running
-    # Note the call to socket.connect, rather than socket.bind
-    socket.connect("tcp://localhost:5555")
-    
-    # For up to 10 messages:
-    for _ in range(10):
-        
-        # Await a message from the server and print it when received
-        message = socket.recv()
-        print(message)
-        
-        # Send two messages to the server
-        socket.send_string("Hello from Client")
-        socket.send_string("This is a client message to the server")
-        
-        # Pause for one second
-        time.sleep(1)
-        
-    # Destroy the context and close the socket, to clean up, before finishing
-    context.destroy()
-    socket.close()
-    ```
-    
+   ```python
+   # Import required modules
+   import zmq
+   import time
+   
+   # Initialise a new ZeroMQ context for creating a socket
+   context = zmq.Context()
+   
+   # Create a PAIR-type socket
+   socket = context.socket(zmq.PAIR)
+   
+   # Ensure that any pending messages are discarded when the socket is closed
+   socket.setsockopt(zmq.LINGER, 0)
+   
+   # Create a client connection on port 5555 of the machine on which the code is running
+   # Note the call to socket.connect, rather than socket.bind
+   socket.connect("tcp://localhost:5555")
+   
+   # For up to 10 messages:
+   for _ in range(10):
+       
+       # Await a message from the server and print it when received
+       message = socket.recv()
+       print(message)
+       
+       # Send two messages to the server
+       socket.send_string("Hello from Client")
+       socket.send_string("This is a client message to the server")
+       
+       # Pause for one second
+       time.sleep(1)
+       
+   # Before finishing, destroy the context and close the socket to clean up
+   context.destroy()
+   socket.close()
+   ```
+
 6. Save and close the file by applying the `Ctrl+S` and then the `Ctrl+X` keyboard key combination.
-    
+
 #### Running the Server
 
 7. On your active SSH terminal window (or on a new window, if one is not already open), start the server by running the following command.
 
-    ```bash
-    python3 pair-server.py
-    ```
+   ```bash
+   python3 pair-server.py
+   ```
 
 #### Running the Client
 
 8. On a separate SSH terminal window, start the client by running the following command.
 
-    ```bash
-    python3 pair-client.py
-    ```
+   ```bash
+   python3 pair-client.py
+   ```
 
 9. Examine the outputs generated by the client and the server to verify their operation.
 
-    > :information_source: Notes
-    > - We can run only one exclusive pair at a time. After the client has successfully connected to the server, attempting to run another instance of the client will cause the second instance to hang. `PAIR`-type sockets are, therefore, ideal when a client needs to have exclusive access to a server.
-    > - Due to the exclusivity of the pair, even after the initial client has shut down, starting the client again will cause the client program to hang.
-    > - We can have multiple PAIR client and server connections, but each pair will have to use a different port number.
+   > :information_source: Notes
+   >
+   > - We can run only one exclusive pair at a time. After the client has successfully connected to the server, attempting to run another instance of the client will cause the second instance to hang. `PAIR`-type sockets are, therefore, ideal when a client needs to have exclusive access to a server.
+   > - Due to the exclusivity of the pair, even after the initial client has shut down, starting the client again will cause the client program to hang.
+   > - We can have multiple PAIR client and server connections, but each pair will have to use a different port number.
 
 #### Cleaning Up
 
@@ -228,7 +225,7 @@ For this demonstration, we will produce a server and a client that can pair up, 
     ```bash
     sudo fuser -k 5555/tcp
     ```
-    
+
 12. Close your SSH terminal windows by running the following command in each.
 
     ```bash
@@ -248,50 +245,50 @@ For this demonstration, we will produce a server that represents a data service 
 
 1. On an active SSH terminal window (or on a new window, if one is not already open), create a file named `rep-server.py` and open it for editing by running the following command.
 
-    ```bash
-    nano rep-server.py
-    ```
-    
+   ```bash
+   nano rep-server.py
+   ```
+
 2. Enter the following code. Note that the special `localhost` machine name has been specified in the code, as all system components will run on the same VM.
 
-    ```python
-    # Import required modules
-    import zmq
-    import time
-    
-    # Initialise a new ZeroMQ context for creating a socket
-    context = zmq.Context()
-    
-    # Create a REP-type socket
-    socket = context.socket(zmq.REP)
-    
-    # Ensure that any pending messages are discarded when the socket is closed
-    socket.setsockopt(zmq.LINGER, 0)
-    
-    # Create a server connection on port 5555 of the machine on which the code is running
-    socket.bind("tcp://localhost:5555")
-    
-    # While no errors (such as a keyboard interrupt) occur:
-    try:
-    
-        # Constantly:
-        while True:
-            
-            # Await a message from a requester and print it when received
-            message = socket.recv().decode("utf-8")
-            print(f"Received request: {message}")
-            
-            # Pause for one second
-            time.sleep(1)
-            
-            # Reply to the requester with a message
-            socket.send_string("Hi from Server")
-    
-    # Destroy the context and close the socket, to clean up, upon any errors
-    except KeyboardInterrupt:
-        context.destroy()
-        socket.close()
-    ```
+   ```python
+   # Import required modules
+   import zmq
+   import time
+   
+   # Initialise a new ZeroMQ context for creating a socket
+   context = zmq.Context()
+   
+   # Create a REP-type socket
+   socket = context.socket(zmq.REP)
+   
+   # Ensure that any pending messages are discarded when the socket is closed
+   socket.setsockopt(zmq.LINGER, 0)
+   
+   # Create a server connection on port 5555 of the machine on which the code is running
+   socket.bind("tcp://localhost:5555")
+   
+   # While no errors (such as a keyboard interrupt) occur:
+   try:
+   
+       # Constantly:
+       while True:
+           
+           # Await a message from a requester and print it when received
+           message = socket.recv().decode("utf-8")
+           print(f"Received request: {message}")
+           
+           # Pause for one second
+           time.sleep(1)
+           
+           # Reply to the requester with a message
+           socket.send_string("Hi from Server")
+   
+   # Upon interruption by the user, destroy the context and close the socket to clean up
+   except KeyboardInterrupt:
+       context.destroy()
+       socket.close()
+   ```
 
 3. Save and close the file by applying the `Ctrl+S` and then the `Ctrl+X` keyboard key combination.
 
@@ -299,73 +296,73 @@ For this demonstration, we will produce a server that represents a data service 
 
 4. Create a file named `req-client1.py` and open it for editing by running the following command.
 
-    ```bash
-    nano req-client1.py
-    ```
-    
+   ```bash
+   nano req-client1.py
+   ```
+
 5. Enter the following code. Note that the special `localhost` machine name has been specified in the code, as all system components will run on the same VM.
 
-    ```python
-    # Import required modules
-    import zmq
-    import time
-    
-    # Note the client ID
-    CLIENT_ID = 1
-    
-    # Initialise a new ZeroMQ context for creating a socket
-    context = zmq.Context()
-    
-    # Create a REQ-type socket
-    socket = context.socket(zmq.REQ)
-    
-    # Ensure that any pending messages are discarded when the socket is closed
-    socket.setsockopt(zmq.LINGER, 0)
-    
-    # Create a client connection on port 5555 of the machine on which the code is running
-    # Note the call to socket.connect, rather than socket.bind
-    socket.connect("tcp://localhost:5555")
-    
-    # For up to 10 requests:
-    for i in range(1, 11):
-        
-        # Send a request to the server
-        print(f"Sending request {i} from client {CLIENT_ID}")
-        socket.send_string(f"Hello from client {CLIENT_ID}")
-        
-        # Await a response from the server and print it when received
-        message = socket.recv().decode("utf-8")
-        print(f"Received reply '{message}' to request {i} from client {CLIENT_ID}")
-        
-        # Pause for one second
-        time.sleep(1)
-        
-    # Destroy the context and close the socket, to clean up, before finishing
-    context.destroy()
-    socket.close()
-    ```
-    
+   ```python
+   # Import required modules
+   import zmq
+   import time
+   
+   # Note the client ID
+   CLIENT_ID = 1
+   
+   # Initialise a new ZeroMQ context for creating a socket
+   context = zmq.Context()
+   
+   # Create a REQ-type socket
+   socket = context.socket(zmq.REQ)
+   
+   # Ensure that any pending messages are discarded when the socket is closed
+   socket.setsockopt(zmq.LINGER, 0)
+   
+   # Create a client connection on port 5555 of the machine on which the code is running
+   # Note the call to socket.connect, rather than socket.bind
+   socket.connect("tcp://localhost:5555")
+   
+   # For up to 10 requests:
+   for i in range(1, 11):
+       
+       # Send a request to the server
+       print(f"Sending request {i} from client {CLIENT_ID}")
+       socket.send_string(f"Hello from client {CLIENT_ID}")
+       
+       # Await a response from the server and print it when received
+       message = socket.recv().decode("utf-8")
+       print(f"Received reply '{message}' to request {i} from client {CLIENT_ID}")
+       
+       # Pause for one second
+       time.sleep(1)
+       
+   # Before finishing, destroy the context and close the socket to clean up
+   context.destroy()
+   socket.close()
+   ```
+
 6. Save and close the file by applying the `Ctrl+S` and then the `Ctrl+X` keyboard key combination.
 
 #### Defining the Second Client/Requester
 
 7. Create a copy of the first client's code, named `req-client2.py`, by running the following command.
 
-    ```bash
-    cp req-client1.py req-client2.py
-    ```
-    
+   ```bash
+   cp req-client1.py req-client2.py
+   ```
+
 8. Assign `2` to the internal `CLIENT_ID` of the copy by running the following command. This will substitute any instances of `CLIENT_ID = 1` with `CLIENT_ID = 2`. Alternatively, you could edit the file (e.g. via `nano`) to make the change and then save it.
 
-    ```bash
-    sed -i 's/CLIENT_ID = 1/CLIENT_ID = 2/g' req-client2.py
-    ```
-    
+   ```bash
+   sed -i 's/CLIENT_ID = 1/CLIENT_ID = 2/g' req-client2.py
+   ```
+
 9. Check that the `CLIENT_ID` value has been correctly updated by viewing the filtered file contents, for the line where the client ID is assigned, by running the following command.
 
-    ```bash
-    cat req-client2.py | grep 'CLIENT_ID ='
-    ```
+   ```bash
+   cat req-client2.py | grep 'CLIENT_ID ='
+   ```
 
 #### Running the Server/Replier
 
@@ -394,6 +391,7 @@ For this demonstration, we will produce a server that represents a data service 
 13. Examine the outputs generated by the client and the server instances to verify their operation.
 
     > :information_source: Notes
+    >
     > - The pattern demonstrated here is very similar to that of lab 1. Clients make calls to a target service, and the service replies with the relevant data.
     > - Unlike the exclusive pair pattern, with this pattern, you can start a client instance that has run and closed and it will successfully communicate with the server again.
 
@@ -405,7 +403,8 @@ For this demonstration, we will produce a server that represents a data service 
 
     ```bash
     sudo fuser -k 5555/tcp
-    ```   
+    ```
+
 16. Close your SSH terminal windows by running the following command in each.
 
     ```bash
@@ -427,149 +426,150 @@ We will run two instances of the server and one instance of the client, which wi
 
 1. On an active SSH terminal window (or on a new window, if one is not already open), create a file named `pub_server.py` and open it for editing by running the following command.
 
-    ```bash
-    nano pub_server.py
-    ```
-    
+   ```bash
+   nano pub_server.py
+   ```
+
 2. Enter the following code. Note that the special `localhost` machine name has been specified in the code, as all system components will run on the same VM, but the port number is read from the command line. This capability will be used later to run two separate instances of the publisher, with each bound to a different port number.
 
-    ```python
-    # Import required modules
-    import zmq
-    import random
-    import sys
-    import time
-    
-    # Obtain the port number from the command line arguments passed to the program
-    port_number = int(sys.argv[1])
-    
-    # Initialise a new ZeroMQ context for creating a socket
-    context = zmq.Context()
-    
-    # Create a PUB-type socket
-    socket = context.socket(zmq.PUB)
-    
-    # Create a server connection on the required port of the machine on which the code is running
-    socket.bind(f"tcp://localhost:{port_number}")
-    
-    # While no errors (such as a keyboard interrupt) occur:
-    try:
-    
-        # Constantly:
-        while True:
-            
-            # Pick a random topic to post messages to
-            topic = random.randrange(9999, 10005)
-            
-            # Generate a random temperature reading as a message for the topic
-            message = random.randrange(-80, 135)
-            
-            # Print the generated topic and message combination
-            print(f"Topic: {topic}, Message: {message}, Port Number: {port_number}")
-            
-            # Publish the generated message to the generated topic
-            # This is done by preceding the message with the topic and a space
-            socket.send_string(f"{topic} {message} {port_number}")
-            
-            # Pause for one second
-            time.sleep(1)
-    
-    # Destroy the context and close the socket, to clean up, upon any errors
-    except KeyboardInterrupt:
-        context.destroy()
-        socket.close()
-    ```
+   ```python
+   # Import required modules
+   import zmq
+   import random
+   import sys
+   import time
+   
+   # Obtain the port number from the command line arguments passed to the program
+   port_number = int(sys.argv[1])
+   
+   # Initialise a new ZeroMQ context for creating a socket
+   context = zmq.Context()
+   
+   # Create a PUB-type socket
+   socket = context.socket(zmq.PUB)
+   
+   # Create a server connection on the required port of the machine on which the code is running
+   socket.bind(f"tcp://localhost:{port_number}")
+   
+   # While no errors (such as a keyboard interrupt) occur:
+   try:
+   
+       # Constantly:
+       while True:
+           
+           # Pick a random topic to post messages to
+           topic = random.randrange(9999, 10005)
+           
+           # Generate a random temperature reading as a message for the topic
+           message = random.randrange(-80, 135)
+           
+           # Print the generated topic and message combination
+           print(f"Topic: {topic}, Message: {message}, Port Number: {port_number}")
+           
+           # Publish the generated message to the generated topic
+           # This is done by preceding the message with the topic and a space
+           socket.send_string(f"{topic} {message} {port_number}")
+           
+           # Pause for one second
+           time.sleep(1)
+   
+   # Upon interruption by the user, destroy the context and close the socket to clean up
+   except KeyboardInterrupt:
+       context.destroy()
+       socket.close()
+   ```
 
 3. Save and close the file by applying the `Ctrl+S` and then the `Ctrl+X` keyboard key combination.
 
-    > :information_source: The publisher represents the model of a temperature sensor service that, once every second, publishes the latest temperature reading for a different ZIP code area, where the ZIP code is the topic of the published message. Clients can subscribe to the feed and, if required, extract only messages associated with a topic (i.e. ZIP code) of their interest.
+   > :information_source: The publisher represents the model of a temperature sensor service that, once every second, publishes the latest temperature reading for a different ZIP code area, where the ZIP code is the topic of the published message. Clients can subscribe to the feed and, if required, extract only messages associated with a topic (i.e. ZIP code) of their interest.
 
 
 #### Defining the Client/Subscriber
 
 4. Create a file named `pub_client.py` and open it for editing by running the following command.
 
-    ```bash
-    nano pub_client.py
-    ```
-    
+   ```bash
+   nano pub_client.py
+   ```
+
 5. Enter the following code. Note that the special `localhost` machine name has been specified in the code, as all system components will run on the same VM, but the port numbers for publishers are read from the command line. This capability will be used later to connect to the two separate instances of the publisher.
 
-    ```python
-    # Import required modules
-    import zmq
-    import sys
-    
-    # Obtain a list of publisher port numbers from the command line arguments passed to the program
-    publisher_port_numbers = [int(port_number) for port_number in sys.argv[1:]]
-    
-    # Initialise a new ZeroMQ context for creating sockets
-    context = zmq.Context()
-    
-    # Create a SUB-type socket
-    socket = context.socket(zmq.SUB)
-    
-    # Create a client connection for each given port number of the machine on which the code is running
-    # Note the call to socket.connect, rather than socket.bind
-    for port_number in publisher_port_numbers:
-        socket.connect(f"tcp://localhost:{port_number}")
-    
-    # Subscribe only to topic 10001
-    socket.setsockopt_string(zmq.SUBSCRIBE, "10001")
-    
-    # Assume an initial running mean temperature value of zero
-    running_mean = 0.0
-    
-    # For up to 10 received publications on the topic:
-    for i in range(1, 11):
-        
-        # Await a publication from the server and split it into topic, message, and port portions
-        data = socket.recv().decode("utf-8")
-        topic, message, port = data.split()
-        
-        # Print the received portions
-        print(f"Topic: {topic}, Message: {message}, Port: {port}")
-        
-        # Calculate and print the running mean temperate value extracted from the message
-        running_mean = (running_mean * (i - 1) + float(message)) / i
-        print(f"  Running average of message values for {topic}, over {i} message(s): {running_mean}")
-        
-    # Destroy the context and close the socket, to clean up, before finishing
-    context.destroy()
-    socket.close()
-    ```
+   ```python
+   # Import required modules
+   import zmq
+   import sys
+   
+   # Obtain a list of publisher port numbers from the command line arguments passed to the program
+   publisher_port_numbers = [int(port_number) for port_number in sys.argv[1:]]
+   
+   # Initialise a new ZeroMQ context for creating sockets
+   context = zmq.Context()
+   
+   # Create a SUB-type socket
+   socket = context.socket(zmq.SUB)
+   
+   # Create a client connection for each given port number of the machine on which the code is running
+   # Note the call to socket.connect, rather than socket.bind
+   for port_number in publisher_port_numbers:
+       socket.connect(f"tcp://localhost:{port_number}")
+   
+   # Subscribe only to topic 10001
+   socket.setsockopt_string(zmq.SUBSCRIBE, "10001")
+   
+   # Assume an initial running mean temperature value of zero
+   running_mean = 0.0
+   
+   # For up to 10 received publications on the topic:
+   for i in range(1, 11):
+       
+       # Await a publication from the server and split it into topic, message, and port portions
+       data = socket.recv().decode("utf-8")
+       topic, message, port = data.split()
+       
+       # Print the received portions
+       print(f"Topic: {topic}, Message: {message}, Port: {port}")
+       
+       # Calculate and print the running mean temperate value extracted from the message
+       running_mean = (running_mean * (i - 1) + float(message)) / i
+       print(f"  Running average of message values for {topic}, over {i} message(s): {running_mean}")
+       
+   # Before finishing, destroy the context and close the socket to clean up
+   context.destroy()
+   socket.close()
+   ```
 
 6. Save and close the file by applying the `Ctrl+S` and then the `Ctrl+X` keyboard key combination.
 
-    > :information_source: The subscriber can subscribe to one or more separate temperature sensor services, ZIP code 10001 only. It receives a maximum of 10 messages on this topic and calculates an updated running average of temperature readings for this ZIP code.
+   > :information_source: The subscriber can subscribe to one or more separate temperature sensor services, ZIP code 10001 only. It receives a maximum of 10 messages on this topic and calculates an updated running average of temperature readings for this ZIP code.
 
 #### Running the First Server/Publisher
 
 7. On your active SSH terminal window (or on a new window), start one instance of the server, bound to port `5555`, by running the following command.
 
-    ```bash
-    python3 pub_server.py 5555
-    ```
+   ```bash
+   python3 pub_server.py 5555
+   ```
 
 #### Running the Second Server/Publisher
 
 8. On a separate SSH terminal window, start a second instance of the server, bound to port `5556`, by running the following command.
 
-    ```bash
-    python3 pub_server.py 5556
-    ```
+   ```bash
+   python3 pub_server.py 5556
+   ```
 
 #### Running the Client/Subscriber
 
 9. On yet another SSH terminal window, start the client and make it connect to each of the running servers by running the following command.
 
-    ```bash
-    python3 pub_client.py 5555 5556
-    ```
+   ```bash
+   python3 pub_client.py 5555 5556
+   ```
 
 10. Examine the outputs generated by the client and the server instances to verify their operation.
 
     > :information_source: Notes
+    >
     > - The server instances publish different temperature readings for different ZIP code areas. Although the client connects to both servers, it filters out the publications for only the 10001 ZIP code, regardless of what server published the information.
     > - Unlike the exclusive pair pattern, with this pattern, you can start a client instance that has run and closed and it will successfully communicate with the servers again.
 
@@ -582,7 +582,8 @@ We will run two instances of the server and one instance of the client, which wi
     ```bash
     sudo fuser -k 5555/tcp
     sudo fuser -k 5556/tcp
-    ```   
+    ```
+
 13. Close your SSH terminal windows by running the following command in each.
 
     ```bash
@@ -605,187 +606,187 @@ We will run one instance of the producer, two instances of consumer, and one ins
 
 1. On an active SSH terminal window (or on a new window, if one is not already open), create a file named `producer.py` and open it for editing by running the following command.
 
-    ```bash
-    nano producer.py
-    ```
-    
+   ```bash
+   nano producer.py
+   ```
+
 2. Enter the following code. Note that the special `localhost` machine name has been specified in the code, as all system components will run on the same VM.
 
-    ```python
-    # Import required modules
-    import zmq
-    import random
-    import time
-        
-    # Initialise a new ZeroMQ context for creating a socket
-    context = zmq.Context()
-    
-    # Create a PUSH-type socket
-    socket = context.socket(zmq.PUSH)
-    
-    # Create a server connection on port 5555 of the machine on which the code is running
-    socket.bind("tcp://localhost:5555")
-    
-    # Assume an initial sum of 0 for numbers that will be dispatched
-    running_total = 0
-    
-    # For up to 10 pushes:
-    for _ in range(10):
-        
-        # Generate a random value between 1 and 5
-        value = random.randint(1, 5)
-        
-        # Embed the value in a dictionary, print it, and transmit it as a JSON object
-        message = {"number": value}
-        print(f"Dispatching {message}")
-        socket.send_json(message)
-        
-        # Update the running total of values dispatched so far
-        running_total += value
-        
-        # Pause for one second
-        time.sleep(1)
-    
-    # Print out the expected final total that should be output by the final collector
-    print(f"Expected final total: {running_total}")
-    
-    # Destroy the context and close the socket, to clean up, upon any errors
-    context.destroy()
-    socket.close()
-    ```
+   ```python
+   # Import required modules
+   import zmq
+   import random
+   import time
+       
+   # Initialise a new ZeroMQ context for creating a socket
+   context = zmq.Context()
+   
+   # Create a PUSH-type socket
+   socket = context.socket(zmq.PUSH)
+   
+   # Create a server connection on port 5555 of the machine on which the code is running
+   socket.bind("tcp://localhost:5555")
+   
+   # Assume an initial sum of 0 for numbers that will be dispatched
+   running_total = 0
+   
+   # For up to 10 pushes:
+   for _ in range(10):
+       
+       # Generate a random value between 1 and 5
+       value = random.randint(1, 5)
+       
+       # Embed the value in a dictionary, print it, and transmit it as a JSON object
+       message = {"number": value}
+       print(f"Dispatching {message}")
+       socket.send_json(message)
+       
+       # Update the running total of values dispatched so far
+       running_total += value
+       
+       # Pause for one second
+       time.sleep(1)
+   
+   # Print out the expected final total that should be output by the final collector
+   print(f"Expected final total: {running_total}")
+   
+   # Before finishing, destroy the context and close the socket to clean up
+   context.destroy()
+   socket.close()
+   ```
 
 3. Save and close the file by applying the `Ctrl+S` and then the `Ctrl+X` keyboard key combination.
 
-    > :information_source: The producer represents a task dispatcher, which will push tasks onto one or more task consumers connected to it, in a round-robin fashion. In this case, the tasks are numbers that the consumers should add together before pushing them onto a final collector.
+   > :information_source: The producer represents a task dispatcher, which will push tasks onto one or more task consumers connected to it, in a round-robin fashion. In this case, the tasks are numbers that the consumers should add together before pushing them onto a final collector.
 
 #### Defining the Consumer
 
 4. Create a file named `consumer.py` and open it for editing by running the following command.
 
-    ```bash
-    nano consumer.py
-    ```
-    
+   ```bash
+   nano consumer.py
+   ```
+
 5. Enter the following code. Note that the special `localhost` machine name has been specified in the code, as all system components will run on the same VM.
 
-    ```python
-    # Import required modules
-    import zmq
-    import random
-    import time
-    
-    # Generate a random number to use as the unique ID of the consumer and print this
-    consumer_id = random.randrange(1, 10005)
-    print(f"My Consumer ID: {consumer_id}")
-        
-    # Initialise a new ZeroMQ context for creating a socket
-    context = zmq.Context()
-    
-    # Create a PULL-type socket for obtaining data from the producer
-    pull_socket = context.socket(zmq.PULL)
-    
-    # Create a pull client connection on port 5555 of the machine on which the code is running
-    # Note the call to socket.connect, rather than socket.bind
-    pull_socket.connect("tcp://localhost:5555")
-    
-    # Create a PUSH-type socket for pushing data to the collector
-    push_socket = context.socket(zmq.PUSH)
-    
-    # Create a push client connection on port 5556 of the machine on which the code is running
-    # Note the call to socket.connect, rather than socket.bind
-    push_socket.connect("tcp://localhost:5556")
-    
-    # Assume an initial sum of 0 for numbers that will be received
-    running_total = 0
-    
-    # While no errors (such as a keyboard interrupt) occur:
-    try:
-    
-        # Constantly:
-        while True:
-            
-            # Await and pull a newly pushed value task from the producer
-            task = pull_socket.recv_json()
-            
-            # Obtain the value embedded in the task and print it
-            value = task["number"]
-            print(f"Processing {value} received from producer.")
-            
-            # Pause for a while to pretend as if a CPU-heavy action is being carried out on the value
-            # Note that this would usually be a useful processing action instead
-            time.sleep(1)
-            
-            # Embed the number in a dictionary, print it, and transmit it as a JSON object via the PUSH socket
-            message = {"from": consumer_id, "number": value}
-            print(f"Dispatching {message}")
-            push_socket.send_json(message)
-    
-    # Destroy the context and close the socket, to clean up, upon any errors
-    except KeyboardInterrupt:
-        context.destroy()
-        pull_socket.close()
-        push_socket.close()
-    ```
+   ```python
+   # Import required modules
+   import zmq
+   import random
+   import time
+   
+   # Generate a random number to use as the unique ID of the consumer and print this
+   consumer_id = random.randrange(1, 10005)
+   print(f"My Consumer ID: {consumer_id}")
+       
+   # Initialise a new ZeroMQ context for creating a socket
+   context = zmq.Context()
+   
+   # Create a PULL-type socket for obtaining data from the producer
+   pull_socket = context.socket(zmq.PULL)
+   
+   # Create a pull client connection on port 5555 of the machine on which the code is running
+   # Note the call to socket.connect, rather than socket.bind
+   pull_socket.connect("tcp://localhost:5555")
+   
+   # Create a PUSH-type socket for pushing data to the collector
+   push_socket = context.socket(zmq.PUSH)
+   
+   # Create a push client connection on port 5556 of the machine on which the code is running
+   # Note the call to socket.connect, rather than socket.bind
+   push_socket.connect("tcp://localhost:5556")
+   
+   # Assume an initial sum of 0 for numbers that will be received
+   running_total = 0
+   
+   # While no errors (such as a keyboard interrupt) occur:
+   try:
+   
+       # Constantly:
+       while True:
+           
+           # Await and pull a newly pushed value task from the producer
+           task = pull_socket.recv_json()
+           
+           # Obtain the value embedded in the task and print it
+           value = task["number"]
+           print(f"Processing {value} received from producer.")
+           
+           # Pause for a while to pretend as if a CPU-heavy action is being carried out on the value
+           # Note that this would usually be a useful processing action instead
+           time.sleep(1)
+           
+           # Embed the number in a dictionary, print it, and transmit it as a JSON object via the PUSH socket
+           message = {"from": consumer_id, "number": value}
+           print(f"Dispatching {message}")
+           push_socket.send_json(message)
+   
+   # Upon interruption by the user, destroy the context and close the socket to clean up
+   except KeyboardInterrupt:
+       context.destroy()
+       pull_socket.close()
+       push_socket.close()
+   ```
 
 6. Save and close the file by applying the `Ctrl+S` and then the `Ctrl+X` keyboard key combination.
 
-    > :information_source: The consumer represents a task executor, which will received tasks given to it, carry them out, and push each result onto the next consumer or collector in line, in a round-robin fashion. In this case, the tasks are numbers that the consumers simply pass on. Normally, however, a consumer would perform a more complex action on the received task (e.g. carry out a CPU-heavy calculation).
+   > :information_source: The consumer represents a task executor, which will received tasks given to it, carry them out, and push each result onto the next consumer or collector in line, in a round-robin fashion. In this case, the tasks are numbers that the consumers simply pass on. Normally, however, a consumer would perform a more complex action on the received task (e.g. carry out a CPU-heavy calculation).
 
 #### Defining the Client/Collector
 
 7. create a file named `collector.py` and open it for editing by running the following command.
 
-    ```bash
-    nano collector.py
-    ```
-    
+   ```bash
+   nano collector.py
+   ```
+
 8. Enter the following code. Note that the special `localhost` machine name has been specified in the code, as all system components will run on the same VM.
 
-    ```python
-    # Import required modules
-    import zmq
-        
-    # Initialise a new ZeroMQ context for creating a socket
-    context = zmq.Context()
-    
-    # Create a PULL-type socket
-    socket = context.socket(zmq.PULL)
-    
-    # Create a server connection on port 5556 of the machine on which the code is running
-    # Note the call to socket.bind, rather than socket.connect
-    socket.bind("tcp://localhost:5556")
-    
-    # Assume an initial sum of 0 for numbers that will be received
-    running_total = 0
-    
-    # For up to 10 pulls:
-    for _ in range(10):
-    
-        # Await and pull a newly pushed output from a consumer
-        consumer_output = socket.recv_json()
-        
-        # Obtain the ID of the consumer and the value embedded in the output and print them
-        consumer_id = consumer_output["from"]
-        value = consumer_output["number"]
-        print(f"Received {value} from consumer {consumer_id}.")
-        
-        # Update and print the running total of values received so far
-        running_total += value
-        print(f"Total so far: {running_total}")
-    
-    # Print out the final running total of received values
-    print(f"Final total: {running_total}")
-    
-    # Destroy the context and close the socket, to clean up, upon any errors
-    context.destroy()
-    socket.close()
-    ```
+   ```python
+   # Import required modules
+   import zmq
+       
+   # Initialise a new ZeroMQ context for creating a socket
+   context = zmq.Context()
+   
+   # Create a PULL-type socket
+   socket = context.socket(zmq.PULL)
+   
+   # Create a server connection on port 5556 of the machine on which the code is running
+   # Note the call to socket.bind, rather than socket.connect
+   socket.bind("tcp://localhost:5556")
+   
+   # Assume an initial sum of 0 for numbers that will be received
+   running_total = 0
+   
+   # For up to 10 pulls:
+   for _ in range(10):
+   
+       # Await and pull a newly pushed output from a consumer
+       consumer_output = socket.recv_json()
+       
+       # Obtain the ID of the consumer and the value embedded in the output and print them
+       consumer_id = consumer_output["from"]
+       value = consumer_output["number"]
+       print(f"Received {value} from consumer {consumer_id}.")
+       
+       # Update and print the running total of values received so far
+       running_total += value
+       print(f"Total so far: {running_total}")
+   
+   # Print out the final running total of received values
+   print(f"Final total: {running_total}")
+   
+   # Before finishing, destroy the context and close the socket to clean up
+   context.destroy()
+   socket.close()
+   ```
 
 9. Save and close the file by applying the `Ctrl+S` and then the `Ctrl+X` keyboard key combination.
 
-    > :information_source: The collector represents a server at the end of the push/pull pipeline that receives pushed messages from one or more task consumers connected to it. It then carries out further final processing actions on the received data.
-    > 
-    > In this case, the collector calculates the sum of the first ten values that it receives, before exiting. As the producer at the start of the pipeline also only produces ten values before exiting, the running final total of values output by the producer and the collector should match.
+   > :information_source: The collector represents a server at the end of the push/pull pipeline that receives pushed messages from one or more task consumers connected to it. It then carries out further final processing actions on the received data.
+   >
+   > In this case, the collector calculates the sum of the first ten values that it receives, before exiting. As the producer at the start of the pipeline also only produces ten values before exiting, the running final total of values output by the producer and the collector should match.
 
 #### Running the Client/Collector
 
@@ -818,10 +819,11 @@ We will run one instance of the producer, two instances of consumer, and one ins
     ```bash
     python3 producer.py
     ```
-    
+
 14. Examine the outputs generated by the producer, consumers, and the collector instances to verify their operation.
 
     > :information_source: Notes
+    >
     > - The producer pushes 10 objects holding a random number each.
     > - The objects pushed by the producer and pulled by the consumers in a round-robin fashion, before being repackaged and pushed to the collector.
     > - The objects pushed by the consumers are pulled by the collector, which calculates a running total of the values held by them.
@@ -836,8 +838,9 @@ We will run one instance of the producer, two instances of consumer, and one ins
     ```bash
     sudo fuser -k 5555/tcp
     sudo fuser -k 5556/tcp
-    ```   
-13. Close your SSH terminal windows by running the following command in each.
+    ```
+
+17. Close your SSH terminal windows by running the following command in each.
 
     ```bash
     exit
@@ -859,5 +862,4 @@ The full ZeroMQ API documentation for Python can be found at https://pyzmq.readt
 
 ## Credits
 
-Special thanks to **Jara Jenner** for his contributions to this tutorial.
-If you’d like to learn more or connect with him, you can reach him on [LinkedIn](https://www.linkedin.com/in/darajenner/)
+Special thanks to **Dara Jenner** for his contributions to this tutorial. If you'd like to learn more or connect with him, you can reach him on [LinkedIn](https://www.linkedin.com/in/darajenner/).
