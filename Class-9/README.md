@@ -13,7 +13,7 @@ Lab 9 focuses on how to:
 
 ### Phase 1: Setting up our environment
 
-2. To run this tutorial, you will need a **GCP VM with at least 8 GB of RAM and 30 GB of disk space** (e.g., an `e2-standard-2`). This is required because we will be running multiple Cassandra containers on the same VM.
+2. To run this tutorial, you will need a **a GCP VM with the Ubutnu as in the previous labs, but make sure it has at least 8 GB of RAM and 30 GB of disk space.** (e.g., an `e2-standard-2`). This is required because we will be running multiple Cassandra containers on the same VM.
 
 2. Start a new terminal session on your VM and run the following commands. 
    **Make sure you understand each command, do not just copy and paste.**
