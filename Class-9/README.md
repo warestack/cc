@@ -642,6 +642,8 @@ client.execute(query, parameter, (error, result)=> {
 
 10. Great job — Phase 6 completed!
 
+**💡 Don’t forget to stop or delete your VM when you're done.**
+
 ---
 
 ## Appendix
