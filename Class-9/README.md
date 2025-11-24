@@ -1,422 +1,729 @@
-### Lab9: Introduction to Apache Hadoop MapReduce
+## Lab9: Introduction to Apache Cassandra
 
-#### What am I about to learn?
+### What am I about to learn?
 
-Today's lab session focused on Apache Hadoop. We will install and run the wordcount applications on Hadoop.
+Today’s lab session focuses on Apache Cassandra. You will install it, run it, and learn the basic commands needed to containerise and deploy a small Cassandra NoSQL cluster.
 
-Lab 9focuses on how to:
+Lab 9 focuses on how to:
 
-* Configure a Hadoop container on a GCP VM
-* Run a Hadoop job
-* Monitor Hadoop environment
+* Configure Cassandra containers on GCP VMs.
+* Deploy and run a Cassandra cluster.
+* Use basic Cassandra CLI commands to explore and manage data.
+* Interact with Cassandra using Python and Node.js
 
-You will need to watch the following video on installing and running Hadoop MapReduce on a VM.
+### Phase 1: Setting up our environment
 
-> Take your time; make sure you double-check the commands before you run it
+2. To run this tutorial, you will need a **GCP VM with at least 8 GB of RAM and 30 GB of disk space** (e.g., an `e2-standard-2`). This is required because we will be running multiple Cassandra containers on the same VM.
 
-1. The following video demonstrates the commands used in this tutorial. 
-
-[![Watch the video](https://i.ytimg.com/vi/MG8S49xbq8M/hqdefault.jpg)](https://youtu.be/MG8S49xbq8M)
-
-> You should run this tutorial on your GCP VM :white_check_mark:
-
-#### Phase 1: Setting up our environment
-
-2. To run this tutorial, you will need a GCP VM. If you don't remember creating a VM, please watch the video. For this tutorial, I used the following configuration.
-   * Zone: us-central1-a
-   * Machine type: 2 vCPU, 8 GB memory
-   * HTTP traffic: On
-   * HTTPS traffic: On
-   * Image: [ubuntu-1804-bionic-v20220131](https://console.cloud.google.com/compute/imagesDetail/projects/ubuntu-os-cloud/global/images/ubuntu-1804-bionic-v20220131?project=lab-7-270015)
-   * Size (GB): 30
-3. Open a new terminal connection and run the follow the following commands. Make sure you understand the process. You don't have to memorise the commands.
-4. Let's update our system.
+2. Start a new terminal session on your VM and run the following commands. 
+   **Make sure you understand each command, do not just copy and paste.**
+3.  Update the system:
 
 ```bash
-$ sudo apt-get update
-
-Hit:1 http://us-central1.gce.archive.ubuntu.com/ubuntu bionic InRelease
-Get:2 http://us-central1.gce.archive.ubuntu.com/ubuntu bionic-updates InRelease [88.7 kB]
-...
-Get:26 http://security.ubuntu.com/ubuntu bionic-security/multiverse Translation-en [4732 B]
-Fetched 23.7 MB in 5s (4972 kB/s)                           
-Reading package lists... Done
+sudo apt-get update
 ```
 
->  Note that:
->
->  * The **sudo apt-get update** command downloads package information from all configured sources.
->
->  * The sources often defined in /etc/apt/sources.list file and other files located in /etc/apt/sources.list.d/ directory. 
->
->  * So when you run the update command, it downloads the package information from the Internet. It is helpful to get info on updated packages or their dependencies.
+💡**Notes:**
 
-5. We can now install Docker; make sure you type `Y` for Yes when prompted.
+* sudo apt-get update` downloads the latest package information from all configured sources.` 
+
+* `These sources are usually listed in `/etc/apt/sources.list` and `/etc/apt/sources.list.d/`.
+
+* This step ensures your system knows about updated packages and dependencies.
+
+4. Install Docker. Type `Y` when prompted:
 
 ```bash
-$ sudo apt-get install docker.io
-
-Reading package lists... Done
-Building dependency tree       
-Reading state information... Done
-...
-Do you want to continue? [Y/n] Y
-...
-Processing triggers for man-db (2.8.3-2ubuntu0.1) ...
-Processing triggers for ureadahead (0.100.0-21) ...
+sudo apt-get install docker.io
 ```
 
-> Docker is now installed on our VM; we can start trying a couple of tasks.
->
-> We install docker once (in a VM), then we can use it.
+Docker is now installed on your VM.
 
-6. What is the Docker version? Run the next command
+We only need to install it once—after that we can run as many containers as we like.
+
+5. Check the Docker version:
 
 ```bash
-$ sudo docker --version
-
-Docker version 20.10.7, build 20.10.7-0ubuntu5~18.04.3
+sudo docker --version
 ```
 
-7. Let's create a new user called docker-user. You can use this user to run our containers.
+6. Create a new user called `docker-user`, which we will use to run our containers:
 
 ```bash
-$ sudo adduser docker-user
-
-Adding user `docker-user' ...
-Adding new group `docker-user' (1003) ...
-Adding new user `docker-user' (1002) with group `docker-user' ...
-Creating home directory `/home/docker-user' ...
-Copying files from `/etc/skel' ...
-Enter new UNIX password: 
-Retype new UNIX password: 
-passwd: password updated successfully
-Changing the user information for docker-user
-Enter the new value, or press ENTER for the default
-        Full Name []: 
-        Room Number []: 
-        Work Phone []: 
-        Home Phone []: 
-        Other []: 
-Is the information correct? [Y/n] Y
+sudo adduser docker-user
 ```
 
-> Make sure you add a password, and you can leave the rest empty—type Y at the end (although you can press enter).
+Set a password when prompted.
 
-8. We will need to give `sudo` access to our new `docker-user`, so let's add it to the `sudo` group.
+You may press **Enter** for the additional fields and type **Y** at the end.
+
+7. Add the new user to the `sudo` group:
 
 ```bash
-$ sudo usermod -aG sudo docker-user
+sudo usermod -aG sudo docker-user
 ```
 
-> If we don't add the user in the `sudo` group, we will not run `sudo` commands.
+Without this, `docker-user` will not be allowed to run `sudo` commands.
 
-9. Now, run the following command; this will allow us to give `sudo` permissions to docker to run our commands. 
+8. Allow `docker-user` to run Docker commands without needing `sudo`:
 
 ```bash
-$ sudo usermod -aG docker docker-user
+sudo usermod -aG docker docker-user
 ```
 
-> This command ensures that our new `docker-user` can run docker commands without using the `sudo` keyword. For example, instead of running always: 
+9. Switch to the new `docker-user`:
+
+```bash
+su - docker-user
+```
+
+The `-` ensures you switch fully into the user's environment and home directory.
+
+10. Test that Docker works:
+
+```bash
+docker
+```
+
+You should see a full list of Docker commands and options. This confirms that your setup is ready.
+
+---
+
+### Phase 2: Running a Cassandra container
+
+1. Our next step is to create a create a Cassandra container. Let's start a new Cassandra node using Docker. 
+   We will name the container `my-cassandra-1`:
+
+```bash
+docker run --name my-cassandra-1 -m 2g -d cassandra:3.11
+```
+
+The `-m 2g` option assigns **2 GB of memory** to this container.
+
+2. We have now created an Apache Cassandra container called `my-cassandra-1`.  Check the active containers by running:
+
+```bash
+docker ps -a
+```
+
+You should see the container listed as running.
+
+3. Before creating our cluster, let's stop the container:
+
+```bash
+docker stop my-cassandra-1 
+```
+
+4. Then remove it:
+
+```bash
+docker rm my-cassandra-1 
+```
+
+---
+
+### Phase 3: Building a three-nodes Cassandra cluster
+
+1. We will now create a cluster of three Cassandra nodes. 
+
+   The first node will be called `cassandra-1`, and for this tutorial we will use Cassandra 3.11.
+
+* We will interact with the cluster using `nodetool`.
+
+* `nodetool` is a command-line tool for managing a Cassandra cluster.
+
+  All Cassandra nodes work together as a single distributed database system.
+
+```bash
+docker run --name cassandra-1 -d cassandra:3.11
+```
+
+2. Use `docker ps -a` to check if your container is up and running. It is good practice to verify each container after creation. Let’s inspect `cassandra-1`:
+
+```bash
+docker inspect cassandra-1
+```
+
+3. The output contains all configuration details of your container.  To extract only the IP address, use:
+
+```bash
+docker inspect --format='{{ .NetworkSettings.IPAddress }}' cassandra-1
+# Example output:
+# 172.17.0.2
+```
+
+4. There are different ways to configure a Cassandra cluster. The most common approach is to link nodes using IP addresses.  Since all our containers run on the same VM, we can simply use their container names.
+
+   Before proceeding, ensure that `cassandra-1` is running:
+
+```bash
+docker ps -a
+```
+
+:rotating_light: Container creation may fail for various reasons. 
+
+If that happens, stop it (`docker stop <name>`) and remove it (`docker rm <name>`),  then recreate the container.  
+
+If you want to learn how to create Cassandra clusters across different VMs or servers, check Appendix A.
+
+5. Use `nodetool` in `cassandra-1` to verify that our first node is healthy:
+
+```bash
+docker exec -i -t cassandra-1 bash -c 'nodetool status'
+```
+
+If you see:
+
+`Error: The node does not have system_traces yet, probably still bootstrapping`
+
+This means the container is still starting up. Wait a few moments.
+
+> Expected output:
 >
 > ```bash
-> $ sudo docker <command> 
+> Datacenter: datacenter1
+> =======================
+> Status=Up/Down
+> |/ State=Normal/Leaving/Joining/Moving
+> --  Address     Load       Tokens       Owns (effective)  Host ID                               Rack
+> UN  172.17.0.2  100.22 KiB  256          100.0%            abc2a2ee-9bff-415f-8cd0-f8a19295e846  rack1
 > ```
 >
-> we will be able to run:
+> The `UN` status means the node is Up and Normal.
+
+6. Now let’s create the second Cassandra node, `cassandra-2`:
+
+```bash
+docker run --name cassandra-2 -d --link cassandra-1:cassandra cassandra:3.11
+```
+
+The `--link cassandra-1:cassandra` option links `cassandra-2` to `cassandra-1`,  allowing them to form a cluster.
+
+7. Check the cluster status again:
+
+```bash
+docker exec -i -t cassandra-1 bash -c 'nodetool status'
+```
+
+Sample output:
+
+> ```
+> Datacenter: datacenter1
+> =======================
+> Status=Up/Down
+> |/ State=Normal/Leaving/Joining/Moving
+> --  Address     Load       Tokens       Owns (effective)  Host ID                               Rack
+> UJ  172.17.0.3  30.47 KiB  256          ?                 bff8c5c1-8af3-4eb9-bfce-a6f90c049972  rack1
+> UN  172.17.0.2  70.9 KiB   256          100.0%            abc2a2ee-9bff-415f-8cd0-f8a19295e846  rack1
+> ```
+>
+> * `UJ` means Up / Joining — still syncing.  
+> * The `?` in `Owns` is normal during bootstrapping.  
+> * Wait 1–2 minutes and run the command again.  
+>
+> After syncing
+>
+> ```
+> UN  172.17.0.3  70.92 KiB  256  100.0%  bff8c5c1-8af3-4eb9-bfce-a6f90c049972  rack1
+> UN  172.17.0.2  75.93 KiB  256  100.0%  abc2a2ee-9bff-415f-8cd0-f8a19295e846  rack1
+> ```
+
+8. Before creating a third container, check your VM's memory:
+
+```bash
+free
+```
+
+> Example:
 >
 > ```bash
-> $ docker <command>
+>            total        used        free      shared  buff/cache   available
+> Mem:        4022808     3368560      117324        1076      536924      436672
+> Swap:             0           0           0
 > ```
+>
+> * With 3.36 GB used out of 4 GB, adding another node may fail.  
+> * Scale your VM to 8 GB RAM, restart it, and reconnect using:
+>
+> ```bash
+> su - docker-user
+> ```
+>
+> * Run `free` again to confirm available memory.
 
-10. Let's switch users, type the following command.
-
-```bash
-$ su - docker-user
-```
-
-> The `-` symbol allows us to switch user (`su`) and change to the target user's home directory.
-
-* We should be ready now! Try the following command to see if everything works fine.
-
-```bash
-$ docker
-```
-
-* You should be able to see a list of available options and commands. We can always refer to this when we need to explore using commands and options.
-
-#### Phase 2: Running Hadoop
-
-11. We need to open 8088 and 50070RN interfaces) to run the Hadoop containers (default ports of HDFS and YA.
-11. Let us pull a Hadoop docker image (version 2.7.0) as follows.
+9. Start the existing containers again:
 
 ```bash
-$ docker pull sequenceiq/hadoop-docker:2.7.0
+docker start cassandra-1 cassandra-2
 ```
 
-> *  This is an Apache Hadoop 2.7.0 docker image preconfigured with HDFS and YARN to run our jobs.
-> * The Hadoop instance includes the code for the MapReduce examples that we will run today (as any Hadoop installation).
-> * The image will provide us with an environment to run a simple Big Data job on a Hadoop: Single Node Cluster using Docker. 
-> * For the sake of simplicity, we will run just one node today.
-
-12. Let us check the docker images present on your system.
+10. Recheck the cluster:
 
 ```bash
-$ docker images
+docker exec -i -t cassandra-1 bash -c 'nodetool status'
 ```
 
-> We should have the sequenceiq/hadoop-docker 2.7.0 image
-
-13. The next step is to create a new Hadoop container using the following command.
-    * This command creates a container with 5GB RAM and maps the appropriate services to the VM ports.
+11. Now add the third Cassandra node:
 
 ```bash
-$ docker run -m 5GB -p 8088:8088 -p 50070:50070 -it sequenceiq/hadoop-docker:2.7.0 /etc/bootstrap.sh -bash
+docker run --name cassandra-3 -d --link cassandra-1:cassandra cassandra:3.11
 ```
 
-14. We just deployed a Hadoop ecosystem using Docker (including HDFS and YARN services).
-    * We used port 8088 to expose YARN and 50070 to expose HDFS
-
-15. We are now inside the container.
+12. Check all active containers:
 
 ```bash
-bash-4.1# 
+docker ps -a
 ```
 
-* Let's clear the terminal.
+> You should see three running containers:
+>
+> ```bash
+> cassandra-3
+> cassandra-2
+> cassandra-1
+> ```
+>
+> If any container is `Exited`, delete it and recreate it.
+
+13. Run `nodetool` again (from any node):
 
 ```bash
-# clear
+docker exec -i -t cassandra-2 bash -c 'nodetool status'
 ```
 
-#### Phase 3: Running a data intensive task on Hadoop
+> Now you should see all **three nodes** in the cluster:
+>
+> ```bash
+> UN 172.17.0.3 ...
+> UN 172.17.0.2 ...
+> UN 172.17.0.4 ...
+> ```
+>
+> * You may need to wait until all nodes reach `UN`.  
+> * Cassandra uses a **gossip protocol** for cluster coordination.  
+> * You can add more nodes, but remember each container uses CPU/RAM.
 
-13. In this tutorial we will use the `touch` command to create a text file. [Touch](https://www.geeksforgeeks.org/touch-command-in-linux-with-examples/) allow us to create an empty file (without the need to edit it as with pico e.g. open it and edit). 
+13. Great! We now have a fully working 3-node Cassandra cluster running in Docker! 🎉
 
-    * If you want to learn more about touch run the following command.
+---
 
-    ```bash
-    # touch --help
+### Phase 4: Using Cassandra's cli `sqlsh` 
+
+1. Now it is time to learn the basic Cassandra commands.
+
+   * We will interact with the cluster using the `cqlsh` command-line interface. This tool allows us to create keyspaces (databases), tables, and insert or query records.
+   * We will run the tool inside `cassandra-1`.
+
+   ```bash
+   docker exec -it cassandra-1 bash -c 'cqlsh'
+   ```
+
+   > After running this command, you are inside the **cqlsh** CLI.  
+   >
+   > ```cassandra
+   > cqlsh>
+   > ```
+
+2. Let’s create a database (called a **KEYSPACE** in Cassandra). 
+
+   Our keyspace will be named **music_store**.
+
+   * Run this inside `cqlsh`:
+
+   ```cassandra
+   CREATE KEYSPACE music_store
+     WITH REPLICATION = { 
+       'class' : 'SimpleStrategy', 
+       'replication_factor' : 3 
+     };
+   ```
+
+   > * `SimpleStrategy` is a basic replication strategy used for **single-datacenter** setups.  
+   > * `replication_factor = 3` means our data will be copied across all three nodes.
+
+3. Select (USE) the keyspace as the active database:
+
+   ```cassandra
+   USE music_store;
+   ```
+
+   > You should now see:
+   >
+   > ```cassandra
+   > cqlsh:music_store>
+   > ```
+
+4. Let’s create a table and insert some simple data.
+
+   ```cassandra
+   CREATE TABLE music_store.music_by_category (
+      type text, 
+      category text, 
+      id UUID, 
+      name text, 
+      title text,
+      PRIMARY KEY (type, id)
+   );
+   ```
+
+   > * `UUID` generates unique IDs automatically.
+
+5. Insert a record:
+
+   ```cassandra
+   INSERT INTO music_store.music_by_category 
+    (type, category, id, name, title)
+   VALUES
+     ('LP record', 'Rock', uuid(), 'Pink Floyd', 'The Dark Side of the Moon');
+   ```
+
+6. Select all rows:
+
+   ```cassandra
+   SELECT * FROM music_store.music_by_category;
+   ```
+
+7. Delete the table:
+
+   ```cassandra
+   DROP TABLE music_store.music_by_category;
+   ```
+
+8. Now let’s create a table using a more advanced data structure:  a `map<int, text>` (similar to a Python dictionary).
+
+   ```cassandra
+   CREATE TABLE music_store.music_by_category (
+      type text, 
+      category text, 
+      id UUID, 
+      name text, 
+      title map<int,text>,
+      PRIMARY KEY (type, id)
+   );
+   ```
+
+9. Insert a record with a map:
+
+   ```cassandra
+   INSERT INTO music_store.music_by_category 
+   (type, category, id, name, title) VALUES
+   ('LP record', 'Rock', uuid(), 'Pink Floyd', 
+     {1975: 'Wish you were here', 1979: 'The Wall'});
+   ```
+
+10. Insert another record:
+
+    ```cassandra
+    INSERT INTO music_store.music_by_category 
+    (type, category, id, name, title) VALUES
+    ('LP record', 'Reggae', uuid(), 'Bob Marley', {1984: 'The legend'});
     ```
 
-14. Let us create a new file using touch, note the new `file01` is empty.
+11. Select all rows:
 
-```bash
-# touch file01
-```
-
-15. Let's add some text, we can use the [echo](https://www.geeksforgeeks.org/echo-command-in-linux-with-examples/) command for this task.
-    * The `>` symbol takes the output of a command and redirect it into a file (will overwrite the whole file, in our case it is empty). Run the following command.
-      * The command will add the given text `can you can a can as a canner can can a can ?` into the `file01`.
-
-```bash
-# echo can you can a can as a canner can can a can ? > file01 
-```
-
-16. Use the [cat](https://www.geeksforgeeks.org/cat-command-in-linux-with-examples/) command to see the contents of the file.
-
-```bash
-# cat file01
-```
-
-> This should print `can you can a can as a canner can can a can ?`.
-
-17. Our task is to run a word count program following the MapReduce paradigm to count the word frequencies of the `file01`.
-
-18. Let us create a directory in HDFS. 
-    * Remember that Hadoop reads files from the HDFS, and any file added into the HDFS is split into files of a predefined block size (e.g., 64MB or 128MB) depending on the Hadoop configuration. 
-    * If the file is less than this size it just occupies the size of the file in the disk and does not allocate the whole block.  
-    * Run the following command.
-
-```bash
-# /usr/local/hadoop/bin/hdfs dfs -mkdir /user/test/
-```
-
-> The commandI will create a folder called `/user/test` in the HDFS.
->
-> *  We are using the `hdfs dfs` command that is actually inside the `/usr/local/hadoop/bin/hdfs` directory.
-
-19. Let us create a subdirectory inside the HDFS `/user/test` directory. The new directory is called `input` will include all the input files to our program (e.g. `file01`).
-
-```bash
-# /usr/local/hadoop/bin/hdfs dfs -mkdir /user/test/input
-```
-
-20. Let us move (`put`)  `file01` in the HDFS.
-    * Run the following command to copy `file01` in the HDFS input folder we created in the previous step called  `/user/test/input`.
-
-```bash
-# /usr/local/hadoop/bin/hdfs dfs -put file01 /user/test/input
-```
-
-21. We are now ready to run the Hadoop MapReduce Wordcount program. The code for this is preinstalled in our container. 
-    * Run the following command. 
-
-```bash
-# /usr/local/hadoop/bin/hadoop jar /usr/local/hadoop/share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.0.jar wordcount /user/test/input /user/test/output
-```
-
-22. Now, let us check the output folder in the HDFS, we can use the `ls` command (as in Linux) in the specific folder.
-
-```bash
-# /usr/local/hadoop/bin/hdfs dfs -ls /user/test/output
-```
-
-> * Whenever there is a successful creation of a job, the MapReduce runtime creates a `_SUCCESS` file in the output directory.
-> * The second file is the output file produced by the reducer of our job.
-
-23. Let us check the output of our file using the cat command.
-
-```bash
-# /usr/local/hadoop/bin/hdfs dfs -cat /user/test/output/part-r-00000
-```
-
-24. The output of the word count map reduce job looks like this.
-
-```bash
-?       1
-a       3
-as      1
-can     6
-canner  1
-you     1
-```
-
->  We successfully ran a MapReduce job in Hadoop!
-
-21. If you need to run a second job, make sure you create new input and output directories. Alternatively delete the input and  output directories you already created in HDFS. 
-
-    * To delete the input and output directories we can use the following commands.
-    * Do not run these commands yet.
-
-    ```bash
-    /usr/local/hadoop/bin/hdfs dfs -rm -r /user/test/input
-    /usr/local/hadoop/bin/hdfs dfs -rm -r /user/test/output
+    ```cassandra
+    SELECT * FROM music_store.music_by_category;
     ```
 
-22. If we run a program with multiple input files inside the input folder then Hadoop will run the MapReduce phase for all the files. Then it will aggregate the results to one reducer. Let us see an example on how this looks like.
+12. To search inside the `title` map, we must create an **index**:
 
-23. Let us add a new `file02`  in the HDSF and run the wordcount once more. First, use `touch` to create a file.
+    ```cassandra
+    CREATE INDEX ON music_store.music_by_category (title);
+    ```
 
-```bash
-# touch file02
-```
+13. Now we can search for records containing a particular value:
 
-24. Then add the following text.
+    ```cassandra
+    SELECT * FROM music_store.music_by_category 
+    WHERE title CONTAINS 'The legend';
+    ```
 
-```bash
-# echo Cloud is good Cloud is Scalable Cloud is Fast > file02 
-```
+14. Exit the `cqlsh` shell:
 
-25. Then put the file in the HDFS input folder.
+    ```cassandra
+    exit
+    ```
 
-```bash
-# /usr/local/hadoop/bin/hdfs dfs -put file02 /user/test/input
-```
+    > Want to learn more Cassandra CQL commands? See the official documentation: https://docs.datastax.com/en/cql-oss/3.3/cql/cql_reference/cqlInsert.html
 
-26. Now run the job for all files in input folder. As you can see this command runs the MapReduce program for the wordcount example for all the files inside the `/user/test/input` folder.
+---
 
-```bash
-# /usr/local/hadoop/bin/hadoop jar /usr/local/hadoop/share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.0.jar wordcount /user/test/input /user/test/output
-```
+### Phase 5: Cassandra and Python
 
-27. **There is an error!** Let us examine the output... 
-    * Did you find the problem?
-28. The problem is that **the output folder already exists** in the HDFS! This means that we will need to delete the output folder, so Hadoop will create a new one to add the output of our MapReduce wordcount. Another option is to export the data to a different folder e.g. `/user/test/output-run2`. 
-    * In my case I will just delete it using the hdfs `dfs -rm -R` command following by the name of the folder.
+1. Let's create a Python application to connect and extract data!
 
-```bash
-# /usr/local/hadoop/bin/hdfs dfs -rm -R -skipTrash /user/test/output
-```
+2. The script will connect to our cluster and select data from a table. To do this, we need the `cassandra-driver`.
 
-29. Now lets rerun the wordcount job.
+3. Install the required packages:
 
 ```bash
-# /usr/local/hadoop/bin/hadoop jar /usr/local/hadoop/share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.0.jar wordcount /user/test/input /user/test/output
+sudo apt install python3-pip
 ```
 
-30. Run the cat command once more to see the output of the reduce phase. 
+> Type `Y` when prompted.
+
+4. Create a virtual environment and install the Python Cassandra driver:
 
 ```bash
-# /usr/local/hadoop/bin/hdfs dfs -cat /user/test/output/part-r-00000
+# Install venv support
+sudo apt install python3-venv python3-full
+
+# Create venv
+python3 -m venv venv
+
+# Activate venv
+source venv/bin/activate
 ```
 
-> The output looks like this:
->
-> ```
-> ?       1
-> Cloud   3
-> Fast    1
-> Scalable    1
-> a       3
-> as      1
-> can     6
-> canner  1
-> good    1
-> you     1
-> ```
->
-> * The wordcount was executed for both `file01` and `file02`, since both are in the same input folder.
-
-31.  If you want to run a separate word count for another file, then you will need to create a new input folder.
-
-#### Phase 4: Using Hadoop services to inspect task executions
-
-24. Let us use the Hadoop interface to inspect our Hadoop system
-
-* Enter the URL: **YOUR_IP:50070**
-* This is the Hadoop HDFS interface. Take a moment and observe the information in the one node Hadoop cluster.
-
-25. Let us check the DataNodes tab, click on it.
-    * We have one DataNode, with all the data about our one node cluster.
-26. Finally, let us check the Utilities tab, click on the **Browse the file system**.
-    * We can see the HDFS (file system). Click on the user, then test, then output and you will see the output file from our latest Hadoop run.
-27. Now, let us access the YARN interface.
-    * Visit the URL: **YOUR_IP:8088**
-    * The YARN interface shows information about the jobs submitted in the cluster. Take a minute to look around the different options.
-
-#### Phase 5: Running a computational intensive task on Hadoop
-
-24. Let us run a **computationally intensive task** in contrast to the word count that is a **data intensive task** 
-    * A computationally intensive task requires extensive CPU and/or memory resources and is usually refers to a scientific problem or calculation. 
-    * Our task is to estimate the pi (3.14) value using a Monte Carlo simulation.
-    * The algorithm calculates the probability of a point to be inside the area of a circle to estimate the value of pi.
-    * This is one of the most common ways to calculate pi! If you want to know more about it read [this](https://www.geeksforgeeks.org/estimating-value-pi-using-monte-carlo/) article. Also, this [link](https://academo.org/demos/estimating-pi-monte-carlo/) provides a nice visualisation demonstration of the algorithm.
-25. In our first run we will run **4** mappers, with **100** samples (our data points for the pi estimation using the Monte Carlo simulation) per mapper.
+5. Install the Cassandra driver:
 
 ```bash
-# /usr/local/hadoop/bin/hadoop jar /usr/local/hadoop/share/hadoop/mapreduce/hadoop-mapreduce-examples-2.7.0.jar pi 4 100
+pip install cassandra-driver
 ```
 
-> The output looks like this:
->
-> ```bash
-> Number of Maps = 4
-> Samples per Map = 100
-> ...
-> Job Finished in 40.374 seconds
-> Estimated value of Pi is 3.17000000000000000000
-> ```
-
-26. Our estimation is 3.17 (not so good, not so bad). In my case it took 40.37 seconds to run it.
-
-27. Now let us run the same command (step 51) using **10** mappers, with **100** samples per map. As we can see the pi estimation is now better, yet it requires more the time to complete. 
+6. Inspect the IP addresses of the Cassandra containers:
 
 ```bash
-Number of Maps = 10
-Samples per Map = 100
-...
-Job Finished in 59.281 seconds
-Estimated value of Pi is 3.14800000000000000000
+docker inspect --format='{{ .NetworkSettings.IPAddress }}' cassandra-1 cassandra-2 cassandra-3
 ```
 
-28. You can visit the YARN interface on your browser (**YOUR_IP:8088**) and check the job executions.
+Example output:
 
-29. These are the traditional tasks that a Hadoop MapReduce program can run in parallel so our applications can benefit from fast parallel processing. 
-    * The same commands will run exactly in a cluster of one node or thousand nodes.
+```
+172.17.0.2
+172.17.0.3
+172.17.0.4
+```
 
-30. :checkered_flag: Well done, you just deployed and ran your first Hadoop MapReduce applications.
+7. Create a Python file:
 
->  Want to learn more about Hadoop?
->
-> [Hadoop: The Definitive Guide (4th Edition)](http://grut-computing.com/HadoopBook.pdf)
+```bash
+sudo apt install nano
+pico test-cassandra.py
+```
+
+8. Add the following Python code:
+
+```python
+from cassandra.cluster import Cluster 
+
+cluster = Cluster(['172.17.0.2','172.17.0.3','172.17.0.4'], port=9042)
+session = cluster.connect('music_store') 
+session.set_keyspace('music_store')
+session.execute('USE music_store')
+
+rows = session.execute('SELECT * FROM music_store.music_by_category')
+
+for i in rows: 
+     print(i)
+```
+
+9. Run the script:
+
+```bash
+python test-cassandra.py
+```
+
+10. Example output:
+
+```
+Row(type='LP record', ...)
+Row(type='LP record', ...)
+```
+
+11. Example query with variables:
+
+```python
+search = 'The Wall'
+rows = session.execute(
+    'SELECT * FROM music_store.music_by_category WHERE title CONTAINS %s', 
+    [search]
+)
+```
+
+12. Stop `cassandra-1` to test cluster replication:
+
+```bash
+docker stop cassandra-1
+```
+
+13. Run Python script again — data should still be available due to replication.
+
+14. Deactivate the virtual environment:
+
+```bash
+deactivate
+```
+
+---
+
+### Phase 6: Cassandra and Node.js
+
+1. Create a new directory:
+
+```bash
+mkdir node-cassandra
+cd node-cassandra
+```
+
+2. Install npm:
+
+```bash
+sudo apt install npm
+```
+
+3. Initialise the project:
+
+```bash
+npm init
+```
+
+4. Install the Cassandra driver:
+
+```bash
+npm install cassandra-driver
+```
+
+5. Create the script:
+
+```bash
+pico cassandra-app.js
+```
+
+6. Add the following Node.js code:
+
+```javascript
+let cassandra = require('cassandra-driver');
+const keyspace="music_store";
+let contactPoints = ['172.17.0.2','172.17.0.3','172.17.0.4'];
+
+let client = new cassandra.Client({
+  contactPoints: contactPoints, 
+  keyspace:keyspace,
+  localDataCenter: 'datacenter1'
+});
+
+let query = 'SELECT * FROM music_store.music_by_category'; 
+client.execute(query, function(error, result) {
+  if(error){
+    console.log('Error:', error);
+  }else{
+    console.log(result.rows);
+  }
+});
+```
+
+7. Run it:
+
+```bash
+node cassandra-app.js
+```
+
+8. Example output:
+
+```
+[ {type: 'LP record', ...}, {type: 'LP record', ...} ]
+```
+
+9. Query with parameters:
+
+```javascript
+let query = 'SELECT * FROM music_store.music_by_category WHERE title CONTAINS ?'; 
+let parameter = ['The Wall'];
+
+client.execute(query, parameter, (error, result)=> {
+  if(error){
+    console.log('Error:', error);
+  }else{
+    console.log(result.rows);
+  }
+});
+```
+
+10. Great job — Phase 6 completed!
+
+---
+
+## Appendix
+
+### Cassandra Cluster Across VMs
+
+1. You need **two VMs** with Docker installed.
+
+2. Stop/delete previous Cassandra containers.
+
+3. Open port **7000** in GCP firewall.
+
+4. Get internal VM IPs. Example:
+   * VM1 → `<internal-ip-address-vm1>`
+   * VM2 → `<internal-ip-address-vm2>`
+
+5. On VM1, run:
+
+```bash
+docker run --name cas-c1 -d   -e CASSANDRA_BROADCAST_ADDRESS=<internal-ip-address-vm1>   -p 7000:7000 cassandra:3.11
+```
+
+6. Check status:
+
+```bash
+docker exec -i -t cas-c1 bash -c 'nodetool status'
+```
+
+7. On VM2, run:
+
+```bash
+docker run --name cas-c2 -d   -e CASSANDRA_BROADCAST_ADDRESS=<internal-ip-address-vm2>   -e CASSANDRA_SEEDS=<internal-ip-address-vm1>   -p 7000:7000 cassandra:3.11
+```
+
+8. Check cluster status on VM1:
+
+```bash
+docker exec -i -t cas-c1 bash -c 'nodetool status'
+```
+
+9. You now have a Cassandra cluster across two VMs.
+
+10. Apple famously runs 75,000 Cassandra nodes.
+
+11. You can interact with this cluster using any commands from previous phases.
+
+---
+
+### 🔥 How to Open Port 7000 in GCP Firewall
+
+1. Open the VPC network menu, On the left menu: **VPC network → Firewall rules**
+
+2. Click “Create firewall rule”
+3. Fill in the firewall rule details.
+
+Use the following values:
+
+| Field               | Value                                                        |
+| ------------------- | ------------------------------------------------------------ |
+| Name                | `allow-cassandra-7000`                                       |
+| Network             | `default` (or your custom network)                           |
+| Direction           | Ingress                                                      |
+| Action              | Allow                                                        |
+| Targets             | All instances in the network (or specify your VMs)           |
+| Source filter       | IPv4 range                                                   |
+| Source IP ranges    | `0.0.0.0/0` (or restrict to internal IP ranges if preferred) |
+| Protocols and ports | Select TCP, enter 7000                                       |
+
+4. Click “Create”. That’s it! The firewall rule is now active.
+
+**💡 Important Notes**
+
+- Port 7000 is used for Cassandra intra-node communication (gossip protocol).
+
+- If your cluster is only internal, use a safer source range such as:
+
+  ```
+  10.0.0.0/8
+  ```
+
+- Cassandra also commonly uses:
+
+  - 9042 – CQL (client API)
+  - 7199 – JMX
+  - 7001 – SSL internode communication
