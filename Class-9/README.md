@@ -307,7 +307,7 @@ docker exec -i -t cassandra-2 bash -c 'nodetool status'
 
 ---
 
-### Phase 4: Using Cassandra's cli `sqlsh` 
+### Phase 4: Using Cassandra's cli `cqlsh` 
 
 1. Now it is time to learn the basic Cassandra commands.
 
