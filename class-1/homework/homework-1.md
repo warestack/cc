@@ -278,4 +278,4 @@ Before you finish, make sure:
 - `GET /students/s10` returns a `404` JSON error.
 - You can explain what `/{student_id}` does.
 
-Homework 1 is complete. Week 1 is complete.
+Homework 1 is complete. Continue to [Weekend Activity](../lab/weekend-activity.md).
