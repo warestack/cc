@@ -4,10 +4,11 @@ In Week 1, you will build your first API using Python and FastAPI.
 
 Complete the tasks in this order:
 
-1. [Part 1: Create Your First FastAPI App](lab/part-1.md)
-2. [Part 2: Hello FastAPI Exercise](lab/part-2.md)
-3. [Part 3: Routes, Routers, and JSON Responses](lab/part-3.md)
-4. [Homework 1: University API Exercise](homework/homework-1.md)
+1. [Welcome to Week 1: Prepare Your Tools](lab/welcome.md)
+2. [Part 1: Create Your First FastAPI App](lab/part-1.md)
+3. [Part 2: Hello FastAPI Exercise](lab/part-2.md)
+4. [Part 3: Routes, Routers, and JSON Responses](lab/part-3.md)
+5. [Homework 1: University API Exercise](homework/homework-1.md)
 
 #### What You Need To Do
 
