@@ -90,11 +90,11 @@ week1-hello-api/
 from fastapi import APIRouter
 
 # This router will hold all movie-related endpoints.
-routers = APIRouter()
+router = APIRouter()
 
 
-# This route will become /movies after we connect it in main.py.
-@routers.get("/")
+# This route will become /movies/ after we connect it in main.py.
+@router.get("/")
 def get_movies():
     return {"message": "Hello world from the movies router!"}
 ```
@@ -146,7 +146,9 @@ This means:
 
 - load the routes from `routers/movies.py`
 - place them under the `/movies` URL prefix
-- the route `/` inside `movies.py` becomes `/movies`
+- the route `/` inside `movies.py` becomes `/movies/`
+
+The trailing slash comes from `@router.get("/")`. Visiting `/movies` automatically redirects to `/movies/`.
 
 > **Quick question**
 >
@@ -156,7 +158,7 @@ This means:
 > <summary>Show answer</summary>
 >
 > ```text
-> http://127.0.0.1:8000/movies
+> http://127.0.0.1:8000/movies/
 > ```
 >
 > </details>
@@ -170,7 +172,7 @@ uvicorn main:app --reload
 15. Open the browser and visit:
 
 ```text
-http://127.0.0.1:8000/movies
+http://127.0.0.1:8000/movies/
 ```
 
 You should see:
@@ -208,13 +210,13 @@ movies = {
 }
 
 
-@routers.get("/")
+@router.get("/")
 def get_movies():
     # Return all movie records.
     return movies
 
 
-@routers.get("/{movie_id}")
+@router.get("/{movie_id}")
 def get_movie(movie_id: str):
     # movie_id comes from the URL, for example /movies/hobbit.
     # We use it as a key in the movies dictionary.
@@ -230,7 +232,7 @@ uvicorn main:app --reload
 20. Open:
 
 ```text
-http://127.0.0.1:8000/movies
+http://127.0.0.1:8000/movies/
 ```
 
 You should see all movies.
@@ -290,7 +292,7 @@ from fastapi import APIRouter, HTTPException
 25. Replace the `get_movie` function with this version:
 
 ```python
-@routers.get("/{movie_id}")
+@router.get("/{movie_id}")
 def get_movie(movie_id: str):
     # .get() returns None instead of crashing if the key does not exist.
     movie = movies.get(movie_id)
@@ -319,6 +321,8 @@ You should now see a clearer JSON error:
 ```json
 {"detail":"Movie not found"}
 ```
+
+28. Stop the server with `Ctrl + C` before opening the homework project. The homework server will also use port `8000`.
 
 #### Command Summary
 

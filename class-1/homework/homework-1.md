@@ -108,6 +108,8 @@ def home():
 
 Use this as the starting point for `routers/students.py`:
 
+The dictionary keys `s1`, `s2`, and `s3` identify records in the URL. The `student_id` field inside each record is the university registration number. For example, request `/students/s1` to retrieve John Smith, whose registration number is `S12345`; `/students/S12345` will return `404` because it is not a dictionary key.
+
 ```python
 from fastapi import APIRouter, HTTPException
 
@@ -203,11 +205,13 @@ Run the server:
 uvicorn main:app --reload
 ```
 
+The list route uses `@router.get("/")` with the prefix `/students`, so its full path is `/students/`. Visiting `/students` automatically redirects to `/students/`.
+
 Open these URLs in your browser:
 
 ```text
 http://127.0.0.1:8000/
-http://127.0.0.1:8000/students
+http://127.0.0.1:8000/students/
 http://127.0.0.1:8000/students/s1
 http://127.0.0.1:8000/students/s10
 ```

@@ -52,6 +52,7 @@ from fastapi import APIRouter, HTTPException
 router = APIRouter()
 
 students = {
+    # URL keys (s1, s2, s3) differ from university registration numbers.
     "s1": {
         "name": "John Smith",
         "student_id": "S12345",
@@ -92,7 +93,7 @@ def get_student(student_id: str):
 
 ```text
 http://127.0.0.1:8000/
-http://127.0.0.1:8000/students
+http://127.0.0.1:8000/students/
 http://127.0.0.1:8000/students/s1
 http://127.0.0.1:8000/students/s10
 ```
