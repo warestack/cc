@@ -11,7 +11,7 @@ In this part, you will create a small FastAPI app that reads data from the SQLit
 
 #### Part A: Create the FastAPI Project Files
 
-1. Stay inside the `week2-sqlite` folder.
+1. Stay inside the `week2-sqlite` folder. Complete Part 1 first and check that `university.db` and `setup_students.sql` are present.
 
 2. Create a virtual environment:
 
@@ -48,8 +48,8 @@ requirements.txt
 5. Add:
 
 ```text
-fastapi==0.141.1;
-uvicorn==0.52.4;
+fastapi==0.141.1
+uvicorn==0.52.4
 ```
 
 6. Install the requirements:
@@ -70,15 +70,19 @@ main.py
 
 ```python
 from fastapi import FastAPI
+from pathlib import Path
 import sqlite3
 
 app = FastAPI()
+
+# Find the database beside main.py, regardless of the terminal folder.
+DATABASE_PATH = Path(__file__).resolve().parent / "university.db"
 
 
 def get_connection():
     # Open a connection to the SQLite database file.
     # row_factory lets us access columns by name.
-    connection = sqlite3.connect("university.db")
+    connection = sqlite3.connect(DATABASE_PATH)
     connection.row_factory = sqlite3.Row
     return connection
 
@@ -91,13 +95,15 @@ def home():
 @app.get("/students")
 def get_students():
     connection = get_connection()
-    cursor = connection.cursor()
+    try:
+        cursor = connection.cursor()
 
-    # Read all rows from the students table.
-    cursor.execute("SELECT * FROM students")
-    rows = cursor.fetchall()
-
-    connection.close()
+        # Read all rows from the students table in ID order.
+        cursor.execute("SELECT * FROM students ORDER BY id")
+        rows = cursor.fetchall()
+    finally:
+        # Close the connection even if the query fails.
+        connection.close()
 
     # Convert each row into a dictionary
     students = []
@@ -110,9 +116,12 @@ def get_students():
 
 #### What Is Happening?
 
-- `sqlite3.connect("university.db")` opens the database file.
+- `Path(__file__)` finds the location of `main.py`; `DATABASE_PATH` points to the database beside it.
+- `sqlite3.connect(DATABASE_PATH)` opens that database file.
 - `cursor.execute(...)` runs a SQL command.
 - `fetchall()` reads all matching rows.
+- `ORDER BY id` displays rows in ID order.
+- `finally` closes the connection whether the query succeeds or raises an error.
 - `dict(row)` converts each row into JSON-friendly data.
 
 > **Quick question**
@@ -152,7 +161,13 @@ You should see:
 http://127.0.0.1:8000/students
 ```
 
-You should see the students you inserted in Part 1.
+You should see a JSON **list** of three student objects. Ada's year should be `3` after the update in Part 1. For example, the first object is:
+
+```json
+{"id": 1, "name": "Ada Lovelace", "course": "Cloud Computing", "year": 3}
+```
+
+The SQL rows are stored in SQLite; the API converts them into JSON for the client.
 
 > **Quick question**
 >
@@ -171,4 +186,11 @@ You should see the students you inserted in Part 1.
 Ctrl + C
 ```
 
-Part 2 is complete. Continue to [Part 3](part-3.md)
+#### Troubleshooting
+
+- **`no such table: students`:** confirm that you ran Part 1's setup against the `university.db` beside `main.py`. SQLite can create an empty file when the expected database is missing; a file existing does not mean it contains your table.
+- **`Address already in use`:** stop the previous server with `Ctrl + C` before starting another on port `8000`.
+- **`uvicorn` not found:** activate this project's `.venv` and install its requirements.
+- **PowerShell blocks activation:** use the process-scoped activation instructions in [Week 1 Part 1](../../class-1/lab/part-1.md).
+
+Part 2 is complete. Continue to [Part 3](part-3.md).

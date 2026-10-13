@@ -25,20 +25,22 @@ week2-books-api
 
 3. Open a new VS Code terminal.
 
-4. Create and open a SQLite database called:
+4. Create and open the database from the project terminal:
 
-```text
-books.db
+```bash
+sqlite3 books.db
 ```
+
+Write and run your table creation and insert statements for steps 5–6 inside the `sqlite>` shell.
 
 5. Create a table called `books` with these columns:
 
-- `id`
-- `title`
-- `author`
-- `year`
+- `id`: `INTEGER PRIMARY KEY AUTOINCREMENT`
+- `title`: `TEXT NOT NULL`
+- `author`: `TEXT NOT NULL`
+- `year`: `INTEGER NOT NULL`
 
-6. Insert at least three books.
+6. Insert at least three books of your choice. Use publication years for books, rather than film release years. For example, *The Hobbit* by J.R.R. Tolkien was published in `1937`.
 
 7. Use `SELECT * FROM books;` to check your data.
 
@@ -59,7 +61,7 @@ uvicorn==0.52.4
 
 12. Create `main.py`.
 
-13. Create a FastAPI app that connects to `books.db`.
+13. Create a FastAPI app that connects to `books.db`. As in Part 2, build the database path relative to `main.py`, set `connection.row_factory = sqlite3.Row`, and use `dict(row)` to convert each returned record into a dictionary.
 
 14. Add:
 
@@ -67,6 +69,14 @@ uvicorn==0.52.4
 GET /
 GET /books
 ```
+
+The home endpoint should return:
+
+```json
+{"message": "Books API is running"}
+```
+
+The books endpoint should return a JSON list of objects containing `id`, `title`, `author`, and `year`, ordered by `id`.
 
 #### Part C: Test
 
@@ -95,5 +105,7 @@ Before you finish, make sure:
 - at least three books are inserted
 - `GET /` works
 - `GET /books` returns your database rows
+
+After trying the exercise yourself, compare your work with the [Part 3 reference solution](../solutions/part-3_solutions.md).
 
 Part 3 is complete. Continue to [Homework 1](../homework/homework-1.md).

@@ -35,13 +35,19 @@ sqlite3 --version
 
 If you see a version number, SQLite is ready.
 
-If the command is not found, ask for help before continuing.
+If the command is not found, install the SQLite **command-line tools** for your operating system from the [official SQLite download page](https://www.sqlite.org/download.html). On Windows, the tools ZIP contains `sqlite3.exe`; extract it to a folder and add that folder to your `PATH`, then reopen the terminal and repeat the check. Ask your tutor if you need help.
+
+Python includes a `sqlite3` module, but this does not install the separate `sqlite3` terminal command.
+
+Run commands from the `week2-sqlite` folder. The commands below that begin with `sqlite3` belong in your normal terminal; SQL and commands such as `.tables` belong inside the `sqlite>` shell.
 
 #### Part B: Create a SQL File
 
 Instead of typing the longer setup SQL directly into the terminal, we will write the table creation and insert commands in a text file first. This makes it easier to fix mistakes before running the commands.
 
 We will still run the smaller check commands, such as `SELECT`, `.tables`, and `.schema`, directly in the SQLite shell.
+
+SQL statements end with a semicolon (`;`). SQLite shell commands beginning with a dot, such as `.tables` and `.quit`, do not. If the prompt changes to `...>`, SQLite is waiting for you to finish the SQL statement.
 
 5. Create a new file called:
 
@@ -80,23 +86,28 @@ VALUES ('Grace Hopper', 'Software Engineering', 1);
 8. Run the SQL file and create the database:
 
 ```bash
-sqlite3 university.db < setup_students.sql
+sqlite3 -bail university.db ".read setup_students.sql"
 ```
 
 This command means:
 
 - open or create `university.db`
-- read the SQL commands from `setup_students.sql`
+- use SQLite's `.read` command to read `setup_students.sql`
 - run those commands inside SQLite
+- use `-bail` to stop at the first SQL error
+
+This command works in macOS/Linux terminals and Windows PowerShell. Run the setup **once**. Running it again reports `table students already exists`; `-bail` stops before any duplicate rows are inserted.
+
+To restart this exercise from scratch, stop any API server, delete only `university.db` from your `week2-sqlite` exercise folder, and rerun the setup. This resets the exercise data.
 
 > **Quick question**
 >
-> What does the `< setup_students.sql` part do?
+> What does `.read setup_students.sql` do?
 >
 > <details>
 > <summary>Show answer</summary>
 >
-> It sends the contents of `setup_students.sql` into SQLite, as if you typed those SQL commands into the SQLite shell.
+> It tells SQLite to execute the SQL commands stored in `setup_students.sql`. It is a SQLite command, so it does not depend on your terminal's input-redirection syntax.
 >
 > </details>
 
@@ -158,6 +169,8 @@ students
 SELECT * FROM students;
 ```
 
+You should see three rows, with IDs `1`, `2`, and `3`. Ada Lovelace starts in year `2`, Alan Turing in year `3`, and Grace Hopper in year `1`.
+
 #### Part E: Basic Queries
 
 15. Select only names:
@@ -185,6 +198,8 @@ WHERE name = 'Ada Lovelace';
 ```sql
 SELECT * FROM students;
 ```
+
+Ada Lovelace should now be in year `3`. The updated value is saved in `university.db` and will appear in Part 2.
 
 19. Exit SQLite:
 
