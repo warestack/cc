@@ -27,9 +27,21 @@ Use the official Postman site only.
 
 Postman supports Windows, macOS, and Linux. The official installation guide says to download the latest desktop app from the Postman download page and choose the option for your operating system.
 
+For installation steps specific to your system, follow the [official Postman installation guide](https://learning.postman.com/docs/getting-started/installation/install-app/).
+
+Use the **desktop app** for this homework so you can send requests directly to your local API at `127.0.0.1`.
+
 3. Install and open Postman.
 
 You may be asked to create or sign in to a Postman account. Follow the screen instructions.
+
+#### Watch the Basics First
+
+Watch [How to Send Your First API Request in Postman](https://www.youtube.com/watch?v=2oOSnxZ28fA), published on **Postman's official YouTube channel** (about 9 minutes).
+
+Focus on creating a request, sending a GET request, and reading the JSON response. The video demonstrates a different API; for this homework, use your Notes API and the URLs below.
+
+The video uses an earlier Postman interface, so some buttons may look different. The [current official quick-start guide](https://learning.postman.com/docs/getting-started/quick-start) provides an up-to-date reference.
 
 #### Part B: Start Your API
 
@@ -47,7 +59,7 @@ Keep the server running while you use Postman. If the API is already running, sk
 
 #### Part C: Send a GET Request
 
-7. In Postman, create a new request.
+7. In Postman, open a new HTTP request tab using **Add** (the **+** button) in the workbench.
 
 8. Set the method to:
 
