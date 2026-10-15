@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 app.db
 auth.db
+university.db
