@@ -13,6 +13,8 @@ SQLAlchemy is a Python library that helps us work with databases. Instead of wri
 
 #### Part A: Open a New Project Folder
 
+If you already created the project and activated its environment on the welcome page, keep them and continue at step 5 (requirements).
+
 1. Close your previous project in VS Code.
 
 2. Create a new folder:
@@ -28,7 +30,7 @@ week3-sqlalchemy-api
 5. Create `requirements.txt`:
 
 ```text
-sqlalchemy
+sqlalchemy==2.0.55
 ```
 
 6. Install the requirements:
@@ -44,12 +46,15 @@ python -m pip install -r requirements.txt
 8. Add:
 
 ```python
+from pathlib import Path
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 # This creates a SQLite database file called courses.db.
 # sqlite:/// means "use a local SQLite file".
-DATABASE_URL = "sqlite:///./courses.db"
+DATABASE_PATH = Path(__file__).resolve().parent / "courses.db"
+DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
 
 # The engine is the connection point between SQLAlchemy and the database.
 engine = create_engine(

@@ -18,7 +18,7 @@ In this part, you will protect an API route using the JWT token from login.
 ```python
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError
+from jwt.exceptions import InvalidTokenError
 from sqlalchemy.orm import Session
 
 import models
@@ -28,7 +28,7 @@ from database import get_db
 These imports add the tools needed to read and verify bearer tokens.
 
 - `HTTPBearer` reads the `Authorization: Bearer ...` header.
-- `JWTError` lets us catch invalid token problems.
+- `InvalidTokenError` lets us catch invalid token problems.
 - `Session` and `get_db` let us find the user in the database.
 - `models` gives access to the `User` table.
 
@@ -36,35 +36,41 @@ These imports add the tools needed to read and verify bearer tokens.
 
 ```python
 # HTTPBearer tells FastAPI to expect an Authorization: Bearer <token> header.
-bearer_scheme = HTTPBearer()
+bearer_scheme = HTTPBearer(auto_error=False)
 ```
 
 This creates the security dependency.
 
 - If a route uses this dependency, FastAPI expects a bearer token.
-- If no token is sent, FastAPI rejects the request before the route runs.
+- With `auto_error=False`, our function explicitly returns `401` if no bearer token is sent.
 
 4. Add this function at the bottom:
 
 ```python
 def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     db: Session = Depends(get_db)
 ):
+    if credentials is None:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
     # Extract the token value from the Authorization header.
     token = credentials.credentials
 
     try:
         # Decode and verify the JWT.
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(
+            token, SECRET_KEY, algorithms=[ALGORITHM],
+            options={"require": ["exp", "sub"]}
+        )
 
         # We stored the user's email in the token subject.
         email = payload.get("sub")
 
-        if email is None:
+        if not isinstance(email, str) or not email:
             raise HTTPException(status_code=401, detail="Invalid token")
 
-    except JWTError:
+    except InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
     # Find the user represented by the token.
@@ -150,7 +156,7 @@ uvicorn main:app --reload
 http://127.0.0.1:8000/profile/me
 ```
 
-You should get an authentication error because you did not send a token.
+You should get `401` because you did not send a token.
 
 The response should include:
 
@@ -172,7 +178,7 @@ http://127.0.0.1:8000/docs
 
 14. Click the **Authorize** button at the top of the docs page.
 
-15. Paste the token.
+15. Paste only the token value, without quotes or the word `Bearer`.
 
 16. Click **Authorize**.
 
@@ -202,4 +208,4 @@ Before you finish, make sure:
 - `/profile/me` works with a valid token
 - you can explain why passwords should be hashed
 
-Part 3 is complete. Week 4 is complete.
+Part 3 is complete. Continue to [Homework 1: Test Your Authentication API](../homework/homework-1.md).

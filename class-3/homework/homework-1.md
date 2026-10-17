@@ -49,7 +49,7 @@ Your `requirements.txt` should contain:
 ```text
 fastapi==0.141.1
 uvicorn==0.52.4
-sqlalchemy
+sqlalchemy==2.0.55
 ```
 
 Install the requirements:
@@ -108,117 +108,11 @@ The home route should return:
 {"message":"Books API is running"}
 ```
 
-#### Starter Boilerplate
+#### Build Your Solution
 
-Use this as the starting point for `database.py`:
+Use the Courses API from Parts 1–3 as a guide. Build the database path relative to `database.py`, as in Part 1, and give each request its own session using `get_db`. Return `201` when a book is created, `404` for a missing book and `422` for invalid input. Use a response schema containing `id`, `title`, `author` and `year`.
 
-```python
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
-
-DATABASE_URL = "sqlite:///./books.db"
-
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-Base = declarative_base()
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-```
-
-Use this as the starting point for `models.py`:
-
-```python
-from sqlalchemy import Column, Integer, String
-
-from database import Base
-
-
-class Book(Base):
-    __tablename__ = "books"
-
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=False)
-    author = Column(String, nullable=False)
-    year = Column(Integer, nullable=False)
-```
-
-Use this as the starting point for `schemas.py`:
-
-```python
-from pydantic import BaseModel, ConfigDict, Field
-
-
-class BookCreate(BaseModel):
-    title: str = Field(min_length=2)
-    author: str = Field(min_length=2)
-    year: int = Field(ge=1900)
-
-
-class BookResponse(BaseModel):
-    id: int
-    title: str
-    author: str
-    year: int
-
-    model_config = ConfigDict(from_attributes=True)
-```
-
-Use this as the starting point for `main.py`:
-
-```python
-from fastapi import Depends, FastAPI, HTTPException
-from sqlalchemy.orm import Session
-
-import models
-import schemas
-from database import engine, get_db
-
-models.Base.metadata.create_all(bind=engine)
-
-app = FastAPI()
-
-
-@app.get("/")
-def home():
-    return {"message": "Books API is running"}
-
-
-@app.get("/books", response_model=list[schemas.BookResponse])
-def get_books(db: Session = Depends(get_db)):
-    return db.query(models.Book).all()
-
-
-@app.get("/books/{book_id}", response_model=schemas.BookResponse)
-def get_book(book_id: int, db: Session = Depends(get_db)):
-    book = db.query(models.Book).filter(models.Book.id == book_id).first()
-
-    if book is None:
-        raise HTTPException(status_code=404, detail="Book not found")
-
-    return book
-
-
-@app.post("/books", response_model=schemas.BookResponse)
-def create_book(book_data: schemas.BookCreate, db: Session = Depends(get_db)):
-    book = models.Book(
-        title=book_data.title,
-        author=book_data.author,
-        year=book_data.year
-    )
-
-    db.add(book)
-    db.commit()
-    db.refresh(book)
-    return book
-```
+Attempt the exercise before checking the [complete reference files](../solutions/books-api/).
 
 #### Test
 
@@ -286,4 +180,4 @@ Before you finish, make sure:
 - all routes were tested in Postman
 - you can explain the difference between a SQLAlchemy model and a Pydantic schema
 
-Week 3 is complete.
+After attempting the exercise, compare with the [Books reference solution](../solutions/README.md). Then return to your Courses project for the [weekend testing tutorial](../lab/weekend-activity.md).

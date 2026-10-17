@@ -13,6 +13,8 @@ In this short recap, you will use the same idea for user registration. This time
 
 #### Part A: Create the Project
 
+If you already created the project and activated its environment on the welcome page, keep them and continue at step 4.
+
 1. Create a new folder:
 
 ```text
@@ -26,13 +28,12 @@ week4-auth-api
 4. Create `requirements.txt`:
 
 ```text
-fastapi==0.141.1;
-uvicorn==0.52.4;
-sqlalchemy;
-passlib[bcrypt];
-bcrypt<5;
-pyasn1>=0.4.6;
-python-jose[cryptography];
+fastapi==0.141.1
+uvicorn==0.52.4
+sqlalchemy==2.0.55
+pwdlib[argon2]==0.3.1
+PyJWT==2.15.1
+email-validator==2.3.0
 ```
 
 5. Install:
@@ -89,17 +90,9 @@ This code checks registration data before we save anything.
 - `register_preview()` returns only safe information.
 - The password is accepted for validation, but it is not returned in the response.
 
-8. Add `email-validator` to `requirements.txt`:
+8. Check that `email-validator` installed successfully; `EmailStr` needs it.
 
-```text
-email-validator
-```
-
-9. Install again:
-
-```bash
-python -m pip install -r requirements.txt
-```
+9. Save `main.py`.
 
 10. Run:
 

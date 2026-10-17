@@ -15,11 +15,14 @@ In this part, you will create users, hash passwords, and build a login endpoint.
 1. Create `database.py`:
 
 ```python
+from pathlib import Path
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 # Store users in a local SQLite file called auth.db.
-DATABASE_URL = "sqlite:///./auth.db"
+DATABASE_PATH = Path(__file__).resolve().parent / "auth.db"
+DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
 
 engine = create_engine(
     DATABASE_URL,
@@ -129,16 +132,20 @@ These schemas describe the data that enters and leaves the auth API.
 ```python
 from datetime import datetime, timedelta, timezone
 
-from jose import jwt
-from passlib.context import CryptContext
+import os
 
-# In a real app, this should come from an environment variable.
-SECRET_KEY = "change-this-secret-key"
+import jwt
+from pwdlib import PasswordHash
+
+# Read the same secret on each restart; never commit its value.
+SECRET_KEY = os.environ["JWT_SECRET"]
+if len(SECRET_KEY) < 32:
+    raise RuntimeError("JWT_SECRET must contain at least 32 characters")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-# passlib manages password hashing and verification.
-password_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# pwdlib uses Argon2 to hash and verify passwords.
+password_context = PasswordHash.recommended()
 
 
 def hash_password(password: str) -> str:
@@ -170,9 +177,29 @@ This file handles passwords and tokens.
 - `create_access_token()` creates a signed JWT.
 - The token stores a small piece of user information and an expiry time.
 
-> [!WARNING]
->
-> The `SECRET_KEY` here is only for the lab. In a real application, secrets must not be hard-coded in source code.
+Before starting the app, generate a secret:
+
+```bash
+python -c "import secrets; print(secrets.token_hex(32))"
+```
+
+Copy the result into an environment variable in the terminal where you run Uvicorn.
+
+On macOS/Linux:
+
+```bash
+export JWT_SECRET="paste-your-generated-value-here"
+```
+
+On Windows PowerShell:
+
+```powershell
+$env:JWT_SECRET = "paste-your-generated-value-here"
+```
+
+Keep the value private and reuse it after restarting the terminal. Changing it invalidates existing tokens. Do not include it in commits, screenshots or Teams posts. A missing variable causes `KeyError: JWT_SECRET`; set it before starting the app.
+
+This follows FastAPI's [password hashing and JWT guidance](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/), using JSON login and HTTP bearer authentication. No separate authorisation server is needed.
 
 #### Part D: Create Auth Routes
 
@@ -192,6 +219,7 @@ __init__.py
 
 ```python
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 import models
@@ -202,13 +230,13 @@ from security import create_access_token, hash_password, verify_password
 router = APIRouter()
 
 
-@router.post("/register", response_model=schemas.UserResponse)
+@router.post("/register", response_model=schemas.UserResponse, status_code=201)
 def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     # Check whether another user already has this email.
     existing_user = db.query(models.User).filter(models.User.email == user.email).first()
 
     if existing_user is not None:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=409, detail="Email already registered")
 
     # Create a database user.
     # The password is hashed before it is stored.
@@ -220,7 +248,11 @@ def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
     # Save the new user and reload it so the generated ID is available.
     db.add(db_user)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Email already registered")
     db.refresh(db_user)
     return db_user
 
@@ -231,11 +263,11 @@ def login(user_login: schemas.UserLogin, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == user_login.email).first()
 
     if user is None:
-        raise HTTPException(status_code=400, detail="Invalid email or password")
+        raise HTTPException(status_code=401, detail="Invalid email or password")
 
     # Compare the submitted password with the stored hash.
     if not verify_password(user_login.password, user.hashed_password):
-        raise HTTPException(status_code=400, detail="Invalid email or password")
+        raise HTTPException(status_code=401, detail="Invalid email or password")
 
     # Put the user's email in the token subject.
     token = create_access_token({"sub": user.email})
@@ -305,7 +337,9 @@ Use:
 }
 ```
 
-12. Test `POST /auth/login` with the same email and password.
+Registration should return `201`; repeating it should return `409`.
+
+12. Test `POST /auth/login` with the same email and password. Incorrect credentials should return `401`.
 
 You should receive:
 
@@ -315,7 +349,6 @@ You should receive:
   "token_type": "bearer"
 }
 ```
-![login](images/week4_lab_2.png "login")
 
 > **Quick question**
 >

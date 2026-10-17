@@ -18,9 +18,9 @@ The important idea is this: FastAPI handles the web request, and SQLAlchemy hand
 2. Replace it with:
 
 ```text
-fastapi==0.141.1;
-uvicorn==0.52.4;
-sqlalchemy;
+fastapi==0.141.1
+uvicorn==0.52.4
+sqlalchemy==2.0.55
 ```
 
 3. Install:
@@ -136,7 +136,7 @@ def create_course(course_data: dict, db: Session = Depends(get_db)):
     except IntegrityError:
         # If the unique course code is repeated, undo the failed transaction.
         db.rollback()
-        raise HTTPException(status_code=400, detail="Course code already exists")
+        raise HTTPException(status_code=409, detail="Course code already exists")
 ```
 
 This code turns the SQLAlchemy database into a FastAPI API.
@@ -148,6 +148,8 @@ This code turns the SQLAlchemy database into a FastAPI API.
 - `db.commit()` saves the new course.
 - `db.refresh(course)` reloads the course so the generated `id` is available.
 - `IntegrityError` is used here to catch repeated course codes.
+
+> **Clarification:** This intermediate version expects all three fields. Missing fields can cause a server error; Part 3 adds validation so invalid requests receive `422`.
 
 #### Part D: Run the API
 
@@ -206,9 +208,8 @@ http://127.0.0.1:8000/courses
 
 13. Try to create another course with the same `code`.
 
-You should get an error because `code` is unique:
+You should receive `409 Conflict` because `code` is unique.
 
-![Error](images/week3_lab_2.png "Error")
 
 14. Stop the server with `Ctrl + C`.
 

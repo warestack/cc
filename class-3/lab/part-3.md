@@ -95,7 +95,7 @@ def get_course(course_id: int, db: Session = Depends(get_db)):
     return course
 
 
-@app.post("/courses", response_model=schemas.CourseResponse)
+@app.post("/courses", response_model=schemas.CourseResponse, status_code=201)
 def create_course(course_data: schemas.CourseCreate, db: Session = Depends(get_db)):
     # course_data has already been checked by Pydantic.
     # We can use dot notation because course_data is a CourseCreate object.
@@ -113,7 +113,7 @@ def create_course(course_data: schemas.CourseCreate, db: Session = Depends(get_d
 
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=400, detail="Course code already exists")
+        raise HTTPException(status_code=409, detail="Course code already exists")
 ```
 
 This code updates the API to use Pydantic schemas.
@@ -148,10 +148,8 @@ http://127.0.0.1:8000/docs
 }
 ```
 
-You should receive the new course with an `id`.
+You should receive `201 Created` and the new course with an `id`.
 
-![POST](images/week3_lab_3.1.png "POST")
-![ID](images/week3_lab_3.2.png "ID")
 
 #### Part D: Test Invalid Data
 
@@ -165,7 +163,7 @@ You should receive the new course with an `id`.
 }
 ```
 
-FastAPI should reject the request before it reaches the database code.
+FastAPI should return `422` before the request reaches the database code.
 
 <details>
 <summary>Which part of the code rejects the short values?</summary>
