@@ -16,13 +16,24 @@ Use the following structure:
 
 | Section                   | Suggested words | Content                                                      |
 | ------------------------- | --------------- | ------------------------------------------------------------ |
-| Overview and architecture | 200             | Purpose, architecture diagram and relationship to teaching material |
+| Architecture and critical reflection | 450 | How the components fit together, technology choices, trade-offs and improvements |
 | Implementation            | 350             | Data model, authentication, validation and Piazza rules      |
 | Automated testing         | 350             | Summary of unit/API tests, results, isolation, representative cases and limitations |
 | Containerisation          | 200             | Image design, registry reference and VM execution            |
 | Kubernetes deployment     | 400             | Deployment, storage, Pod replacement, update and cleanup     |
-| Critical evaluation       | 250             | Limitations, technical trade-offs and justified improvements |
 | **Suggested total**       | **1,750**       |                                                              |
+
+### Architecture and critical reflection
+
+Include a **400–500-word Architecture and critical reflection** section, supported by an architecture diagram. Discuss:
+
+- How FastAPI, authentication, SQLAlchemy/SQLite, Docker and Kubernetes fit together in your application, including the request path and persistent storage.
+- Why these technologies suit the application and the trade-offs of SQLite, one replica, persistence and availability.
+- What you learned from implementation and testing, and which improvements you would prioritise and why.
+
+Base the discussion on your own application and results, rather than general definitions of the technologies.
+
+> **Clarification:** This section is included in the 1,500–2,000-word report target, not an additional submission.
 
 ### Required testing section
 
@@ -86,9 +97,9 @@ Each mark is one percentage point of the assignment total.
 | E2 | Persistent storage and successful Pod-replacement verification | 4 |
 | E3 | Versioned application update and cleanup evidence | 3 |
 |  | **Kubernetes subtotal** | 10 |
-| F1 | Traceable technical evidence and reproduction references | 5 |
-| F2 | Critical evaluation of design choices and limitations | 4 |
-| F3 | Clear report structure, architecture diagram and references | 5 |
+| F1 | Architecture explanation and diagram | 5 |
+| F2 | Critical reflection and justified improvements | 5 |
+| F3 | Traceable evidence, report organisation and references | 4 |
 | F4 | Clear and accurate testing summary with results, representative cases and limitations | 6 |
 |  | **Technical report subtotal** | 20 |
 | G1 | Five meaningful milestone commits | 10 |
@@ -120,9 +131,9 @@ The percentages below apply to the marks available for each individual criterion
 | E1        | Deployment unavailable                 | Pod and Service operate                 | External API access demonstrated              | Correct manifests, configuration and reproducible deployment |
 | E2        | Data lost or persistence unproven      | Volume mounted and data stored          | Data survives Pod replacement                 | Clear before/after verification tied to stored records       |
 | E3        | Update/cleanup absent                  | Some update or cleanup evidence         | Update preserves data; cleanup shown          | Both stages clearly verified with version and resource evidence |
-| F1        | Claims difficult to verify             | Main evidence identifiable              | Evidence maps clearly to requirements         | Concise, complete traceability to the assessed revision      |
-| F2        | Descriptive or unsupported             | Main limitations recognised             | Trade-offs explained using evidence           | Critical, technically justified evaluation and improvements  |
-| F3        | Unclear or poorly referenced           | Readable structure and basic references | Clear diagram and appropriate attribution     | Precise, coherent report with complete attribution           |
+| F1 | Architecture unclear or diagram missing/inaccurate | Main components and their roles explained | Diagram and explanation show request flow, authentication and storage | Accurate, coherent explanation of component interactions and technology choices |
+| F2 | Generic description or unsupported claims | Main trade-offs and limitations identified | Reflection uses implementation/test evidence to justify improvements | Critical evaluation connects technology choices, observed results and prioritised improvements |
+| F3 | Evidence difficult to verify or report poorly organised/referenced | Readable report with basic evidence and attribution | Clear structure, evidence links and appropriate references | Concise, complete traceability to the assessed revision with clear organisation and attribution |
 | F4 | Testing summary absent, unclear or unsupported | Main test types and results summarised | Results, representative cases and limitations explained with evidence | Accurate, concise interpretation linking results, isolation and boundary cases to the assessed revision |
 | G3 | Mostly vague or missing descriptions | Messages identify the main changes | Messages consistently describe coherent changes | Precise, informative messages make development decisions and fixes easy to follow |
 | G4 | History unavailable, one final upload or progress largely unverifiable | History retained with some dated push evidence | Milestone links and dated pushes demonstrate staged development | Complete milestone traceability and dated pushes clearly demonstrate sustained development |
@@ -154,6 +165,7 @@ Before submission, confirm that:
 - The report appendix includes qualifying commit links, the elapsed-period calculation and dated push evidence.
 - Source code, tests, dependencies, Docker assets and Kubernetes manifests are included.
 - A basic root-level README.md explains the application, prerequisites, setup, configuration, testing, container execution and deployment.
+- The report includes a 400–500-word architecture and critical reflection section with a diagram.
 - The report includes a testing section summarising unit/API tests, pass/fail/skip counts, representative cases and limitations.
 - The report provides evidence for VM execution, GKE deployment, persistence, update and cleanup.
 - Secrets, real credentials and unnecessary personal data are excluded.
