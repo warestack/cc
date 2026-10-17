@@ -161,6 +161,7 @@ Before submission, confirm that:
 - The final assessed commit has been pushed and its SHA is recorded.
 - The repository preserves at least five meaningful commits covering all five milestones, with the first and last qualifying commits at least 15 full days apart.
 - The report appendix includes qualifying commit links, the elapsed-period calculation and dated push evidence.
+- Your repository includes `development-log.md`, updated throughout development with an entry for each milestone.
 - Source code, tests, dependencies, Docker assets and Kubernetes manifests are included.
 - A basic root-level README.md explains the application, prerequisites, setup, configuration, testing, container execution and deployment.
 - The report includes a 400–500-word architecture and critical reflection section with a diagram.

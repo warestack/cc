@@ -67,6 +67,14 @@ In the report appendix, provide a milestone table with completion dates, commit 
 
 > **Clarification:** Commits record local changes; pushes upload them to GitHub. Commit timestamps do not prove when you pushed. For the 15-day rule, 1 November at 12:00 UTC to 16 November at 12:00 UTC qualifies; commits on 15 calendar dates alone may not.
 
+### Development log
+
+Create `development-log.md` in the root of your repository. Update, commit and push it as you work, with at least one entry for each of the five milestones.
+
+Each entry should briefly record the date, work completed, a key decision or problem, related commit links, and any sources or permitted assistance used. For permitted AI assistance, identify the tool and purpose; keep prompts and outputs private.
+
+The log supports your existing development evidence and carries no additional marks. It does not replace the report milestone table or Moodle declaration.
+
 ## Basic repository README
 
 Add a short `README.md` in the main folder of your repository with:
