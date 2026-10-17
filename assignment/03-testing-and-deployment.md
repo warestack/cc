@@ -54,7 +54,7 @@ Test expiry immediately before, exactly at and after the boundary. Include an au
 
 Map requirements to test names in a test matrix and save the pytest output. Summarise actual results in the report’s [required testing section](04-report-marking-and-submission.md#required-testing-section).
 
-> **Clarification:** TC01–TC20 specify behaviours, not a fixed test count. Keep Tech posts live for TC20 when advancing the clock past the Health post’s expiry. Check rejection of both reactions and comments on expired posts.
+> **Clarification:** Use as many test functions as needed to cover all twenty scenarios. Keep Tech posts live for TC20 when advancing the clock past the Health post’s expiry. Check that expired posts reject both reactions and comments.
 
 ## Containerisation requirements
 

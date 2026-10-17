@@ -130,7 +130,7 @@ A post-creation request must accept:
 }
 ```
 
-The expiry timestamp above is illustrative; tests must use a suitable future time relative to their controlled clock.
+The date above is an example. In your tests, use an expiry time after the test clock’s current time.
 
 A reaction request contains `{"value": "like"}` or `{"value": "dislike"}`. A comment request contains `{"body": "A comment"}`.
 

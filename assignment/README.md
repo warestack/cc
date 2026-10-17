@@ -45,11 +45,11 @@ Create your repository at the start of the assignment. Use either:
 
 Both options receive the same marks. Keep your own coursework repository accessible until marking and moderation are complete.
 
-GitHub development accounts for **30% of the assignment mark**, assessed using [criteria G1–G4](04-report-marking-and-submission.md#github-marking-rules).
+Your GitHub work is worth **30 marks**. See [G1–G4](04-report-marking-and-submission.md#github-marking-rules) for the breakdown.
 
-Make **at least five meaningful commits spanning at least 15 full days (360 hours)**. Measure the interval between the first and last qualifying Git author timestamps in UTC. All qualifying commits must fall within the assignment period and be included in the submitted revision.
+Make **at least five meaningful commits spanning at least 15 full days (360 hours)**. Measure the interval between your first and last meaningful commits using their Git author timestamps in UTC. All meaningful commits must fall within the assignment period and be included in the submitted revision.
 
-Your qualifying commits must include at least one substantive contribution to each of the following five milestones:
+Make at least one meaningful commit for each milestone:
 
 | Milestone                  | Expected repository progress                               |
 | -------------------------- | ---------------------------------------------------------- |
@@ -61,15 +61,15 @@ Your qualifying commits must include at least one substantive contribution to ea
 
 Commit coherent changes and push at each milestone. Use descriptive messages such as `Reject reactions on expired posts`. Five commits are the minimum; extra commits earn no automatic bonus.
 
-A meaningful commit contributes to its milestone. Empty commits, trivial count-increasing edits and imported third-party history do not qualify. A single final upload or five last-minute commits is insufficient. Preserve your history without squashing it into one final commit or fabricating dates.
+Each commit should show useful progress. Empty commits, minor edits made only to increase the count and other people’s commits do not count. Push as you work, keep your history and do not alter commit dates. Uploading everything at the end is insufficient.
 
-In the report appendix, provide a milestone table with completion dates, commit messages and direct links to at least five qualifying commits. Show the first and last timestamps, calculate the elapsed period and include dated GitHub push evidence. See [G1–G4](04-report-marking-and-submission.md#github-marking-rules) for how marks are awarded.
+In the report appendix, provide a milestone table with completion dates, commit messages and direct links to at least five meaningful commits. Show the first and last timestamps, calculate the elapsed period and include dated GitHub push evidence. See [G1–G4](04-report-marking-and-submission.md#github-marking-rules) for how marks are awarded.
 
 > **Clarification:** Commits record local changes; pushes upload them to GitHub. Commit timestamps do not prove when you pushed. For the 15-day rule, 1 November at 12:00 UTC to 16 November at 12:00 UTC qualifies; commits on 15 calendar dates alone may not.
 
 ## Basic repository README
 
-Maintain a concise root-level `README.md` containing:
+Add a short `README.md` in the main folder of your repository with:
 
 - A short description of Piazza and the main technologies used.
 - Prerequisites and commands to install dependencies.

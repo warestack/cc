@@ -8,7 +8,7 @@ Use the report structure, marking criteria and submission checklist below.
 
 ## Technical report structure
 
-The technical report accounts for **20% of the assignment mark** under F1–F4.
+Your report is worth **20 marks**, as shown in F1–F4 below.
 
 Write approximately **1,500–2,000 words**. References, API tables, the development milestone table and evidence appendices are excluded from this target.
 
@@ -31,22 +31,22 @@ Include a **400–500-word Architecture and critical reflection** section, suppo
 - Why these technologies suit the application and the trade-offs of SQLite, one replica, persistence and availability.
 - What you learned from implementation and testing, and which improvements you would prioritise and why.
 
-Base the discussion on your own application and results, rather than general definitions of the technologies.
+Discuss your own design choices and what you learned from building and testing the app.
 
-> **Clarification:** This section is included in the 1,500–2,000-word report target, not an additional submission.
+> **Clarification:** Include these 400–500 words within your report’s 1,500–2,000-word total.
 
 ### Required testing section
 
 Include a clearly labelled **Automated testing** section in the main report. Summarise:
 
 - What your unit tests and API integration tests check, including their relationship to TC01–TC20 and the additional required cases.
-- How to run the suite, the assessed commit SHA and the date of the reported test run.
+- How to run the suite, the submitted commit SHA and the date of the reported test run.
 - The number of tests passed, failed and skipped, separately for unit tests and API tests. Explain failures, skips and untested requirements.
 - How you isolate the database and control time, plus one representative successful case and one rejected or boundary case.
 
 Use a compact results table, interpret the results and reference the full matrix and pytest output. Do not paste the test suite into the report.
 
-> **Clarification:** C1–C3 assess the executable tests; F4 assesses their written summary and interpretation. Both are required.
+> **Clarification:** You receive marks for both your test code (C1–C3) and how you explain the results (F4).
 
 ### Report details and evidence
 
@@ -57,7 +57,7 @@ Begin with:
 - Full submitted commit SHA.
 - Docker Hub image reference and digest.
 
-Include numbered evidence with captions explaining what it demonstrates. Link evidence to the relevant marking criteria.
+Number your screenshots and other evidence, add short captions and link them to the relevant marking criteria.
 
 Appendices should contain:
 
@@ -72,7 +72,7 @@ Keep full command sequences in the README. Explain decisions and results in the 
 
 ## Marking criteria
 
-Each mark is one percentage point of the assignment total.
+The assignment is marked out of 100.
 
 | ID | Criterion | Marks |
 | --- | --- | ---: |
@@ -111,7 +111,7 @@ Each mark is one percentage point of the assignment total.
 
 ### Performance descriptors
 
-The percentages below apply to the marks available for each individual criterion, except G1 and G2, which use the explicit rules stated below.
+These bands show how marks are awarded for each item. G1 and G2 follow the rules below.
 
 | Criterion | 0–49%                                  | 50–59%                                  | 60–69%                                        | 70–100%                                                      |
 | --------- | -------------------------------------- | --------------------------------------- | --------------------------------------------- | ------------------------------------------------------------ |
@@ -133,29 +133,27 @@ The percentages below apply to the marks available for each individual criterion
 | E3        | Update/cleanup absent                  | Some update or cleanup evidence         | Update preserves data; cleanup shown          | Both stages clearly verified with version and resource evidence |
 | F1 | Architecture unclear or diagram missing/inaccurate | Main components and their roles explained | Diagram and explanation show request flow, authentication and storage | Accurate, coherent explanation of component interactions and technology choices |
 | F2 | Generic description or unsupported claims | Main trade-offs and limitations identified | Reflection uses implementation/test evidence to justify improvements | Critical evaluation connects technology choices, observed results and prioritised improvements |
-| F3 | Evidence difficult to verify or report poorly organised/referenced | Readable report with basic evidence and attribution | Clear structure, evidence links and appropriate references | Concise, complete traceability to the assessed revision with clear organisation and attribution |
-| F4 | Testing summary absent, unclear or unsupported | Main test types and results summarised | Results, representative cases and limitations explained with evidence | Accurate, concise interpretation linking results, isolation and boundary cases to the assessed revision |
+| F3 | Evidence difficult to verify or report poorly organised/referenced | Readable report with basic evidence and attribution | Clear structure, evidence links and appropriate references | Concise, complete traceability to the submitted version with clear organisation and attribution |
+| F4 | Testing summary absent, unclear or unsupported | Main test types and results summarised | Results, representative cases and limitations explained with evidence | Accurate, concise interpretation linking results, isolation and boundary cases to the submitted version |
 | G3 | Mostly vague or missing descriptions | Messages identify the main changes | Messages consistently describe coherent changes | Precise, informative messages make development decisions and fixes easy to follow |
 | G4 | History unavailable, one final upload or progress largely unverifiable | History retained with some dated push evidence | Milestone links and dated pushes demonstrate staged development | Complete milestone traceability and dated pushes clearly demonstrate sustained development |
 
-Higher marks within a band reflect greater completeness, correctness and quality of evidence.
+For higher marks, complete the requirements accurately and support your work with clear evidence.
 
 ### GitHub marking rules
 
-- **G1 (10 marks):** Award 2 marks for each of the five milestones evidenced by a distinct meaningful commit. At least five qualifying commits are needed for all 10 marks. One commit cannot count for multiple milestones.
-- **G2 (10 marks):** Award 10 marks only where at least five qualifying commits span at least 15 full days within the assignment period and before submission. Otherwise award 0 for G2. This does not impose an automatic cap on the assignment or remove marks earned under other criteria.
+- **G1 (10 marks):** You earn 2 marks for each milestone shown by a separate, meaningful commit: five milestones, five commits.
+- **G2 (10 marks):** You earn 10 marks if at least five meaningful commits span at least 15 full days during the assignment period and before submission. Otherwise, you receive 0 for this item only.
 
-Partial credit is available. A deployment failure does not automatically remove marks for functioning application code or tests. Implementation and testing are assessed separately. The same omission will not be deducted twice within one criterion.
+You can earn partial marks for completed work, including your application and tests if deployment fails. The same omission will not be deducted twice within one marking item.
 
-Test quantity and coverage percentages alone do not earn marks. Screenshots do not replace executable automated tests. Additional features cannot raise the total above 100%.
-
-> **Clarification:** Technical marks assess what works; report marks assess explanation and evidence. Missing the 15-day requirement loses G2’s 10 marks, not all 30 GitHub marks.
+Test marks depend on meaningful checks, not just test counts or coverage percentages. Submit executable tests; screenshots alone are insufficient. Extra features earn no bonus marks.
 
 ## Submission checklist
 
 Submit **one PDF report through Moodle** and complete the separate AI Declaration. Keep code and supporting files in GitHub; do not upload a source-code archive.
 
-> **Clarification:** Markers assess the recorded commit SHA. Later changes are outside the submission.
+> **Clarification:** We will mark the version identified by your submitted commit SHA.
 
 Before submission, confirm that:
 
@@ -172,7 +170,7 @@ Before submission, confirm that:
 - Reused material and permitted AI assistance are acknowledged.
 - The official Moodle AI Declaration is completed.
 
-Your repository and report must describe the work you actually completed. Explain any incomplete features, failed tests or deployment limitations accurately.
+Be clear about any unfinished features, failed tests or deployment problems.
 
 ## Assignment navigation
 
