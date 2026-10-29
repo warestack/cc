@@ -1,127 +1,82 @@
-### Week 5 Part 1: GCP Coupon and First Virtual Machine
+# Part 1 — Create your first VM
 
-Welcome to the cloud part of the module.
+Previous: [Preparation](../preparation.md) · [Week 5 overview](../README.md) · Next: [SSH, users, and sudo](part-2.md)
 
-In Weeks 1 to 4, you built APIs locally. Now you will prepare a cloud VM so you can run those kinds of applications outside your own computer.
+Create an Ubuntu VM called `lab-5`. Google manages the physical hardware; you choose the virtual hardware and manage the operating system. This is **infrastructure as a service**, or IaaS.
 
-#### What You Will Do
+Before starting, complete the [preparation guide](../preparation.md): request and redeem your coupon, link the grant billing account to your project, and enable the Compute Engine API. Do not create a VM until the credit and project linkage are confirmed.
 
-- Request and redeem your GCP coupon.
-- Create a GCP project.
-- Enable Compute Engine.
-- Create an Ubuntu virtual machine.
-- Allow web traffic to the VM.
+## 1. Open Compute Engine
 
-#### Part A: Redeem Your GCP Coupon
+1. Search for **Compute Engine**, then open **VM instances**.
+2. If prompted, enable the **Compute Engine API** and wait. If already enabled, continue.
+3. Select **Create instance**.
 
-1. In Moodle, open the **Preparation** tile.
+## 2. Configure the VM
 
-2. Click the **Student Coupon Retrieval Link**.
+Use these values rather than accepting the default machine size.
 
-3. Complete the form using your **Birkbeck email address**.
+| Setting | Value |
+| --- | --- |
+| Name | `lab-5` |
+| Region / zone | `us-central1` (Iowa) / `us-central1-a` |
+| Machine family / series | General purpose / E2 |
+| Machine type | `e2-medium` |
+| Resources | 2 shared vCPUs, 4 GB RAM |
+| Provisioning model | Standard |
+| Operating system | Ubuntu 24.04 LTS, x86/64 (not Minimal) |
+| Boot disk | 10 GB balanced persistent disk (`pd-balanced`) |
+| Backups | No scheduled backups for this temporary lab |
+| Network | `default`, with its `us-central1` subnet |
+| External IP | Ephemeral IPv4 |
+| HTTP / HTTPS | Allow HTTP; leave HTTPS unchecked |
 
-![Coupon form](../assets/1.png)
+`e2-medium` exposes two virtual CPUs to Linux, but CPU time is shared. These are not two dedicated physical cores. Its sustained allocation totals the equivalent of one vCPU, with temporary bursting. See [Google's E2 specifications](https://docs.cloud.google.com/compute/docs/general-purpose-machines).
 
-4. Check your inbox and verify your account.
+In **Machine configuration**, select **General purpose → E2**, keep **Preset**, and choose **e2-medium** in the machine-type list. Check the region and zone near the top of the page. Scroll down to confirm the **VM provisioning model** is **Standard**.
 
-![Email verification](../assets/2.png)
+![Current VM form showing lab-5, the selected zone, E2 series, and e2-medium machine type](../assets/vm-machine-configuration.jpg)
 
-5. Wait for the second email containing your coupon code.
+*This capture shows the machine settings before changing the operating system and backups. Complete the Ubuntu and No backups steps below even if the sidebar still shows defaults at this stage.*
 
-![Coupon email](../assets/3.png)
+Under **OS and storage**, select **Change**, choose the Ubuntu image and disk settings, then confirm. Keep the option to delete the boot disk when the VM is deleted enabled.
 
-> [!IMPORTANT]
+![Ubuntu 24.04 LTS x86/64 selected with a 10 GB balanced persistent boot disk](../assets/ubuntu-boot-disk.jpg)
+
+Open **Data protection** and select **No backups**. The default can be a snapshot schedule, so check this explicitly. This VM is for lab work; keep any important coursework in your own version-controlled project as well.
+
+Under **Networking**, enable **Allow HTTP traffic** for this main VM. Week 6 publishes a container on port 80; this lab does not install a web server. HTTPS remains unchecked. An external IP alone does not mean a website is running.
+
+![Current networking form with HTTP checked and HTTPS unchecked](../assets/vm-networking-http.jpg)
+
+If the default network is unavailable or an organisation policy blocks the zone or external IP, ask the instructor before changing the specification.
+
+## 3. Create and check
+
+1. Review the configuration and estimated cost, then select **Create**.
+2. Wait for **Running**, indicated by a green status icon.
+3. Open the VM details and confirm its type, zone, Ubuntu version, and disk size. Record its name, zone, and external IP.
+
+![Newly created lab-5 VM running in us-central1-a with its SSH control](../assets/main-vm-running.jpg)
+
+An ephemeral external IP can change after a stop/start. Check its current value next week.
+
+> **Think it through — stopped versus deleted**
 >
-> Use your Birkbeck email only for the coupon request form.
->
-> **Redeem the coupon with a personal Gmail account.** Do not redeem it with a Birkbeck, work, or organisation Google account.
+> You stop `lab-5` tonight and start it next week. Which resources and files should still exist? Why might your credit balance still decrease while the VM is stopped?
 
-6. Enter the coupon code and click **Accept and continue**.
+<details>
+<summary>Show answer</summary>
 
-![Redeem coupon](../assets/4.png)
+Stopping the VM preserves its boot disk, installed software, Linux users, and saved files. Compute usage charges stop, but retained disk storage and any other chargeable resources can still consume credit. Deleting a VM is different: if its boot disk is also deleted, the files on that disk are lost. This is why the main VM is stopped for Week 6 while the disposable exercise VM and its disk are deleted.
 
-#### Part B: Create a GCP Project
+</details>
 
-7. In the GCP Console search bar, search for **Compute Engine**.
+### Checkpoint
 
-![Search for Compute Engine](../assets/7.png)
+- [ ] The correct project and grant billing account are selected.
+- [ ] `lab-5` is running with the specified configuration.
+- [ ] HTTP is allowed for Week 6; HTTPS is unchecked.
+- [ ] You can find the VM’s SSH button and have recorded the project ID. Cloud Shell is optional.
 
-8. Click the project selector at the top-left of the page, then choose **New Project**.
-
-![Project selector](../assets/11.png)
-
-9. Give your project a clear name.
-
-Suggested format:
-
-```text
-cc-2026-yourname
-```
-
-![Create project](../assets/13.png)
-
-#### Part C: Create Your First VM
-
-10. Return to **Compute Engine** and select **VM instances** from the sidebar.
-
-![VM instances](../assets/8.png)
-
-11. Click **Create instance**.
-
-If GCP asks you to enable the Compute Engine API, click **Enable** and wait until it finishes.
-
-![Enable Compute Engine API](../assets/22.png)
-
-> **Quick question**
->
-> Why do we need Compute Engine for this lab?
->
-> <details>
-> <summary>Show answer</summary>
->
-> Compute Engine is the GCP service that lets us create and run virtual machines.
->
-> </details>
-
-12. Create a VM and name it:
-
-```text
-lab-5
-```
-
-![Create VM](../assets/14.png)
-
-13. Under **OS and storage**, click **Change**.
-
-![OS and storage](../assets/15.png)
-
-14. Choose **Ubuntu** as the operating system.
-
-Use the closest available Ubuntu version if the exact screen looks different.
-
-![Choose Ubuntu](../assets/16.png)
-
-15. Open the **Networking** section and enable both:
-
-- **Allow HTTP traffic**
-- **Allow HTTPS traffic**
-
-Then click **Create**.
-
-![Networking settings](../assets/17.png)
-
-16. Wait until the VM is ready.
-
-![VM creating](../assets/18.png)
-
-#### Part D: Stop and Check
-
-17. In the VM instances table, find:
-
-```text
-lab-5
-```
-
-18. Copy or note the **External IP**. You will need it in later labs.
-
-Part 1 is complete. Keep the VM running and continue to [Part 2](part-2.md).
+Keep the VM running and continue to [Part 2 — SSH, users, and sudo](part-2.md).

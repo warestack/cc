@@ -2,7 +2,7 @@
 
 In this part, you will install Docker on the GCP VM you created in Week 5 and run your first containers.
 
-Use the `lab-5` VM and your Week 5 lab user. Do not use the default temporary user if you created a separate lab user.
+Use the `lab-5` VM and your Week 5 lab user, `student`. On every new SSH connection, [check the VM and switch to the existing lab user](../../class-5/lab/part-2.md#5-reconnect-using-the-existing-user). Create the user only once per VM.
 
 #### What You Will Learn
 
@@ -18,7 +18,7 @@ Use the `lab-5` VM and your Week 5 lab user. Do not use the default temporary us
 
 2. Start your `lab-5` VM.
 
-3. Connect to the VM using SSH.
+3. Use the **SSH** button on the `lab-5` row to connect. Cloud Shell is an [optional alternative](../../class-5/lab/part-2.md#optional--connect-through-cloud-shell). Check `hostname -s` before running VM commands.
 
 4. Switch to your lab user if you are not already using it.
 

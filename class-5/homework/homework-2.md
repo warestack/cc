@@ -1,8 +1,8 @@
-### Week 5 Homework 2: Cloud and Sudo Research Post
+# Week 5 Homework 2: Cloud and Sudo Research Post
 
-Complete this homework after finishing Week 5 Lab Parts 1 to 3 and Homework 1.
+Complete this homework after finishing [Week 5 Lab Parts 1 to 3](../README.md) and [Homework 1](homework-1.md), which points to the two practical exercises.
 
-#### Topic
+## Topic
 
 Do a small piece of research on this question:
 
@@ -10,7 +10,7 @@ Do a small piece of research on this question:
 Why do Linux and cloud systems usually ask us to work with a normal user and use sudo, instead of working directly as root?
 ```
 
-#### What To Post
+## What To Post
 
 Write a short post in the **Teams collaboration space**.
 
@@ -21,11 +21,11 @@ Your post should include:
 - one example of when `sudo` is useful
 - one link to a source you used, written using the Harvard referencing system
 
-#### Suggested Length
+## Suggested Length
 
 Write about 120 to 180 words.
 
-#### Before You Post
+## Before You Post
 
 Make sure your post is clear and readable. Do not copy and paste directly from a website or use AI to write the post. Use your own words.
 
