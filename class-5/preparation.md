@@ -58,36 +58,38 @@ Use an existing personal Google account, or complete Google's **Create account**
 3. Complete any required name fields, review the displayed terms, and choose **Accept and continue** if you agree.
 4. Wait for confirmation that the credit has been applied. Keep a private note of which Google account and billing account received it.
 
-![Retained example of the credit-redemption page with account details and coupon removed](assets/credit-redemption-example.png)
+![Current coupon-redemption form with personal fields cleared and account email removed](assets/credit-redemption-current.jpg)
 
-Do not follow the example image's old address bar or enter a code shown in someone else's image. Each student's coupon is unique. Do not start a paid trial or add a payment card simply because an example screen looks different; ask the instructor if the education-credit route is unclear.
+The screenshot shows the current form without submitting a coupon. Fill in your own details and code, and check the signed-in account before accepting the displayed terms. Do not enter a code shown in someone else's image. Each student's coupon is unique. Do not start a paid trial or add a payment card simply because an example screen looks different; ask the instructor if the education-credit route is unclear.
 
-## 5. Create or select your module project
+## 5. Create a dedicated project for your labs
 
 1. Open the [Google Cloud Console](https://console.cloud.google.com/) using the same Google account as redemption.
-2. Select the project control beside the Google Cloud logo. If you already have a module project, select it. Otherwise choose **New project**.
+2. After redeeming your coupon, select the project control beside the Google Cloud logo and choose **New project**. Create a dedicated project for this module so your lab resources are kept together. If you already completed this preparation and created that project, select it rather than creating another.
 
 ![Current project selector showing the New project button](assets/project-selector.jpg)
 
-3. Use a clear project name, for example `cc-2026-yourname`. Select **No organisation** if this is the available location for your personal account. If your account requires an organisation or folder, ask the instructor which to use.
-4. Create the project, wait for completion, and select it. Record its **project ID**; the display name and ID may differ.
+3. Use a clear project name, for example `cc-2026-yourname`. If the form offers **Billing account**, choose **Billing Account for Education** now. Select **No organisation** if this is the available location for your personal account. If your account requires an organisation or folder, ask the instructor which to use.
+4. Create the project, wait for completion, and select it. Record its **project ID**; the display name and ID may differ. Use this same project for the following labs, including Week 6, unless instructed otherwise. Creating a project does not automatically mean it is linked to your education credit: complete Section 6 before creating a VM.
 
 ![Current new-project form with an illustrative name](assets/project-create.jpg)
 
-*Form example only. VM screenshots later in the guide use an existing instructor project. Students must use their own module project.*
+*Current capture of the dedicated demonstration project `cc-2026-labs`, created for this walkthrough with education billing selected. Create your own project; its ID must be globally unique. Do not copy the demonstration project ID.*
 
-## 6. Link billing and confirm the credit
+## 6. Link your project to Billing Account for Education
 
 1. Check that your module project is selected.
-2. Open **Billing** from the navigation menu. If the project is not linked to a billing account, use **Link a billing account** and select the account associated with your redeemed education credit. If prompted to choose an account before entering Billing, choose that same grant account.
+2. Open **Billing** from the navigation menu. If the project is not linked to a billing account, use **Link a billing account** and select **Billing Account for Education**, the account containing your redeemed education credit. If prompted to choose an account before entering Billing, choose that same grant account. If several accounts have similar names, check their billing account IDs and Credits entries rather than relying only on the name.
 3. If the project is linked to the wrong billing account, review the project's billing settings and select the education-grant account you are entitled to use. Ask the instructor if the correct account is unavailable; do not substitute a work or unrelated billing account.
-4. Open **Credits** for the selected billing account. Inspect the grant, remaining value, and expiry date. If Credits is not visible, check Billing account management/overview and its menu, or ask the instructor; labels can vary with account permissions.
+4. Confirm the project’s Billing page identifies the education billing account as its linked account. Then open **Credits** for that billing account. Inspect the grant, remaining value, and expiry date. If Credits is not visible, check Billing account management/overview and its menu, or ask the instructor; labels can vary with account permissions.
 
-![Original example showing 50 dollars of initial and remaining credit](assets/credit-balance-example.png)
+![Current education billing Credits view showing available credit, original value, and expiry](assets/education-credit-current.jpg)
 
-*Retained source example. The current course award is also $50, but your remaining balance can be lower after usage. Your own account is the source of truth for available credit and expiry.*
+*Current instructor example: the staff grant is $100. Your student coupon awards $50, and your remaining balance decreases with eligible usage. Check your own account for its value and expiry; the screenshot does not indicate a $100 student award. The original $50 image is retained in the source inventory.*
 
-A coupon code in an email is not yet usable project credit. Check all three: **redeemed coupon → correct billing account → linked project**.
+![New lab project linked to Billing Account for Education](assets/project-billing-linked.jpg)
+
+A coupon code in an email is not yet usable project credit. Check all three: **redeemed coupon → Billing Account for Education → your dedicated lab project**. Credit belongs to the billing account; usage from the linked project draws on eligible credit. Selecting a project alone does not link its billing.
 
 ## 7. Enable Compute Engine
 
@@ -95,15 +97,19 @@ A coupon code in an email is not yet usable project credit. Check all three: **r
 
 1. Confirm the project selector shows your module project.
 2. Search the console for **Compute Engine** and open **VM instances**.
-3. If an **Enable** prompt appears for the **Compute Engine API**, select it and wait for activation to complete. Initial setup can take a little time.
+3. If an **Enable** prompt appears for the **Compute Engine API**, select it and wait for activation to complete. Initial setup can take a little time. Wait for the activation task to finish before opening the VM form.
 4. Alternatively, open **APIs & Services → Library**, search for **Compute Engine API**, open the Google-provided service, and select **Enable**. Do not select an unrelated Marketplace product.
 
-![Retained example of the Compute Engine API product page and its Enable button](assets/compute-engine-api-enable-example.png)
+![Current Compute Engine API activation page in the new lab project](assets/compute-engine-api-enable.jpg)
 
-*Retained example because the instructor's project already has this API enabled. Once enabled, your screen can show Manage instead of Enable.*
+*Fresh capture before enabling Compute Engine in the dedicated lab project. Once enabled, your screen can show Manage instead of Enable.*
 
 5. If the API page shows **Manage**, or VM instances already opens with **Create instance**, the API is enabled. Do not disable and re-enable it just to match a screenshot.
 6. Return to **Compute Engine → VM instances** and confirm that **Create instance** is available.
+
+![Compute Engine VM instances page with Create instance available in the new project](assets/compute-engine-ready.jpg)
+
+If a newly enabled project opens a VM form with empty disk or machine lists, return to VM instances, wait for activation to finish, and reload before entering the settings again. Do not select an arbitrary alternative to clear the error.
 
 If asked to set up billing, return to Section 6. If you see a permissions error, verify the project/account and contact the instructor; do not work around it by using an unrelated organisation project.
 

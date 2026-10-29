@@ -42,7 +42,7 @@ gcloud compute ssh lab-5-exercise --zone=us-central1-a --project=YOUR_PROJECT_ID
 
 Once connected, confirm `hostname -s` is `lab-5-exercise`, then:
 
-![Running lab-5-exercise VM with its green status indicator and SSH button](../assets/exercise-vm-running-ssh.jpg)
+![New lab-5-exercise VM with its green running-status indicator and zone](../assets/exercise-vm-running-ssh.jpg)
 
 1. Create Linux user `case` with its own password and home directory.
 2. Add it to `sudo` without removing other memberships.
@@ -86,3 +86,6 @@ Exit the lab-user shell and then the SSH session. Reconnect with the VM’s **SS
 - [ ] Reconnecting reuses the same account.
 
 Keep the VM running and continue as `case` to [Exercise 2 — Files, folders, and pico](exercise-2.md). Cleanup follows that exercise.
+
+> [!TIP]
+> **Pausing before Exercise 2?** Stop only `lab-5-exercise` from **Compute Engine → VM instances** and wait for **Stopped**. Later, start it, reconnect, and switch to the existing `case` user. Saved files and users remain on its disk, which can still incur storage charges. Delete this VM and its boot disk only when you finish Exercise 2's cleanup.

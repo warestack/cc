@@ -23,9 +23,9 @@ The Linux password created here is separate from your Google password. Membershi
 2. Check that `lab-5` is running and choose **SSH** on its row.
 3. Allow the browser window to open. Review and accept an SSH authorization prompt if it appears, then wait for the terminal.
 
-![Retained example of SSH-in-browser authorization](../assets/ssh-authorization-example.png)
+![Current browser SSH confirmation naming the lab-5 VM](../assets/ssh-connect-current.jpg)
 
-*Source example; the prompt may not reappear in an already authorized browser.*
+*If a Connect confirmation appears, check the VM name before continuing. A separate authorization prompt may appear on a first visit. Our signed-in browser was already authorized, so the [original authorization example](../assets/ssh-authorization-example.png) is retained for reference.*
 
 Run these commands in the connected terminal:
 
@@ -34,6 +34,10 @@ hostname -s
 whoami
 pwd
 ```
+
+![Connected SSH-in-browser session confirms the short hostname lab-5](../assets/ssh-connected-current.jpg)
+
+*Fresh connection in the new lab project. The initial-account prompt was shortened to `vm:~$` for privacy; your normal prompt will include your Linux username and VM name.*
 
 Expect the short hostname `lab-5`. Plain `hostname` may include the zone and project domain; `hostname -s` prints just the short name. Your initial Linux username will depend on your Cloud configuration.
 
@@ -56,7 +60,9 @@ Opening Cloud Shell gives you a terminal in its own environment; it does not aut
 1. In the Cloud Console, check the selected project and click **Activate Cloud Shell** (`>_`) in the top bar.
 2. Wait for the terminal panel. If **Authorise Cloud Shell** appears, review and authorize it to make Google Cloud API calls using your account. This prompt may not appear on later visits.
 
-![Current Cloud Shell authorization prompt explaining access to Google Cloud API calls](../assets/cloud-shell-authorize.jpg)
+![Earlier Cloud Shell authorization capture explaining access to Google Cloud API calls](../assets/cloud-shell-authorize.jpg)
+
+*Retained earlier capture: the authorization prompt may not reappear once access has been granted.*
 
 3. In **Cloud Shell**, check the selected project:
 
@@ -203,3 +209,6 @@ Practise exiting both shells, reconnecting, and following Section 5. Continue wh
 - [ ] Reconnecting reuses the same user.
 
 Continue to [Part 3 — Linux basics](part-3.md).
+
+> [!TIP]
+> **Pausing here? Save credit by stopping your VM.** Save any open files, then open **Compute Engine → VM instances** in your lab project, select only `lab-5`, choose **Stop**, and wait for **Stopped**. Closing SSH or the browser does not stop the VM. When you return, choose **Start/Resume** (or **Start**), wait for it to run, and reconnect with **SSH**. [Switch to the existing `student` user and verify your session](part-2.md#5-reconnect-using-the-existing-user); do not create the user again. Stopping preserves the disk and saved work; retained storage can still incur charges. **Do not delete the main VM or its boot disk**, which you need for Week 6.

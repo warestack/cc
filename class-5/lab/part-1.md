@@ -35,15 +35,19 @@ Use these values rather than accepting the default machine size.
 
 In **Machine configuration**, select **General purpose → E2**, keep **Preset**, and choose **e2-medium** in the machine-type list. Check the region and zone near the top of the page. Scroll down to confirm the **VM provisioning model** is **Standard**.
 
-![Current VM form showing lab-5, the selected zone, E2 series, and e2-medium machine type](../assets/vm-machine-configuration.jpg)
+![VM name lab-5 and location us-central1-a in the new project](../assets/vm-name-location.jpg)
 
-*This capture shows the machine settings before changing the operating system and backups. Complete the Ubuntu and No backups steps below even if the sidebar still shows defaults at this stage.*
+![Selected e2-medium machine type, shared CPU allocation, 4 GB memory, and Standard provisioning](../assets/vm-machine-configuration.jpg)
+
+*Fresh captures from the dedicated lab project. The location and machine-size settings are shown separately for readability.*
 
 Under **OS and storage**, select **Change**, choose the Ubuntu image and disk settings, then confirm. Keep the option to delete the boot disk when the VM is deleted enabled.
 
 ![Ubuntu 24.04 LTS x86/64 selected with a 10 GB balanced persistent boot disk](../assets/ubuntu-boot-disk.jpg)
 
 Open **Data protection** and select **No backups**. The default can be a snapshot schedule, so check this explicitly. This VM is for lab work; keep any important coursework in your own version-controlled project as well.
+
+![Data protection set to No backups for the temporary lab VM](../assets/vm-no-backups.jpg)
 
 Under **Networking**, enable **Allow HTTP traffic** for this main VM. Week 6 publishes a container on port 80; this lab does not install a web server. HTTPS remains unchecked. An external IP alone does not mean a website is running.
 
@@ -79,4 +83,15 @@ Stopping the VM preserves its boot disk, installed software, Linux users, and sa
 - [ ] HTTP is allowed for Week 6; HTTPS is unchecked.
 - [ ] You can find the VM’s SSH button and have recorded the project ID. Cloud Shell is optional.
 
-Keep the VM running and continue to [Part 2 — SSH, users, and sudo](part-2.md).
+If continuing now, keep the VM running and continue to [Part 2 — SSH, users, and sudo](part-2.md).
+
+## Pause and resume
+
+> [!TIP]
+> **Pausing here? Save credit by stopping your VM.** Save any open files, then open **Compute Engine → VM instances** in your lab project, select only `lab-5`, choose **Stop**, and wait for **Stopped**. Closing SSH or the browser does not stop the VM. When you return, choose **Start/Resume** (or **Start**), wait for it to run, and reconnect with **SSH**. Continue with user creation in Part 2 if you have not done it yet. Stopping preserves the disk and saved work; retained storage can still incur charges. **Do not delete the main VM or its boot disk**, which you need for Week 6.
+
+![Stop confirmation explains that persistent disks are still billed](../assets/vm-stop-confirmation.jpg)
+
+![Start/Resume is available from the stopped VM row’s More actions menu](../assets/vm-start-menu.jpg)
+
+*Use More actions on the row for your VM. Stopping and starting preserves its disk; check the current external IP after restarting.*

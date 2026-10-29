@@ -145,6 +145,9 @@ Record the VM configuration and terminal checks in your notes before cleanup. If
 1. Exit the `case` shell and then the SSH session. Close the SSH window, or leave the optional Cloud Shell panel. Open **Compute Engine → VM instances** in the correct project.
 2. Select **only `lab-5-exercise`** and choose **Delete**, possibly under **More actions** on a narrow screen.
 3. Check the VM name and ensure its boot disk will also be deleted. This removes its files, including the practice work. Confirm deletion.
+
+![Current deletion dialog explicitly names the exercise VM and its boot disk](../assets/exercise-delete-confirmation.jpg)
+
 4. Wait until it disappears. Check **Compute Engine → Disks** to confirm its boot disk is gone. Remove a leftover disk only after confirming it belongs to this exercise.
 5. Select **only `lab-5`**, choose **Stop**, and confirm. Wait for **Stopped** (`TERMINATED` in command-line output). If the table shows only a status icon, hover over it or open the VM details to check its state. Keep its disk and user for Week 6.
 

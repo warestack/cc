@@ -94,7 +94,7 @@ pico --version
 
 ![Ubuntu reports nano installed, then verifies the pico executable and version](../assets/pico-package-verified.jpg)
 
-*Package verification captured on the exercise VM. The full Ubuntu image already included nano; running the installation command confirmed its availability.*
+*Retaken on `lab-5` in the new project using the initial SSH account. The full Ubuntu image already included nano; the installation command confirmed its availability. The prompt was shortened for privacy. Continue your own file work as `student`.*
 
 ## 5. Edit, save, reopen, and verify
 
@@ -197,4 +197,7 @@ Use the [Linux command reference](linux-command-reference.md) for every command 
 - [ ] Check that your files belong to `student`.
 - [ ] Copy and rename a file, then remove only its backup.
 
-Keep `lab-5` for Week 6. Continue to [Exercise 1 — Create a VM independently](exercise-1.md).
+Save your work and **stop `lab-5` before moving to the separate exercise VM**; it does not need to run during Exercises 1 and 2. Keep its disk and user for Week 6. Continue to [Exercise 1 — Create a VM independently](exercise-1.md).
+
+> [!TIP]
+> **Pausing here? Save credit by stopping your VM.** Save any open files, then open **Compute Engine → VM instances** in your lab project, select only `lab-5`, choose **Stop**, and wait for **Stopped**. Closing SSH or the browser does not stop the VM. When you return, choose **Start/Resume** (or **Start**), wait for it to run, and reconnect with **SSH**. [Switch to the existing `student` user and verify your session](part-2.md#5-reconnect-using-the-existing-user); do not create the user again. Stopping preserves the disk and saved work; retained storage can still incur charges. **Do not delete the main VM or its boot disk**, which you need for Week 6.
