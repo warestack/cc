@@ -60,6 +60,25 @@ Run account-creation commands once, from the initial SSH account. On the exercis
 | `command -v` | Locate an installed command | `command -v pico` | Prints its executable path, or nothing if unavailable. |
 | `pico --version` | Verify the editor | `pico --version` | Shows the installed editor version. |
 
+## Docker basics on lab-5
+
+Follow [Part 4](part-4.md) in order before using these commands independently. Docker installation and user access are needed only on `lab-5`, as `student`.
+
+| Command | Usage | Example | Short description |
+| --- | --- | --- | --- |
+| `apt install docker.io` | Install Docker | `sudo apt install docker.io` | Installs Ubuntu's Docker package after refreshing package lists. |
+| `systemctl enable --now` | Start Docker and enable it at boot | `sudo systemctl enable --now docker` | Starts the Docker service now and on future boots. |
+| `systemctl is-active` | Check the service | `sudo systemctl is-active docker` | Expect `active` before running a container. |
+| `systemctl status` | Inspect service details | `sudo systemctl status docker` | Helps diagnose service errors; press `q` if a pager opens. |
+| `usermod -aG docker` | Grant the lab user Docker access | `sudo usermod -aG docker "$USER"` | Adds the current user to `docker`, granting root-level control; use a fresh login shell afterward. |
+| `id -nG` | Check active group memberships | `id -nG` | Should include `docker` after logging in again as `student`. |
+| `docker --version` | Check the installed command | `docker --version` | Prints the client version; does not verify service access. |
+| `docker run` | Create and run a container | `docker run --name lab5-hello hello-world` | Downloads the image if missing, then runs a new named test container. |
+| `docker images` | List local images | `docker images` | Shows downloaded image templates. |
+| `docker ps` | List running containers | `docker ps` | Also checks access to the Docker service. |
+| `docker ps -a` | Include stopped containers | `docker ps -a` | Shows `lab5-hello` after its program exits. |
+| `docker rm` | Remove a stopped container | `docker rm lab5-hello` | Removes only the named test container; keeps its image. |
+
 ## Optional Cloud Shell commands
 
 These run in **Cloud Shell**, before connecting to the VM. Cloud Shell is optional; the VM row's SSH button is the default route. See [the connection tutorial](part-2.md#optional--connect-through-cloud-shell).

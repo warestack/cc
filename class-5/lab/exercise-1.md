@@ -1,6 +1,6 @@
 # Exercise 1 — Create a VM independently
 
-Previous: [Linux basics](part-3.md) · [Week 5 overview](../README.md) · Next: [Exercise 2](exercise-2.md)
+Previous: [Docker basics](part-4.md) · [Week 5 overview](../README.md) · Next: [Exercise 2](exercise-2.md)
 
 Create a second VM from an empty **Create instance** form. Apply the tutorials rather than cloning the main VM. Keep it for Exercise 2.
 

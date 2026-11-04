@@ -1,6 +1,6 @@
-# Week 5 — Google Cloud VMs and Linux
+# Week 5 — Google Cloud VMs, Linux, and Docker basics
 
-Move from local development to a Linux virtual machine on Google Cloud. Create a VM, connect through SSH, create a user with administrator access, and practise the commands needed for next week's Docker lab.
+Move from local development to a Linux virtual machine on Google Cloud. Create a VM, connect through SSH, create a user with administrator access, and practise Linux commands. Then install Docker and run a simple container. Week 6 builds on these basics with interactive containers, Dockerfiles, and a containerized FastAPI app.
 
 ## Learning route
 
@@ -10,9 +10,10 @@ Move from local development to a Linux virtual machine on Google Cloud. Create a
 | 1 | [Part 1 — Create your first VM](lab/part-1.md) | Create and check `lab-5` using the required resources. |
 | 2 | [Part 2 — SSH, users, and sudo](lab/part-2.md) | Create `student` once and switch to it whenever you reconnect. |
 | 3 | [Part 3 — Linux basics](lab/part-3.md) | Navigate, manage files, install an editor, and edit text. |
-| 4 | [Exercise 1 — Create a VM independently](lab/exercise-1.md) | Build a second VM and configure its `case` user. |
-| 5 | [Exercise 2 — Files, folders, and pico](lab/exercise-2.md) | Apply your Linux skills, then clean up. |
-| 6 | [Research homework — Cloud users and sudo](homework/homework-2.md) | Explain why administrator access needs care. |
+| 4 | [Part 4 — Docker basics: install and run a container](lab/part-4.md) | Install Docker on `lab-5`, run `hello-world`, and distinguish images from containers. |
+| 5 | [Exercise 1 — Create a VM independently](lab/exercise-1.md) | Build a second VM and configure its `case` user. |
+| 6 | [Exercise 2 — Files, folders, and pico](lab/exercise-2.md) | Apply your Linux skills, then clean up. |
+| 7 | [Research homework — Cloud users and sudo](homework/homework-2.md) | Explain why administrator access needs care. |
 
 Use the [Linux command reference](lab/linux-command-reference.md) during the tutorials and exercises. It includes command purposes, examples, and a few optional next steps.
 

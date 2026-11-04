@@ -1,6 +1,6 @@
 # Part 3 — Linux basics
 
-Previous: [SSH, users, and sudo](part-2.md) · [Week 5 overview](../README.md) · Next: [Exercise 1](exercise-1.md)
+Previous: [SSH, users, and sudo](part-2.md) · [Week 5 overview](../README.md) · Next: [Docker basics](part-4.md)
 
 Work inside the SSH session **connected to `lab-5` using its SSH button or the optional Cloud Shell route**, as `student`. Check `hostname -s` first: it must show `lab-5`, not a Cloud Shell host. After reconnecting, [switch to the existing user first](part-2.md#5-reconnect-using-the-existing-user).
 
@@ -197,7 +197,7 @@ Use the [Linux command reference](linux-command-reference.md) for every command 
 - [ ] Check that your files belong to `student`.
 - [ ] Copy and rename a file, then remove only its backup.
 
-Save your work and **stop `lab-5` before moving to the separate exercise VM**; it does not need to run during Exercises 1 and 2. Keep its disk and user for Week 6. Continue to [Exercise 1 — Create a VM independently](exercise-1.md).
+Save your work and continue on `lab-5` to [Part 4 — Docker basics: install and run a container](part-4.md). After Part 4, stop `lab-5` before moving to the separate exercise VM. Keep its disk, user, and Docker installation for Week 6.
 
 > [!TIP]
 > **Pausing here? Save credit by stopping your VM.** Save any open files, then open **Compute Engine → VM instances** in your lab project, select only `lab-5`, choose **Stop**, and wait for **Stopped**. Closing SSH or the browser does not stop the VM. When you return, choose **Start/Resume** (or **Start**), wait for it to run, and reconnect with **SSH**. [Switch to the existing `student` user and verify your session](part-2.md#5-reconnect-using-the-existing-user); do not create the user again. Stopping preserves the disk and saved work; retained storage can still incur charges. **Do not delete the main VM or its boot disk**, which you need for Week 6.
