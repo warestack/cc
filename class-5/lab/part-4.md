@@ -56,13 +56,21 @@ sudo usermod -aG docker "$USER"
 > [!WARNING]
 > Membership of the `docker` group grants root-level control of this VM. Treat it like administrator access. See [Docker's Linux post-installation guidance](https://docs.docker.com/engine/install/linux-postinstall/).
 
-Start a fresh login shell so it picks up the new group membership:
+Refresh the login session so it picks up the new group membership. If you are in the `student` shell opened in Part 2, run `exit` **once** to return to the initial SSH account on `lab-5`:
+
+```bash
+exit
+whoami
+hostname -s
+```
+
+The username should now be your initial SSH account and the hostname should still be `lab-5`. If you are already at that initial account, skip `exit`; do not disconnect SSH. From there, switch back to the existing lab user:
 
 ```bash
 su - student
 ```
 
-Enter the existing `student` password when asked; no characters appear as you type. Then check:
+Enter the existing `student` password when asked; no characters appear as you type. This replaces the old lab-user shell rather than nesting another `student` shell inside it. Then check:
 
 ```bash
 whoami

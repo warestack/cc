@@ -1,76 +1,92 @@
-### Week 6 Part 1: Continue with Docker Containers
+# Week 6 Part 1 — Continue with Docker containers
 
-Build on [Week 5's Docker basics](../../class-5/lab/part-4.md). You should already have Docker installed on `lab-5` and have run the `hello-world` container. This week, explore an interactive container before packaging FastAPI.
+Previous: [Week 5 Docker basics](../../class-5/lab/part-4.md) · [Week 6 overview](../README.md) · Next: [Containerize FastAPI](part-2.md)
 
-#### What You Will Learn
+In Week 5, you installed Docker on `lab-5`, ran `hello-world`, and compared images with containers. This week, start with an interactive container, then package a FastAPI app. There is no need to reinstall Docker or create the `student` user again.
 
-- How to check Docker after restarting your VM.
-- How to pull an image and open an interactive container shell.
-- How to restart an existing container and remove it when finished.
+## 1. Reconnect and check the VM
 
-#### Part A: Reconnect and Check Docker
+1. Open **Compute Engine → VM instances** in your module project and start the existing `lab-5` VM.
+2. Record its **current external IP**. Its ephemeral IP can change after a stop/start.
+3. Check that **Allow HTTP traffic** is still enabled as in [Week 5 Part 1](../../class-5/lab/part-1.md#2-configure-the-vm). Later tutorials publish the API on VM port `80`; no new database port is needed.
+4. Connect using the VM row's **SSH** button and [switch to the existing `student` user](../../class-5/lab/part-2.md#5-reconnect-using-the-existing-user). Cloud Shell is an [optional connection route](../../class-5/lab/part-2.md#optional--connect-through-cloud-shell); it is a separate environment until SSH connects to your VM.
 
-Start `lab-5` and connect using its **SSH** button. Cloud Shell is an [optional alternative](../../class-5/lab/part-2.md#optional--connect-through-cloud-shell). [Switch to the existing `student` user](../../class-5/lab/part-2.md#5-reconnect-using-the-existing-user); do not create the user again.
+Run these commands in the **VM's SSH terminal**:
 
 ```bash
 hostname -s
 whoami
+id -nG
 docker --version
 docker ps
 ```
 
-Expect `lab-5`, `student`, a Docker version, and a container table, which may be empty. `docker ps` must work without sudo; displaying the version alone does not verify service access.
+Expect `lab-5`, `student`, a group list containing `docker`, a Docker version, and a container table, which may be empty. `docker ps` must work without sudo; the version command alone does not verify access to the Docker service.
 
-If you missed the introduction or Docker is unavailable, complete [Week 5 Part 4](../../class-5/lab/part-4.md) through its checkpoint, then return here. Keep the VM running while continuing to Part B.
+If Docker is missing or permission checks fail, complete the checks in [Week 5 Part 4](../../class-5/lab/part-4.md#4-give-your-lab-user-access). Refresh your login session after a group change. If Docker cannot connect to its service, inspect `sudo systemctl status docker`; press `q` to leave its pager. Keep working on `lab-5` as `student`.
 
-#### Part B: Run an Ubuntu Container
+## 2. Pull and run an Ubuntu container
 
-1. Pull the Ubuntu image:
+Pull a tagged image from Docker Hub:
 
 ```bash
 docker pull ubuntu:24.04
 ```
 
-2. Run an interactive Ubuntu container:
+`ubuntu` is the image repository and `24.04` is its tag. Pulling this public image does not require a Docker Hub account. An image is the template; the next command creates a container from it:
 
 ```bash
 docker run -it --name mini-ubuntu ubuntu:24.04 bash
 ```
 
-You are now inside the container, not in your VM shell. `-it` provides an interactive terminal, `--name` gives the container a name, and `bash` starts its shell. The `24.04` tag selects the Ubuntu release.
-
-If the name is already in use from an earlier attempt, inspect `docker ps -a` and reuse the existing container with `docker start -ai mini-ubuntu` instead of creating another one.
-
-3. Run:
+`-it` provides an interactive terminal, `--name` names the container, and `bash` starts its shell. You are now **inside the container**. Run:
 
 ```bash
 ls
+cat /etc/os-release
 ```
 
-4. Exit the container:
+The container has its own filesystem and processes but shares the VM's Linux kernel. Do not install the host's Docker service or create the lab user inside this container.
+
+If `mini-ubuntu` already exists from an earlier attempt, inspect `docker ps -a` and reuse your stopped practice container with `docker start -ai mini-ubuntu` instead of creating another one.
+
+## 3. Exit, restart, and clean up
+
+Leave the container shell:
 
 ```bash
 exit
 ```
 
-5. Check the container:
+This stops the container because its main process, Bash, has finished. It returns you to the VM shell; it does not stop `lab-5`. Check the stopped container:
 
 ```bash
+hostname -s
+whoami
 docker ps -a
 ```
 
-6. Start it again:
+Expect to be back on `lab-5` as `student`. Start the **same** stopped container again:
 
 ```bash
 docker start -ai mini-ubuntu
 ```
 
-The `-ai` options attach your terminal and allow input, returning you to the same container shell. Run `exit` again to return to `lab-5` and stop the container.
-
-7. Remove the stopped practice container:
+`-a` attaches its output and `-i` allows keyboard input. Run `exit` again, then remove only your stopped practice container:
 
 ```bash
 docker rm mini-ubuntu
+docker ps -a
+cd ~
 ```
 
-Part 1 is complete. Continue to [Part 2](part-2.md).
+The `ubuntu:24.04` image remains available. `docker run` creates a new container; `docker start` restarts an existing one.
+
+### Checkpoint
+
+- [ ] You are `student` on `lab-5` and `docker ps` works without sudo.
+- [ ] You recorded the current external IP and checked the existing HTTP setting.
+- [ ] You entered an Ubuntu container, exited it, and restarted the same container.
+- [ ] You removed `mini-ubuntu` and returned to the VM shell.
+
+Continue to [Part 2 — Containerize a FastAPI app](part-2.md). Keep the VM running while you continue. If pausing, stop `lab-5` in the Cloud Console and keep its disk and saved work; closing SSH alone does not stop it.

@@ -76,6 +76,8 @@ Use configuration to select the database location and JWT secret. The SQLite dat
 
 > **Clarification:** Both VM and GKE demonstrations are required. Use a volume or bind mount for SQLite on the VM and a PersistentVolumeClaim on GKE. Exclude databases and real secrets from the image.
 
+For guided practice, use Week 6's [FastAPI container tutorial](../class-6/lab/part-2.md), [SQLite and Docker tutorial](../class-6/lab/sqlite-and-docker.md) and [Docker Hub tutorial](../class-6/lab/docker-hub.md), followed by the [independent verification exercise](../class-6/lab/part-3.md). These use a practice Courses API to teach packaging, configuration, registry identity and persistence; apply the concepts to your own Piazza implementation under this assignment's requirements. Week 3's [testing activity](../class-3/lab/weekend-activity.md) also demonstrates isolated SQLite tests and reopening an application against the same database file.
+
 ## Kubernetes deployment requirements
 
 Deploy Piazza on **Google Kubernetes Engine** using:

@@ -1,212 +1,98 @@
-### Week 6 Part 3: Docker Exercise
+### Week 6 Part 3: Independent Docker Exercise
 
-In this exercise, you will containerize a small FastAPI API from zero.
+Use the app you built in [SQLite and Docker](sqlite-and-docker.md) and published in [Docker Hub](docker-hub.md). Spend about 20 minutes checking it independently. Work in your existing `week6-fastapi-docker` project on `lab-5`; keep the database volume from the tutorials.
 
-Use Part 1 and Part 2 if you struggle.
+Your goal is to show that the published image runs correctly and that a record created through the API survives replacing its container.
 
-#### Task
+#### Task 1: Identify What Is Running
 
-Create a new project folder:
+Check the running `courses-api` container, its image reference and the volume mounted at `/data`. Record your Docker Hub repository link, explicit version tag and full `repository@sha256:...` reference. Use the digest reported by your push or pull and listed in `RepoDigests`, rather than only the local image ID.
 
-```text
-week6-courses-container
-```
-
-Create these files:
-
-```text
-requirements.txt
-main.py
-Dockerfile
-```
-
-#### Starter Files
-
-Your `requirements.txt` should contain:
-
-```text
-fastapi==0.141.1
-uvicorn==0.52.4
-```
-
-This installs the same FastAPI and Uvicorn versions used in the earlier labs.
-
-Your `main.py` can start with:
-
-```python
-from fastapi import FastAPI, HTTPException
-
-app = FastAPI()
-
-courses = {
-    "c1": {
-        "title": "Cloud Computing",
-        "level": "Year 2"
-    },
-    "c2": {
-        "title": "Databases",
-        "level": "Year 2"
-    }
-}
-
-
-@app.get("/")
-def home():
-    return {"message": "Courses API is running inside Docker"}
-
-
-@app.get("/courses")
-def get_courses():
-    return courses
-
-
-@app.get("/courses/{course_id}")
-def get_course(course_id: str):
-    course = courses.get(course_id)
-
-    if course is None:
-        raise HTTPException(status_code=404, detail="Course not found")
-
-    return course
-```
-
-This code creates a small FastAPI API.
-
-- `courses` is temporary in-memory data.
-- `GET /` checks that the API is running.
-- `GET /courses` returns all courses.
-- `GET /courses/{course_id}` returns one course from the dictionary.
-- `HTTPException` returns a clear `404` response when the course ID is unknown.
-
-Your `Dockerfile` can start with:
-
-```dockerfile
-FROM python:3.12-slim
-
-WORKDIR /app
-
-COPY requirements.txt .
-
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
-
-EXPOSE 8000
-
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-```
-
-This Dockerfile packages the FastAPI app.
-
-- It starts from a Python image.
-- It installs the packages from `requirements.txt`.
-- It copies your API code into the image.
-- It starts Uvicorn when the container runs.
-
-#### API Requirements
-
-Your FastAPI app should have these routes:
-
-```text
-GET /
-GET /courses
-GET /courses/{course_id}
-```
-
-Use this data:
-
-```python
-courses = {
-    "c1": {
-        "title": "Cloud Computing",
-        "level": "Year 2"
-    },
-    "c2": {
-        "title": "Databases",
-        "level": "Year 2"
-    }
-}
-```
-
-If a course does not exist, return:
-
-```json
-{"detail":"Course not found"}
-```
-
-with status code `404`.
+The expected image reference is `USERNAME/week6-courses-api:1`, with your Docker Hub username substituted. The named volume is `week6-courses-data`, and the runtime database URL is `sqlite:////data/courses.db`.
 
 <details>
-<summary>Which FastAPI class can return a `404` error?</summary>
+<summary>Hint: Which commands help identify the container and its storage?</summary>
 
-```python
-HTTPException
-```
+Use `docker ps`, `docker inspect courses-api`, `docker volume inspect week6-courses-data` and the image-inspection command from the Docker Hub tutorial. The container's `Mounts` section should show the named volume mounted at `/data`.
 
 </details>
 
-#### Docker Requirements
+#### Task 2: Test Successful and Rejected Requests
 
-Your Docker image should be called:
+Use Postman or Swagger UI at `http://YOUR_VM_EXTERNAL_IP/docs`. Use `http` and your VM's current external IP.
 
-```text
-week6-courses-api:1
-```
+1. Request `GET /health` and `GET /courses`; expect `200`.
+2. Create a course with `POST /courses`, choosing a course code that is not already present. Supply `code`, `title` and `lecturer` with valid lengths, as in Week 3. Expect `201`.
+3. Save the full returned JSON and its generated integer `id`. Retrieve that exact ID with `GET /courses/{course_id}`; expect `200` and matching values.
+4. Submit the same course code again; expect `409`, and check that no extra course was created.
+5. Send a course with a one-character `code` and otherwise valid fields; expect `422`.
+6. Request a course ID that does not exist; expect `404`.
 
-Your container should be called:
-
-```text
-courses-api
-```
-
-Run the container so the API is available on VM port `80`.
+Choose a different course code if you repeat the exercise. Do not assume that the new record's ID is `1`.
 
 <details>
-<summary>Which Docker option maps a VM port to a container port?</summary>
+<summary>Hint: What should the successful course response contain?</summary>
 
-```bash
--p
-```
+It should contain the server-generated integer `id` plus the `code`, `title` and `lecturer` you submitted. Test a record you created yourself; built-in or seeded data does not prove that your new write survived.
 
 </details>
 
-#### Required Tests
+#### Task 3: Replace the Container and Check the Same Record
 
-Test these URLs in your browser:
+1. Capture the successful retrieval of your new course, including its ID and fields.
+2. Stop and remove `courses-api`. Keep `week6-courses-data`.
+3. Create a replacement container from your versioned Docker Hub image, publishing VM port `80` to container port `8000`. Pass the database configuration and mount the same named volume at `/data`.
+4. Check the container and logs, then retrieve the saved course ID again. Expect `200` and the same JSON values.
+5. Confirm that the replacement is a new container using the same volume. Capture the before-and-after requests, results and container identities.
 
-```text
-http://YOUR_VM_EXTERNAL_IP/
-http://YOUR_VM_EXTERNAL_IP/courses
-http://YOUR_VM_EXTERNAL_IP/courses/c1
-http://YOUR_VM_EXTERNAL_IP/courses/c10
-```
+Restarting the same container is a useful operational check, but it does not demonstrate replacement. Complete the stop, remove and new `docker run` sequence.
 
-Then test the same URLs in Postman.
+<details>
+<summary>Hint: Which settings must the replacement keep?</summary>
+
+Keep `DATABASE_URL=sqlite:////data/courses.db`, the named-volume mount `--mount type=volume,src=week6-courses-data,dst=/data`, and `-p 80:8000`. Use your `.env` file and the versioned image reference as taught in the Docker Hub tutorial. Inspect `docker ps -a` and `docker logs courses-api` if the API does not respond.
+
+</details>
+
+#### Optional Extension: A Visible Version 2
+
+Change the response from `GET /` so that it visibly identifies version 2. Build and publish `USERNAME/week6-courses-api:2`, recording its digest. The Docker Hub tutorial ended with `docker logout`, so [sign back in with your token](docker-hub.md#3-sign-in-from-the-vm-using-a-token) before pushing and run `docker logout` again afterward. Replace the version-1 container with version 2 using the same database volume. Verify both the changed home response and your unchanged stored course.
+
+Keep `:1` as your first version rather than overwriting it. This is practice for the assignment's later versioned deployment update; Kubernetes is covered in a later lab.
+
+#### Checkpoint
+
+Before cleanup, make sure you can show:
+
+- A versioned Docker Hub image reference and registry digest.
+- A running container using that image on the VM.
+- Successful creation/retrieval and the `409`, `422` and `404` responses.
+- The exact newly created record before and after container removal and replacement.
+- A named volume mounted at the database location.
+- A short explanation of why the database is kept outside the image and container's disposable filesystem.
 
 #### Cleanup
 
-When you finish, stop and remove the container.
+Collect the evidence needed for [Homework 1](../homework/homework-1.md) before removing anything.
 
-Also check that no unnecessary containers are still running:
+Stop and remove only your practice API container:
 
 ```bash
+docker stop courses-api
+docker rm courses-api
 docker ps
 ```
 
-When you finish the lab, go back to the GCP dashboard and stop your VM.
+If a container from an earlier part is still running, stop and remove that specific practice container too. Keep `week6-courses-data` if you need to finish the homework or repeat the persistence check.
 
-You can switch it on again when you need it.
+When you have collected all evidence and no longer need the practice data, you may delete this specific volume:
 
-#### Checklist
+```bash
+docker volume rm week6-courses-data
+```
 
-Before you finish, make sure:
+That separate command permanently deletes the practice database. Do not remove the volume before the replacement check, and do not run a blanket cleanup against other projects.
 
-- the Docker image builds successfully
-- the container starts successfully
-- the API works in the browser
-- the API works in Postman
-- unknown course IDs return `404`
-- you can explain the difference between an image and a container
-- your VM is stopped when you no longer need it
+Finally, stop `lab-5` in the GCP console. Keep the VM and its disk for later labs. Do not delete the VM or disk as part of this lab's cleanup.
 
 Part 3 is complete. Continue to [Homework 1](../homework/homework-1.md).

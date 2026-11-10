@@ -1,6 +1,6 @@
 # Week 5 Homework 2: Cloud and Sudo Research Post
 
-Complete this homework after finishing [Week 5 Lab Parts 1 to 3](../README.md) and [Homework 1](homework-1.md), which points to the two practical exercises.
+Complete this homework after finishing [Week 5 Lab Parts 1 to 4](../README.md) and [Homework 1](homework-1.md), which points to the two practical exercises.
 
 ## Topic
 
