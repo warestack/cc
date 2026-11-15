@@ -23,7 +23,14 @@ docker ps
 
 Expect `lab-5`, `student`, a group list containing `docker`, a Docker version, and a container table, which may be empty. `docker ps` must work without sudo; the version command alone does not verify access to the Docker service.
 
-If Docker is missing or permission checks fail, complete the checks in [Week 5 Part 4](../../class-5/lab/part-4.md#4-give-your-lab-user-access). Refresh your login session after a group change. If Docker cannot connect to its service, inspect `sudo systemctl status docker`; press `q` to leave its pager. Keep working on `lab-5` as `student`.
+<details>
+<summary>🟨 Common pitfalls</summary>
+
+- **The hostname or user is different.** Open SSH from the `lab-5` row in Compute Engine, then run `su - student`. Use that session for the remaining commands.
+- **`docker ps` reports permission denied.** Check whether `id -nG` lists `docker`. Follow the [Week 5 Docker access steps](../../class-5/lab/part-4.md#4-give-your-lab-user-access), then open a fresh `student` login to pick up group membership.
+- **Docker cannot connect to its daemon.** Run `sudo systemctl status docker --no-pager`. If the service is installed but inactive, start it with `sudo systemctl start docker`. If `docker` is missing, follow the [Week 5 installation steps](../../class-5/lab/part-4.md#3-install-and-start-docker).
+
+</details>
 
 ## 2. Pull and run an Ubuntu container
 
@@ -39,16 +46,26 @@ docker pull ubuntu:24.04
 docker run -it --name mini-ubuntu ubuntu:24.04 bash
 ```
 
-`-it` provides an interactive terminal, `--name` names the container, and `bash` starts its shell. You are now **inside the container**. Run:
+`-it` provides an interactive terminal, `--name` names the container, and `bash` starts its shell. A prompt such as `root@31981a723490:/#` shows that you are **inside the container**. Run:
 
 ```bash
 ls
 cat /etc/os-release
 ```
 
-The container has its own filesystem and processes but shares the VM's Linux kernel. Do not install the host's Docker service or create the lab user inside this container.
+![Interactive Ubuntu shell showing its prompt, files, and Ubuntu release](../assets/ubuntu-container.png)
 
-If `mini-ubuntu` already exists from an earlier attempt, inspect `docker ps -a` and reuse your stopped practice container with `docker start -ai mini-ubuntu` instead of creating another one.
+*The shell prompt includes the container ID. The release file shows Ubuntu 24.04.*
+
+The container has its own filesystem and processes but shares the VM's Linux kernel. Run the Docker service and lab user commands on the VM.
+
+<details>
+<summary>🟨 Common pitfalls</summary>
+
+- **The name `mini-ubuntu` is already in use.** Check `docker ps -a`. Reopen your stopped container with `docker start -ai mini-ubuntu`, or reconnect to the shell of your running container with `docker attach mini-ubuntu`.
+- **The container disappears from `docker ps` after `exit`.** Use `docker ps -a` to see the stopped container and its exit status.
+
+</details>
 
 ## 3. Exit, restart, and clean up
 

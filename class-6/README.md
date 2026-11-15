@@ -4,7 +4,7 @@ Build on [Week 5's Docker introduction](../class-5/lab/part-4.md) to package Fas
 
 #### Two-Hour Lab Route
 
-Complete the work in this order. The SQLite and Docker Hub tutorials come before the independent exercise at the existing Part 3 link.
+Follow the tutorials in the order shown, then use the independent exercise to test the published API.
 
 | Activity | Time | Outcome |
 | --- | ---: | --- |
@@ -30,7 +30,9 @@ Use the same `week6-fastapi-docker` project throughout the guided tutorials. The
 
 These are practice tasks using a Courses API. They prepare you for the assignment's [Docker, Docker Hub and persistent-storage requirements](../assignment/03-testing-and-deployment.md#containerisation-requirements). Follow the assignment brief separately for Piazza, authentication, testing and later GKE deployment. This lab and its homework add no assignment marks.
 
-Week 7 introduces Kubernetes. For the assignment's GKE deployment, Kubernetes will pull a versioned image from the registry, supply runtime configuration, and mount persistent storage at the database path. A PersistentVolumeClaim takes the place of this VM's local named volume; the data in `week6-courses-data` does not automatically move to GKE. The same configuration approach supplies the coursework's JWT secret, which must stay consistent across application replacement. Authentication remains covered by Week 4 and the assignment brief.
+[Week 7 introduces Kubernetes](../class-7/README.md) with a small stateless FastAPI app supplied in the course repo. You build it from Cloud Shell and deploy it to GKE. Keep `lab-5` stopped with its disk so you can use it again in Week 8.
+
+For the assignment's GKE deployment, Kubernetes will pull a versioned image from the registry, supply runtime configuration, and mount persistent storage at the database path. A PersistentVolumeClaim takes the place of this VM's local named volume. The data in `week6-courses-data` stays on the VM. The same configuration approach supplies the coursework's JWT secret, which must stay consistent across application replacement. Authentication remains covered by Week 4 and the assignment brief.
 
 > [!WARNING]
 >

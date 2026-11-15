@@ -138,7 +138,7 @@ SQLAlchemy maps `Course` to a table, while Pydantic checks request bodies and sh
 
 ## 4. Configure the database path and rebuild
 
-Create `pico .env.example` containing:
+Open `.env.example` with `pico .env.example` and add:
 
 ```dotenv
 DATABASE_URL=sqlite:////data/courses.db
@@ -146,17 +146,18 @@ DATABASE_URL=sqlite:////data/courses.db
 
 Four slashes select an **absolute Linux path**, `/data/courses.db`. The three-slash local default in the code uses `courses.db` relative to the current working directory. See [SQLAlchemy's SQLite connection strings](https://docs.sqlalchemy.org/en/20/dialects/sqlite.html#connect-strings).
 
-Make a working configuration file:
+Make a working configuration file. If `cp` asks to overwrite an existing `.env`, answer `n` to keep it, then check that it has the database setting shown above.
 
 ```bash
-cp .env.example .env
+cp -i .env.example .env
+grep '^DATABASE_URL=' .env
 ```
 
-If you are repeating the tutorial and `.env` already exists, inspect it before replacing it. This lab setting contains no secret. In coursework, keep real secrets in your private runtime configuration and use placeholders in examples. `--env-file` makes Docker supply these settings; the Python code does not automatically load `.env`.
+The output should be `DATABASE_URL=sqlite:////data/courses.db`. If needed, edit `.env` with `pico .env` before continuing. In coursework, keep real secrets in your private runtime configuration and use placeholders in examples. `--env-file` makes Docker supply the settings from `.env` when it creates a container.
 
 Keep the `.dockerignore` from Part 2. It must exclude `.env`, database files and their sidecars, and runtime data. Allow `.env.example` in Git as the documented example. It is not used to bake settings into this image.
 
-Replace `pico Dockerfile` with:
+Open `Dockerfile` with `pico Dockerfile` and replace its contents with:
 
 ```dockerfile
 FROM python:3.12-slim
@@ -179,16 +180,16 @@ docker build -t week6-courses-api:1 .
 
 ## 5. Test storage without a volume
 
-Start with an ordinary container filesystem:
+Start with an ordinary container filesystem. If you have an earlier `courses-api` container, check `docker ps -a`, stop it if it is running, and remove only that container. Keep any existing named volume for Step 6.
 
 ```bash
 docker run -d --name courses-api -p 80:8000 --env-file .env week6-courses-api:1
 docker ps -a
 docker logs courses-api
-curl -i http://127.0.0.1/health
+curl --retry 10 --retry-all-errors --retry-delay 1 -i http://127.0.0.1/health
 ```
 
-Wait for Uvicorn's startup message before sending requests; if a request runs too early, retry it after checking the logs. Create a temporary course:
+Docker can publish the port before Uvicorn is ready. After each start, wait for the health check to return `200 OK` before sending API requests. If health still fails after the retries, inspect `docker logs courses-api`. Create a temporary course:
 
 ```bash
 curl -i -X POST http://127.0.0.1/courses \
@@ -203,7 +204,7 @@ Expect `201 Created`, a generated integer `id`, and the saved row in the list. N
 docker stop courses-api
 docker start courses-api
 docker logs courses-api
-curl -i http://127.0.0.1/courses
+curl --retry 10 --retry-all-errors --retry-delay 1 -i http://127.0.0.1/courses
 ```
 
 After startup, the row is still there. Stopping does not remove this container's writable filesystem. Record the result, then remove the container and create a replacement without a mount:
@@ -213,7 +214,7 @@ docker stop courses-api
 docker rm courses-api
 docker run -d --name courses-api -p 80:8000 --env-file .env week6-courses-api:1
 docker logs courses-api
-curl -i http://127.0.0.1/courses
+curl --retry 10 --retry-all-errors --retry-delay 1 -i http://127.0.0.1/courses
 ```
 
 After startup, expect `200 OK` with `[]`: the new container has a new database. The image contains the code, not the record created while the old container was running.
@@ -231,6 +232,7 @@ docker run -d --name courses-api -p 80:8000 --env-file .env \
   --mount type=volume,source=week6-courses-data,target=/data \
   week6-courses-api:1
 docker logs courses-api
+curl --retry 10 --retry-all-errors --retry-delay 1 -i http://127.0.0.1/health
 ```
 
 If the named volume already exists, Docker reuses it and earlier rows can reappear. Choose a new course code for your evidence rather than deleting an existing volume. Wait for startup, then create a course that you want to keep:
@@ -259,10 +261,23 @@ docker run -d --name courses-api -p 80:8000 --env-file .env \
   --mount type=volume,source=week6-courses-data,target=/data \
   week6-courses-api:1
 docker logs courses-api
-curl -i "http://127.0.0.1/courses/$COURSE_ID"
+curl --retry 10 --retry-all-errors --retry-delay 1 -i "http://127.0.0.1/courses/$COURSE_ID"
 ```
 
 After startup, expect the identical row and ID. This is persistence evidence because the container was removed and replaced. A successful restart alone would not distinguish the two storage approaches.
+
+![Terminal shows different container IDs with the same named volume and matching course JSON](../assets/sqlite-volume-replacement.png)
+
+*Both containers mounted `week6-courses-data` at `/data`. The new container returned the same course record.*
+
+<details>
+<summary>🟨 Common pitfalls</summary>
+
+- **The course list is empty after attaching the volume.** Run `docker inspect courses-api --format '{{json .Mounts}}'` and check for the volume name `week6-courses-data` and destination `/data`. Check `grep '^DATABASE_URL=' .env` for the four-slash path. Recreate the container with those settings and keep the existing volume.
+- **The first POST returns `409 Conflict`.** The course code already exists. Pick a new code, retry the POST, and use the ID from the new `201 Created` response for the replacement check.
+- **The URL ends in `/courses/` or the saved request returns `404`.** Run `curl -i http://127.0.0.1/courses` to find the course by its code. Set `COURSE_ID` to the matching numeric ID in this SSH session.
+
+</details>
 
 ## 7. Check successful and rejected requests
 
@@ -277,7 +292,7 @@ curl -i -X POST http://127.0.0.1/courses \
 
 Expect `404 Not Found` for the missing ID and `422 Unprocessable Entity` for the short fields. Confirm `GET /courses` still returns the saved data afterward.
 
-Use Postman on your computer to repeat the checks through `http://YOUR_VM_EXTERNAL_IP`. Use your VM's current external IP and **HTTP**, with no `:8000` suffix. Browser users can inspect `http://YOUR_VM_EXTERNAL_IP/docs`; Postman can send the POST body as raw JSON with `Content-Type: application/json`.
+Use Postman on your computer to repeat the checks through `http://YOUR_VM_EXTERNAL_IP`. Use your VM's current external IP and **HTTP**, with no `:8000` suffix. For a fresh `201`, send the POST with a new course code and save its returned ID. In Postman, choose **Body → raw → JSON** for the POST body. In a browser, use **Try it out** on `http://YOUR_VM_EXTERNAL_IP/docs`.
 
 ### Checkpoint and next step
 

@@ -1,4 +1,18 @@
-# Week 6 reference screenshots
+# Week 6 screenshots
+
+## Lab verification
+
+These screenshots show the lab running on a disposable Ubuntu Compute Engine VM. The Docker Hub demonstration used a temporary private repository.
+
+| Screenshot | What to look for |
+| --- | --- |
+| `ubuntu-container.png` | The Bash prompt and Ubuntu release inside `mini-ubuntu`. |
+| `fastapi-container-health.png` | The published port and successful health check on the VM. |
+| `fastapi-swagger.png` | The two routes listed in the running app's Swagger UI. |
+| `sqlite-volume-replacement.png` | Two container IDs, one named volume, and the same course record. |
+| `docker-hub-push-pull.png` | The matching push and pull digests for tag `1`. |
+
+## Docker Hub reference images
 
 These PNG files were extracted unchanged from the user-supplied **Cloud Computing 2026-2027 - Lab 02.docx**. They illustrate Docker Hub controls in [Tutorial 4](../lab/docker-hub.md); they are reference UI, not screenshots of a completed Week 6 exercise. The source DOCX was not modified.
 

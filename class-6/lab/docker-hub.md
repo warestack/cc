@@ -31,11 +31,11 @@ The **Docker Official Image** badge identifies [Docker's curated image collectio
 
 *Reference location of the account controls on Docker Hub.*
 
-3. Open your repositories and select **Create repository**.
+3. Open **My Hub → Repositories** and select **Create repository**.
 
 ![Reference Create repository button](../assets/docker-hub-create-repository-reference.png)
 
-4. Select your personal namespace, enter **`week6-courses-api`** as the repository name, choose **Public**, then select **Create**. Public means others can pull this image. Publish only the teaching application; keep credentials and live database files out of the image, using the `.dockerignore` from Part 2.
+4. Select your personal namespace, enter **`week6-courses-api`** as the repository name, choose **Public**, then select **Create**. If you already created this repository for the lab, open it from your repository list. Public means others can pull this image. Publish only the teaching application and keep the `.dockerignore` from Part 2.
 
 These steps follow [Docker's repository walkthrough](https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-registry/#create-your-first-repository). The reference screenshots illustrate the controls, not the exact current page layout.
 
@@ -76,7 +76,7 @@ docker push "$PUBLISHED_IMAGE"
 
 Wait for the successful push and its `digest: sha256:...` line. Save the complete image reference and digest in your lab notes. The push uploads image content; it does not upload `.env`, running-container changes, or the named volume's database.
 
-Refresh your repository in Docker Hub and open its **Tags** view. Confirm that **`1`** appears in **your** `week6-courses-api` repository.
+Refresh your repository in Docker Hub and open the [**Tags** tab](https://docs.docker.com/docker-hub/repos/manage/hub-images/tags/#view-repository-tags). Confirm that **`1`** appears in **your** `week6-courses-api` repository.
 
 ![Reference Docker Hub repository view showing published image tags](../assets/docker-hub-tags-reference.png)
 
@@ -84,7 +84,9 @@ Refresh your repository in Docker Hub and open its **Tags** view. Confirm that *
 
 ## 5. Pull the published image and replace the container
 
-Before replacing anything, confirm that the saved record is still present. If you opened a new SSH shell, return to the project and restore all three shell variables below. Replace `your-docker-id` with your Docker ID and `1` with the **actual saved course ID from your notes**. Variables set in a previous shell do not carry over; the registry login remains saved until you log out.
+If you paused after the SQLite tutorial, check `docker ps -a` and run `docker start courses-api` if it shows `Exited`. If you previously removed the container but kept its named volume, use the `docker run` command in the [SQLite named volume step](sqlite-and-docker.md#6-store-the-database-in-a-named-volume) to recreate it. Wait for `curl -i http://127.0.0.1/health` to return `200 OK`.
+
+Now confirm that the saved record is still present. Replace `your-docker-id` with your Docker ID and `1` with the **actual saved course ID from your notes**. Set these variables in every new SSH shell. Docker keeps its registry login on the VM until you log out.
 
 ```bash
 cd ~/week6-fastapi-docker
@@ -96,11 +98,9 @@ docker inspect courses-api --format '{{json .Mounts}}'
 docker volume inspect week6-courses-data
 ```
 
-Expect your saved row and a mount of `week6-courses-data` at `/data`. If you paused the lab, start `courses-api` and wait for startup before checking. Then remove this container, **keeping the named volume**:
+Expect your saved row and a mount of `week6-courses-data` at `/data`. Pull the published image while the current container is still running:
 
 ```bash
-docker stop courses-api
-docker rm courses-api
 docker pull "$PUBLISHED_IMAGE"
 ```
 
@@ -111,17 +111,23 @@ docker image inspect "$PUBLISHED_IMAGE" \
   --format '{{range .RepoDigests}}{{println .}}{{end}}'
 ```
 
-The output includes a reference such as `your-docker-id/week6-courses-api@sha256:...`. This **repository digest** identifies the published image manifest (or image index). For deployment evidence, record this full reference from `RepoDigests`, rather than only the local image ID printed earlier. These fields serve different purposes; do not rely on their hash values being different, because some Docker engines can show matching values. Tags can be reassigned; a digest identifies fixed content. A digest reference can replace `name:tag` when pulling or running that content. See [pulling by digest](https://docs.docker.com/reference/cli/docker/image/pull/#pull-an-image-by-digest-immutable-identifier).
+The output may contain more than one reference. For your evidence, record the full **repository digest** whose prefix is your Docker Hub namespace and repository, such as `your-docker-id/week6-courses-api@sha256:...`. The digest identifies the published image manifest (or image index). A digest reference can replace `name:tag` when pulling or running that content. [Pulling by digest](https://docs.docker.com/reference/cli/docker/image/pull/#pull-an-image-by-digest-immutable-identifier)
 
-Create a replacement from the Docker Hub reference, with the same runtime configuration and volume:
+![Docker Hub push and pull reporting the same SHA-256 repository digest](../assets/docker-hub-push-pull.png)
+
+*The verification run used a temporary private repository. In your lab, look for the matching digest for your own `week6-courses-api:1` tag.*
+
+After the pull succeeds, stop and remove the current container. Create its replacement from the Docker Hub reference with the same runtime configuration and named volume.
 
 ```bash
+docker stop courses-api
+docker rm courses-api
 docker run -d --name courses-api -p 80:8000 --env-file .env \
   --mount type=volume,source=week6-courses-data,target=/data \
   "$PUBLISHED_IMAGE"
 docker ps -a
 docker logs courses-api
-curl -i http://127.0.0.1/health
+curl --retry 10 --retry-all-errors --retry-delay 1 -i http://127.0.0.1/health
 curl -i "http://127.0.0.1/courses/$COURSE_ID"
 ```
 
@@ -131,16 +137,15 @@ The record survives because this replacement uses the same volume **on the same 
 
 ## 6. Troubleshoot and finish
 
-| Symptom | Check |
-| --- | --- |
-| Push denied / requested access denied | Use your personal Docker ID namespace, confirm repository name `week6-courses-api`, and check that the token is active with write permission. Log in again as that Docker ID. |
-| Login fails | Use the Docker ID, not the email address, and paste the token at the hidden prompt. Check its expiry and permissions in Docker Home. |
-| `No such image` | Confirm Tutorial 3's build completed and the source is exactly `week6-courses-api:1`. |
-| Pull says `manifest unknown` | Confirm the push succeeded and tag `1` appears in your repository; spelling and tag must match. |
-| Pull/push times out or reports a network/rate limit error | Read the error, check VM internet access and Docker Hub's service status, and sign in if requested. Retry after any reported limit resets. |
-| Container name or port already in use | Inspect `docker ps -a`. Stop/remove the earlier lab container using that name or port before running its replacement. |
-| Container exits / API request fails | Inspect `docker logs courses-api`; check `.env`, the `/data` mount, and startup completion. On your computer, use the current VM external IP and HTTP port 80. |
-| Course list is empty | Check `DATABASE_URL=sqlite:////data/courses.db` and that the same `week6-courses-data` volume is mounted at `/data`. Pulling an image does not restore a database. |
+<details>
+<summary>🟨 Common pitfalls</summary>
+
+- **Login fails or a push is denied.** Use your Docker ID as the username and paste the token at Docker's hidden password prompt. Check its expiry, its write permission, and the namespace in `printf '%s\n' "$PUBLISHED_IMAGE"`.
+- **Docker reports `No such image` while tagging.** Run `docker image ls week6-courses-api:1`. If the tag is missing, return to the [SQLite build step](sqlite-and-docker.md#4-configure-the-database-path-and-rebuild).
+- **The pull reports `manifest unknown`.** Check the exact repository and tag in Docker Hub and confirm that the previous push reported a digest. If you see a rate-limit message, follow the retry interval in the error.
+- **The replacement returns an empty list or exits.** Run `docker ps -a` and `docker logs courses-api`. Check the [SQLite volume mount](sqlite-and-docker.md#6-store-the-database-in-a-named-volume) and the value of `DATABASE_URL`.
+
+</details>
 
 Log out on the VM when you have finished pushing and pulling:
 
@@ -148,7 +153,7 @@ Log out on the VM when you have finished pushing and pulling:
 docker logout
 ```
 
-Logging out removes the saved registry login; it does not revoke the token, remove the published image, or stop the container. Revoke the lab token in Docker Home when you no longer need it. See [Docker logout](https://docs.docker.com/reference/cli/docker/logout/).
+Logging out clears the VM's saved registry login. If you plan to complete the [version 2 extension](part-3.md#optional-extension-a-visible-version-2), keep the token until you finish. Then revoke it in Docker Home. [Docker logout](https://docs.docker.com/reference/cli/docker/logout/)
 
 ### Checkpoint and next step
 

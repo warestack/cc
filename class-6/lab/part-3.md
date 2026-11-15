@@ -4,6 +4,8 @@ Use the app you built in [SQLite and Docker](sqlite-and-docker.md) and published
 
 Your goal is to show that the published image runs correctly and that a record created through the API survives replacing its container.
 
+If you stopped the VM after the Docker Hub tutorial, reconnect as `student` and use `docker ps -a` to check `courses-api`. If it shows `Exited`, run `docker start courses-api` and wait for a successful health check. Use the current external IP from the VM row for your browser or Postman.
+
 #### Task 1: Identify What Is Running
 
 Check the running `courses-api` container, its image reference and the volume mounted at `/data`. Record your Docker Hub repository link, explicit version tag and full `repository@sha256:...` reference. Use the digest reported by your push or pull and listed in `RepoDigests`, rather than only the local image ID.
@@ -13,13 +15,17 @@ The expected image reference is `USERNAME/week6-courses-api:1`, with your Docker
 <details>
 <summary>Hint: Which commands help identify the container and its storage?</summary>
 
-Use `docker ps`, `docker inspect courses-api`, `docker volume inspect week6-courses-data` and the image-inspection command from the Docker Hub tutorial. The container's `Mounts` section should show the named volume mounted at `/data`.
+Use `docker ps` and the [image-inspection command](docker-hub.md#5-pull-the-published-image-and-replace-the-container) from the Docker Hub tutorial. This command prints the container ID, image reference, and mounts without including environment variables in your screenshot.
+
+```bash
+docker inspect --format '{{.Id}} {{.Config.Image}}{{range .Mounts}} {{.Name}} → {{.Destination}}{{end}}' courses-api
+```
 
 </details>
 
 #### Task 2: Test Successful and Rejected Requests
 
-Use Postman or Swagger UI at `http://YOUR_VM_EXTERNAL_IP/docs`. Use `http` and your VM's current external IP.
+Use Postman or Swagger UI at `http://YOUR_VM_EXTERNAL_IP/docs`. In Swagger UI, open a route, select **Try it out**, and select **Execute** after entering any requested values. In Postman, choose **Body → raw → JSON** for POST requests.
 
 1. Request `GET /health` and `GET /courses`; expect `200`.
 2. Create a course with `POST /courses`, choosing a course code that is not already present. Supply `code`, `title` and `lecturer` with valid lengths, as in Week 3. Expect `201`.
@@ -43,14 +49,23 @@ It should contain the server-generated integer `id` plus the `code`, `title` and
 2. Stop and remove `courses-api`. Keep `week6-courses-data`.
 3. Create a replacement container from your versioned Docker Hub image, publishing VM port `80` to container port `8000`. Pass the database configuration and mount the same named volume at `/data`.
 4. Check the container and logs, then retrieve the saved course ID again. Expect `200` and the same JSON values.
-5. Confirm that the replacement is a new container using the same volume. Capture the before-and-after requests, results and container identities.
+5. Run the same inspection command from Task 1 again. Capture the before-and-after requests, matching records, and different container IDs with the same volume.
 
 Restarting the same container is a useful operational check, but it does not demonstrate replacement. Complete the stop, remove and new `docker run` sequence.
 
 <details>
 <summary>Hint: Which settings must the replacement keep?</summary>
 
-Keep `DATABASE_URL=sqlite:////data/courses.db`, the named-volume mount `--mount type=volume,src=week6-courses-data,dst=/data`, and `-p 80:8000`. Use your `.env` file and the versioned image reference as taught in the Docker Hub tutorial. Inspect `docker ps -a` and `docker logs courses-api` if the API does not respond.
+Keep `DATABASE_URL=sqlite:////data/courses.db`, the named-volume mount `--mount type=volume,src=week6-courses-data,dst=/data`, and `-p 80:8000`. Use your `.env` file and the versioned image reference as taught in the Docker Hub tutorial.
+
+</details>
+
+<details>
+<summary>🟨 Common pitfalls</summary>
+
+- **The API is unreachable after replacement.** Check `docker ps -a` and `docker logs courses-api` on the VM. Then test `curl -i http://127.0.0.1/health` from that SSH terminal to check that the replacement started.
+- **The request returns `422` for the path.** Replace `{course_id}` with the number returned by your `201 Created` response. In Swagger UI, enter that value in the `course_id` field.
+- **You forgot to capture the old container's ID.** Run the Task 1 inspection command on the current container, save the result, and repeat the replacement with the same volume to obtain both IDs.
 
 </details>
 

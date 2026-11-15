@@ -1,551 +1,374 @@
-### Week 9 Lab 1: ZeroMQ Communication Patterns
+# Week 9 Lab 1 — Apache Cassandra with Docker and Python
 
-In this tutorial, you will use Python and ZeroMQ to run simple distributed communication patterns.
+[Week 9 overview](../README.md)
 
-ZeroMQ is a messaging library. It lets programs communicate using sockets without you needing to build all the low-level networking code yourself.
+Cassandra is a distributed database. This lab runs three Cassandra nodes in containers and stores three replicas of each partition. You will query the same data as nodes go down and come back. All three nodes share one VM, so stopping the VM takes down the entire practice cluster.
 
-A socket is a communication endpoint. In this lab, all programs run on the same VM or computer, so we use `localhost` and different ports.
+## 1. Prepare the VM
 
-#### What You Will Learn
+Start your Ubuntu Compute Engine VM and connect through **Compute Engine → VM instances → SSH**. If you are using the Week 5 VM, [switch to the existing `student` user](../../class-5/lab/part-2.md#5-reconnect-using-the-existing-user).
 
-- What sockets are.
-- How separate programs communicate through ports.
-- How ZeroMQ Pair works.
-- How ZeroMQ Request/Reply works.
-- How ZeroMQ Publish/Subscribe works.
-- How ZeroMQ Push/Pull works.
-- How to clean up ports when testing distributed programs.
+For a dedicated VM, use the Week 5 setup steps with Ubuntu 24.04 LTS, an `e2-standard-4` machine, and a boot disk of at least 30 GB. Install Docker and verify that the lab user can run it. [Create the VM](../../class-5/lab/part-1.md#2-configure-the-vm) · [Set up Docker](../../class-5/lab/part-4.md#3-install-and-start-docker).
 
-#### Communication Patterns
-
-#### Pair
-
-![Pair pattern](../images/pair.png)
-
-Pair communication is one-to-one. One program talks directly to one other program.
-
-#### Request/Reply
-
-![Request reply pattern](../images/client-server.png)
-
-Request/Reply is similar to a client-server API. A client sends a request, and the server must send one reply.
-
-#### Publish/Subscribe
-
-![Publish subscribe pattern](../images/ps.png)
-
-Publish/Subscribe lets publishers send messages without knowing exactly which subscribers will receive them.
-
-#### Push/Pull
-
-![Push pull pattern](../images/push-pull.png)
-
-Push/Pull is useful for pipelines. One process pushes work, workers pull it, and another process can collect the results.
-
-#### Part A: Prepare the Project
-
-1. Start your GCP VM from Week 5, or use your own computer.
-
-2. Create a new folder:
+Run these commands on the **VM**, using the SSH terminal:
 
 ```bash
-mkdir week9-zeromq
-cd week9-zeromq
+hostname -s
+docker version --format '{{.Server.Version}}'
+free -h
+df -h /
 ```
 
-3. Create and activate a virtual environment:
+Each Cassandra container has a 2 GiB limit. Check that existing workloads leave enough memory and disk space before starting all three containers. If your Week 5 VM has its original machine type or 10 GB boot disk, resize it or use a dedicated VM. [Change the machine type](https://docs.cloud.google.com/compute/docs/instances/changing-machine-type-of-stopped-instance) · [Increase the boot disk size](https://docs.cloud.google.com/compute/docs/disks/resize-persistent-disk)
+
+![Ubuntu VM terminal showing the Docker version, available memory, and boot disk space](../assets/vm-ready.png)
+
+*The 16 GB test VM shows about 15 GiB of usable memory and 25 GiB of free disk space.*
+
+<details>
+<summary>🟨 Common pitfalls</summary>
+
+- **Docker reports permission denied.** Run `docker ps` to check access and follow [Week 5's Docker access steps](../../class-5/lab/part-4.md#4-give-your-lab-user-access) if needed. Reconnect after adding the lab user to the Docker group.
+- **The VM is too small.** Stop it in Compute Engine before changing its machine type, and keep its existing disk. Restart it and reconnect before continuing.
+- **`hostname -s` shows a different machine.** Go back to the VM row in Compute Engine and open SSH there. Cloud Shell has its own hostname and resources.
+
+</details>
+
+## 2. Start the first node
+
+Create a user-defined Docker network and pull the pinned Docker Official Image. If the network already exists from a previous run, reuse it. If a lab container already exists, use the resume instructions below or [clean up](#7-clean-up) before starting over.
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+docker network inspect week9-cassandra >/dev/null 2>&1 || docker network create week9-cassandra
+CASSANDRA_IMAGE=cassandra:5.0.9
+docker pull "$CASSANDRA_IMAGE"
 ```
 
-On Windows PowerShell:
+Containers on this network can resolve each other by name. The examples leave the Cassandra port inside the Docker network, where the lab's client will connect. No GCP firewall rule is needed. [Cassandra image](https://hub.docker.com/_/cassandra) · [Docker bridge networking](https://docs.docker.com/engine/network/drivers/bridge/)
 
-```powershell
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-```
-
-4. Install ZeroMQ for Python:
+Paste this function in the same VM terminal. It starts a node with the same cluster, datacenter and rack settings each time.
 
 ```bash
-python -m pip install pyzmq
+start_node() {
+  docker run -d --name "$1" --network week9-cassandra --memory 2g \
+    -e CASSANDRA_CLUSTER_NAME=Week9 \
+    -e CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch \
+    -e CASSANDRA_DC=datacenter1 -e CASSANDRA_RACK=rack1 \
+    -e CASSANDRA_SEEDS=week9-c1 \
+    -e MAX_HEAP_SIZE=768M -e HEAP_NEWSIZE=192M \
+    "$CASSANDRA_IMAGE"
+}
 ```
 
-5. Create a `requirements.txt` file:
+Start the seed node. If `week9-c1` already exists, use `docker start week9-c1` when it shows `Exited`, or go to the status checks if it is already running.
 
 ```bash
-python -m pip freeze > requirements.txt
+start_node week9-c1
 ```
 
-6. Install `psmisc` if you are using Ubuntu and need the `fuser` cleanup command:
+`week9-c1` is the **seed**. It gives joining nodes an address through which to discover cluster membership. Each node can coordinate requests once the cluster is ready.
+
+Check the first node. Cassandra can take a few minutes to start. Retry these commands until `cqlsh` prints a row and `nodetool` shows the seed as `UN`. A fresh cluster has one row at this point.
 
 ```bash
-sudo apt update
-sudo apt install -y psmisc
+docker exec week9-c1 cqlsh -e 'SELECT release_version, data_center, cluster_name FROM system.local;'
+docker exec week9-c1 nodetool status
 ```
 
-#### Part B: Pair Pattern
+![First Cassandra node reports version 5.0.9, datacenter1, and UN](../assets/first-node.png)
 
-7. Create `pair_server.py`:
+*The node accepts CQL queries and reports `UN` (Up and Normal).*
+
+## 3. Add two more nodes
+
+Start one follower at a time. Before starting the third node, wait until the seed and the second node are both `UN`. When resuming, use `docker start` for each existing follower that shows `Exited`. If a follower is already running, go to its status check.
 
 ```bash
-pico pair_server.py
+start_node week9-c2
+docker exec week9-c1 nodetool status
 ```
 
-8. Add:
+```bash
+start_node week9-c3
+docker exec week9-c1 nodetool status
+```
+
+Wait until all **three** rows report `UN` in `datacenter1`. `UJ` means Up and Joining. Check the same cluster from another node:
+
+```bash
+docker exec week9-c3 nodetool status
+```
+
+![Nodetool status shows three UN rows in datacenter1](../assets/three-nodes.png)
+
+*All three nodes have joined the same datacenter. The container IP addresses can differ on your VM. Use `docker network inspect week9-cassandra` to match addresses to container names.*
+
+<details>
+<summary>🟨 Common pitfalls</summary>
+
+- **A container shows Up but `cqlsh` refuses the connection.** Run `docker logs --tail 40 week9-c1` and wait for startup. Check again before adding followers.
+- **Only one node appears after the second starts.** Run `docker logs --tail 40 week9-c2`, then `docker network inspect week9-cassandra`. Check that both containers are on the same network and that the follower uses `week9-c1` as its seed.
+- **A container exits during startup.** Use `docker ps -a` and `docker inspect --format '{{.State.OOMKilled}}' week9-c2` for the affected node. A value of `true` indicates a memory-limit kill. Check the configured heap and free VM memory.
+- **The network or a container already exists.** Use `docker network inspect week9-cassandra` and `docker ps -a --filter 'name=week9-c'` to check what is there. Resume your existing lab resources. For an empty cluster, follow the cleanup step before starting again.
+- **A restart of the SSH session loses `start_node`.** Set `CASSANDRA_IMAGE=cassandra:5.0.9` and paste the function's code block from [step 2](#2-start-the-first-node) again. Check existing container names with `docker ps -a` before resuming.
+
+</details>
+
+## 4. Create and query a table
+
+Open the CQL shell on one of the running nodes:
+
+```bash
+docker exec -it week9-c1 cqlsh
+```
+
+Paste the following into **`cqlsh>`**. A **keyspace** is a namespace for tables and defines how Cassandra replicates their data. For this keyspace, `NetworkTopologyStrategy` asks Cassandra to store three replicas of each partition in `datacenter1`. At `LOCAL_QUORUM`, reads and writes require responses from two of those three replicas. [Cassandra replication and consistency](https://cassandra.apache.org/doc/stable/cassandra/architecture/dynamo.html)
+
+```sql
+CREATE KEYSPACE IF NOT EXISTS music_store
+  WITH replication = {'class': 'NetworkTopologyStrategy', 'datacenter1': 3};
+
+USE music_store;
+CONSISTENCY LOCAL_QUORUM;
+
+CREATE TABLE IF NOT EXISTS music_by_type (
+  type text,
+  id uuid,
+  category text,
+  artist text,
+  title text,
+  PRIMARY KEY (type, id)
+);
+```
+
+`type` is the **partition key**, so Cassandra can find the partition by the record format. `id` distinguishes records within that partition. The fixed example UUIDs make the insert, update and delete commands easy to repeat.
+
+Insert two rows, then read them by partition key:
+
+```sql
+INSERT INTO music_by_type (type, id, category, artist, title)
+VALUES ('LP record', 00000000-0000-0000-0000-000000000001,
+        'Rock', 'Pink Floyd', 'The Dark Side of the Moon');
+
+INSERT INTO music_by_type (type, id, category, artist, title)
+VALUES ('LP record', 00000000-0000-0000-0000-000000000002,
+        'Reggae', 'Bob Marley', 'Legend');
+
+SELECT id, artist, title, category FROM music_by_type WHERE type = 'LP record';
+```
+
+Update a row by its full primary key. Then insert and delete a temporary practice row:
+
+```sql
+UPDATE music_by_type SET category = 'Roots reggae'
+WHERE type = 'LP record' AND id = 00000000-0000-0000-0000-000000000002;
+
+INSERT INTO music_by_type (type, id, category, artist, title)
+VALUES ('LP record', 00000000-0000-0000-0000-000000000003,
+        'Practice', 'Example Artist', 'Temporary row');
+
+DELETE FROM music_by_type
+WHERE type = 'LP record' AND id = 00000000-0000-0000-0000-000000000003;
+
+SELECT id, artist, title, category FROM music_by_type WHERE type = 'LP record';
+```
+
+Expect two rows again. `Legend` now has the category `Roots reggae`, and the temporary row is gone.
+
+![CQL query shows two records and the updated Roots reggae category](../assets/cql-query.png)
+
+*The read returns the two retained records after the update and delete.*
+
+```sql
+SELECT replication
+FROM system_schema.keyspaces
+WHERE keyspace_name = 'music_store';
+```
+
+Check that the keyspace uses `NetworkTopologyStrategy` with three replicas in `datacenter1`. Then type `EXIT` to return to the VM terminal.
+
+<details>
+<summary>🟨 Common pitfalls</summary>
+
+- **The prompt changes to `...`.** Finish the CQL statement with a semicolon. Press **Ctrl+C** to discard an unfinished statement.
+- **Cassandra asks for a keyspace.** Enter `USE music_store;` after opening a new `cqlsh` session. Set `CONSISTENCY LOCAL_QUORUM;` again in the new session.
+- **The update targets the wrong row.** Use both `type` and the matching UUID in `WHERE`. Check them with the partition-key query before editing.
+
+</details>
+
+## 5. Query Cassandra from Python
+
+Create a project folder in the VM terminal:
+
+```bash
+mkdir -p ~/week9-cassandra
+cd ~/week9-cassandra
+```
+
+Open `pico query_music.py`, paste the script, then save with **Ctrl+O → Enter** and exit with **Ctrl+X**.
 
 ```python
-import time
+from cassandra import ConsistencyLevel
+from cassandra.cluster import EXEC_PROFILE_DEFAULT, Cluster, ExecutionProfile
+from cassandra.policies import DCAwareRoundRobinPolicy
 
-import zmq
 
-context = zmq.Context()
-socket = context.socket(zmq.PAIR)
-socket.setsockopt(zmq.LINGER, 0)
-socket.bind("tcp://localhost:5555")
+contact_points = ["week9-c1", "week9-c2", "week9-c3"]
+profile = ExecutionProfile(
+    load_balancing_policy=DCAwareRoundRobinPolicy(local_dc="datacenter1"),
+    consistency_level=ConsistencyLevel.LOCAL_QUORUM,
+)
 
-try:
-    for number in range(1, 6):
-        socket.send_string(f"server message {number}")
-        message = socket.recv_string()
-        print(f"Server received: {message}")
-        time.sleep(1)
-finally:
-    socket.close()
-    context.destroy()
+with Cluster(
+    contact_points,
+    protocol_version=5,
+    execution_profiles={EXEC_PROFILE_DEFAULT: profile},
+) as cluster:
+    session = cluster.connect("music_store")
+    rows = session.execute(
+        "SELECT artist, title, category FROM music_by_type WHERE type = %s",
+        ("LP record",),
+    )
+
+    for row in rows:
+        print(f"{row.artist} | {row.title} | {row.category}")
 ```
 
-This server creates one Pair socket.
+The **contact points** give the driver initial addresses, and the driver discovers cluster members after connecting. The execution profile uses `datacenter1` and requests local quorum reads. Leaving the `with` block closes the connection.
 
-- `zmq.Context()` creates the ZeroMQ environment.
-- `zmq.PAIR` creates a one-to-one socket.
-- `bind(...)` opens port `5555`.
-- `send_string(...)` sends text to the client.
-- `recv_string()` waits for text from the client.
-- The `finally` block closes the socket when the program ends.
+Open `pico Dockerfile` in the same folder and save the following:
 
-9. Create `pair_client.py`:
+```dockerfile
+FROM python:3.12-slim
+
+WORKDIR /lab
+RUN python -m pip install --no-cache-dir cassandra-driver==3.30.1
+COPY query_music.py .
+CMD ["python", "query_music.py"]
+```
+
+Build the client and run it on the same network as the Cassandra nodes.
 
 ```bash
-pico pair_client.py
+docker build -t week9-cassandra-client:1 .
+docker run --rm --network week9-cassandra week9-cassandra-client:1
 ```
 
-10. Add:
+![Python client prints the Pink Floyd and Bob Marley records](../assets/python-query.png)
 
-```python
-import zmq
+*Docker resolves the three contact-point names on the bridge network. Python reads the two rows.*
 
-context = zmq.Context()
-socket = context.socket(zmq.PAIR)
-socket.setsockopt(zmq.LINGER, 0)
-socket.connect("tcp://localhost:5555")
+<details>
+<summary>🟨 Common pitfalls</summary>
 
-try:
-    for number in range(1, 6):
-        message = socket.recv_string()
-        print(f"Client received: {message}")
-        socket.send_string(f"client reply {number}")
-finally:
-    socket.close()
-    context.destroy()
-```
+- **The VM does not have `pico`.** Install the Ubuntu package with `sudo apt update` and `sudo apt install nano`. Then open the files with `pico` or `nano`.
+- **The client says it cannot resolve a contact point.** Check that the client command includes `--network week9-cassandra`. Use the same node names as in Steps 2–3.
+- **Python reports an unknown keyspace or table.** Complete Step 4 in `cqlsh`. Verify that the script uses `music_store` and `music_by_type`.
+- **An edit to the script does not change the output.** Run the build command again before starting the client.
 
-This client connects to the server.
+</details>
 
-- `connect(...)` connects to the server port.
-- The client waits for a server message first.
-- Then it sends a reply.
-- Pair works best when there is exactly one server and one client.
+## 6. Test failover and recovery
 
-11. Open two terminals in the same folder.
+### Stop one node
 
-12. In terminal 1, run:
+Stop the seed node and check status from a surviving node.
 
 ```bash
-python pair_server.py
+docker stop -t 30 week9-c1
+docker exec week9-c3 nodetool status
 ```
 
-13. In terminal 2, run:
+Wait until status shows **two `UN` rows and one `DN` row**, then run the client. `DN` means Down and Normal in the cluster's membership information.
 
 ```bash
-python pair_client.py
+docker run --rm --network week9-cassandra week9-cassandra-client:1
 ```
 
-Both programs should print messages and then finish.
+Expect Python to return both records. The two live replicas can satisfy `LOCAL_QUORUM`.
 
-#### Part C: Request/Reply Pattern
+![Cluster with one DN and two UN nodes still returns both Python query rows](../assets/one-node-down.png)
 
-14. Create `rep_server.py`:
+*The client can still read at local quorum after the seed stops.*
+
+### Stop a second node
+
+Leave the first node stopped and stop `week9-c2`.
 
 ```bash
-pico rep_server.py
+docker stop -t 30 week9-c2
+docker exec week9-c3 nodetool status
 ```
 
-15. Add:
-
-```python
-import zmq
-
-context = zmq.Context()
-socket = context.socket(zmq.REP)
-socket.setsockopt(zmq.LINGER, 0)
-socket.bind("tcp://localhost:5555")
-
-try:
-    for _ in range(6):
-        message = socket.recv_string()
-        print(f"Server received: {message}")
-        socket.send_string("response from server")
-finally:
-    socket.close()
-    context.destroy()
-```
-
-This server uses a Reply socket.
-
-- `zmq.REP` waits for requests.
-- For every request, it must send one response.
-- This is similar to an API endpoint receiving a request and returning a response.
-
-16. Create `req_client.py`:
+Wait until status from `week9-c3` shows **one `UN` and two `DN` rows**. Then ask the remaining node to read the same partition.
 
 ```bash
-pico req_client.py
+docker exec week9-c3 cqlsh -e "CONSISTENCY LOCAL_QUORUM; SELECT title FROM music_store.music_by_type WHERE type = 'LP record';"
 ```
 
-17. Add:
+Look for `Unavailable` in the response. The lab run showed it inside `NoHostAvailable`, with `required_replicas: 2` and `alive_replicas: 1`. The coordinator answered, but the read could not reach quorum.
 
-```python
-import sys
-import time
+![Cqlsh reports LOCAL_QUORUM unavailable with one live replica and two required](../assets/quorum-unavailable.png)
 
-import zmq
+*The remaining node reports that it cannot meet the requested consistency level.*
 
-client_id = sys.argv[1]
+### Restore the nodes
 
-context = zmq.Context()
-socket = context.socket(zmq.REQ)
-socket.setsockopt(zmq.LINGER, 0)
-socket.connect("tcp://localhost:5555")
-
-try:
-    for number in range(1, 4):
-        socket.send_string(f"request {number} from client {client_id}")
-        reply = socket.recv_string()
-        print(f"Client {client_id} received: {reply}")
-        time.sleep(1)
-finally:
-    socket.close()
-    context.destroy()
-```
-
-This client uses a Request socket.
-
-- `zmq.REQ` sends requests.
-- A Request socket must receive a reply before it sends the next request.
-- We pass a client ID from the command line so we can run two clients.
-
-18. Open three terminals.
-
-19. In terminal 1, run:
+Start the seed again.
 
 ```bash
-python rep_server.py
+docker start week9-c1
+docker exec week9-c3 nodetool status
 ```
 
-20. In terminal 2, run:
+Wait for **two** `UN` rows before starting the second node.
 
 ```bash
-python req_client.py 1
+docker start week9-c2
+docker exec week9-c3 nodetool status
 ```
 
-21. In terminal 3, run:
+Wait for **three** `UN` rows, then run the Python client again and check both records.
 
 ```bash
-python req_client.py 2
+docker run --rm --network week9-cassandra week9-cassandra-client:1
 ```
 
-The server should receive six requests in total.
+![Nodetool shows three UN nodes again and Python returns both saved records](../assets/cluster-recovered.png)
 
-#### Part D: Publish/Subscribe Pattern
+*Both restarted nodes rejoin. The same query succeeds after recovery.*
 
-22. Create `pub_server.py`:
+<details>
+<summary>🟨 Common pitfalls</summary>
+
+- **Status still shows `UN` immediately after a stop.** Wait a few seconds for the surviving nodes to detect the change, then retry `nodetool status`.
+- **The two-node outage test loses its connection.** Run `cqlsh` inside `week9-c3`, which remains running for this test.
+- **A restarted container does not rejoin.** Use `docker logs --tail 40` with that container's name and check its startup, then check status from `week9-c3` again. Use `docker start` on the original containers to retain their data.
+
+</details>
+
+## 7. Clean up
+
+After saving any evidence you need, stop and remove the practice containers and their anonymous Cassandra data volumes, then remove the network. The `-v` flag in this command deletes this lab's database data.
+
+If you stopped partway through setup, run `docker ps -a --filter 'name=week9-c'` first and use only the container names that exist in the stop and remove commands.
 
 ```bash
-pico pub_server.py
+docker stop -t 30 week9-c1 week9-c2 week9-c3
+docker rm -v week9-c1 week9-c2 week9-c3
+docker network rm week9-cassandra
+docker ps -a --filter 'name=week9-c'
+docker network ls --filter 'name=week9-cassandra'
 ```
 
-23. Add:
+The final two commands should show headers with no matching entries.
 
-```python
-import sys
-import time
+When finished, open **Compute Engine → VM instances**. If you reused the Week 5 VM, stop it and keep its boot disk for later labs. If you created a dedicated Week 9 VM, you can delete it and its boot disk after saving your evidence and any files you want to keep.
 
-import zmq
+### Checkpoint
 
-port = int(sys.argv[1])
-topics = ["cloud", "database", "api", "cloud"]
-
-context = zmq.Context()
-socket = context.socket(zmq.PUB)
-socket.setsockopt(zmq.LINGER, 0)
-socket.bind(f"tcp://localhost:{port}")
-
-try:
-    for _ in range(20):
-        topic = topics[_ % len(topics)]
-        value = _ + 1
-        message = f"{topic} {value} {port}"
-        print(f"Publishing: {message}")
-        socket.send_string(message)
-        time.sleep(0.5)
-finally:
-    socket.close()
-    context.destroy()
-```
-
-This publisher sends messages with topics.
-
-- `zmq.PUB` creates a publisher socket.
-- Each message starts with a topic such as `cloud`.
-- Subscribers can filter messages by topic.
-- The port comes from the command line, so we can run two publishers.
-
-24. Create `sub_client.py`:
-
-```bash
-pico sub_client.py
-```
-
-25. Add:
-
-```python
-import sys
-
-import zmq
-
-ports = sys.argv[1:]
-
-context = zmq.Context()
-socket = context.socket(zmq.SUB)
-socket.setsockopt(zmq.LINGER, 0)
-
-for port in ports:
-    socket.connect(f"tcp://localhost:{port}")
-
-socket.setsockopt_string(zmq.SUBSCRIBE, "cloud")
-
-try:
-    for _ in range(5):
-        message = socket.recv_string()
-        print(f"Subscriber received: {message}")
-finally:
-    socket.close()
-    context.destroy()
-```
-
-This subscriber listens for selected topics.
-
-- `zmq.SUB` creates a subscriber socket.
-- `connect(...)` connects to one or more publishers.
-- `SUBSCRIBE` filters messages.
-- This client receives only messages that start with `cloud`.
-
-26. Open three terminals.
-
-27. In terminal 1, run:
-
-```bash
-python pub_server.py 5555
-```
-
-28. In terminal 2, run:
-
-```bash
-python pub_server.py 5556
-```
-
-29. In terminal 3, run:
-
-```bash
-python sub_client.py 5555 5556
-```
-
-The subscriber should receive five `cloud` messages, then finish. The publishers finish after sending twenty messages.
-
-#### Part E: Push/Pull Pattern
-
-30. Create `producer.py`:
-
-```bash
-pico producer.py
-```
-
-31. Add:
-
-```python
-import random
-import time
-
-import zmq
-
-context = zmq.Context()
-socket = context.socket(zmq.PUSH)
-socket.setsockopt(zmq.LINGER, 0)
-socket.bind("tcp://localhost:5555")
-
-try:
-    total = 0
-
-    for _ in range(10):
-        number = random.randint(1, 5)
-        total += number
-        task = {"number": number}
-        print(f"Producer sent: {task}")
-        socket.send_json(task)
-        time.sleep(0.5)
-
-    print(f"Expected final total: {total}")
-finally:
-    socket.close()
-    context.destroy()
-```
-
-32. Create `worker.py`:
-
-```bash
-pico worker.py
-```
-
-33. Add:
-
-```python
-import random
-
-import zmq
-
-worker_id = random.randint(1000, 9999)
-
-context = zmq.Context()
-pull_socket = context.socket(zmq.PULL)
-pull_socket.setsockopt(zmq.LINGER, 0)
-pull_socket.connect("tcp://localhost:5555")
-
-push_socket = context.socket(zmq.PUSH)
-push_socket.setsockopt(zmq.LINGER, 0)
-push_socket.connect("tcp://localhost:5556")
-
-try:
-    while True:
-        task = pull_socket.recv_json()
-        number = task["number"]
-        result = {"worker": worker_id, "number": number}
-        print(f"Worker {worker_id} processed: {number}")
-        push_socket.send_json(result)
-except KeyboardInterrupt:
-    pass
-finally:
-    pull_socket.close()
-    push_socket.close()
-    context.destroy()
-```
-
-34. Create `collector.py`:
-
-```bash
-pico collector.py
-```
-
-35. Add:
-
-```python
-import zmq
-
-context = zmq.Context()
-socket = context.socket(zmq.PULL)
-socket.setsockopt(zmq.LINGER, 0)
-socket.bind("tcp://localhost:5556")
-
-try:
-    total = 0
-
-    for _ in range(10):
-        result = socket.recv_json()
-        total += result["number"]
-        print(f"Collector received {result} total={total}")
-
-    print(f"Final total: {total}")
-finally:
-    socket.close()
-    context.destroy()
-```
-
-This pattern creates a small pipeline.
-
-- `producer.py` pushes tasks.
-- `worker.py` pulls tasks, processes them, and pushes results.
-- `collector.py` pulls results and calculates a total.
-- You can run more than one worker to share the work.
-
-36. Open four terminals.
-
-37. In terminal 1, run:
-
-```bash
-python collector.py
-```
-
-38. In terminal 2, run:
-
-```bash
-python worker.py
-```
-
-39. In terminal 3, run a second worker:
-
-```bash
-python worker.py
-```
-
-40. In terminal 4, run:
-
-```bash
-python producer.py
-```
-
-The final total printed by the collector should match the expected final total printed by the producer.
-
-Stop the two workers with `Ctrl + C`.
-
-#### Part F: Cleanup
-
-41. If a port is stuck, kill the process using it:
-
-```bash
-sudo fuser -k 5555/tcp
-sudo fuser -k 5556/tcp
-```
-
-42. Deactivate the virtual environment:
-
-```bash
-deactivate
-```
-
-43. Stop the VM from the GCP dashboard when you finish.
-
-#### Checklist
-
-Before you finish, make sure:
-
-- `pyzmq` installed successfully
-- Pair server and client exchanged messages
-- Request/Reply server answered both clients
-- Publish/Subscribe filtered messages by topic
-- Push/Pull pipeline produced matching totals
-- no Python socket programs are still running
-- your VM is stopped
-
-Week 9 is complete.
+- [ ] Three Cassandra containers showed `UN` in the same datacenter.
+- [ ] You inserted, read, updated and deleted a row in CQL.
+- [ ] The Python client queried by partition key using container names.
+- [ ] A local quorum read succeeded with two live replicas and returned `Unavailable` with one.
+- [ ] You restarted the two nodes, verified recovery and removed the lab containers and network.

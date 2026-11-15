@@ -10,12 +10,12 @@ Start from your home directory:
 
 ```bash
 cd ~
-mkdir week6-fastapi-docker
+mkdir -p week6-fastapi-docker
 cd week6-fastapi-docker
 pwd
 ```
 
-Expect `/home/student/week6-fastapi-docker`. If the folder already exists, inspect it and reuse your earlier work rather than deleting it. This project does not need a virtual environment on the VM: the Dockerfile will install Python packages inside the image.
+Expect `/home/student/week6-fastapi-docker`. If you already completed the SQLite tutorial, substitute `week6-fastapi-retry` for `week6-fastapi-docker` in this part to preserve your database application's source files. The Dockerfile will install Python packages inside the image.
 
 Create `requirements.txt` with pico:
 
@@ -126,14 +126,22 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 ## 4. Build the image
 
-From `~/week6-fastapi-docker`, run:
+From the project folder you created in Step 1, run:
 
 ```bash
 docker build -t week6-fastapi-app:1 .
-docker images
+docker image ls week6-fastapi-app:1
 ```
 
-The final `.` selects the current project folder as the build context. `week6-fastapi-app` is the image name and `1` is its tag. You should see that image in the list. If the build fails, read the first error and check your filenames and file contents before continuing.
+The final `.` selects the current project folder as the build context. `week6-fastapi-app` is the image name and `1` is its tag. Wait for the build to succeed and check that the image is listed before continuing.
+
+<details>
+<summary>🟨 Common pitfalls</summary>
+
+- **Docker cannot find the Dockerfile or a file named in `COPY`.** Run `pwd` and `ls -la Dockerfile requirements.txt main.py .dockerignore` to check the folder and exact filenames. Include the final `.` when you rebuild.
+- **The image appears in the list even though this build failed.** Docker can retain an image from a previous successful build. Fix the first error in the latest build output and run the build again.
+
+</details>
 
 ## 5. Run and check the container on the VM
 
@@ -143,12 +151,11 @@ Inspect existing containers first:
 docker ps -a
 ```
 
-Use VM port `80` for one lab web container at a time. If you are repeating this part, stop and remove your earlier `week6-api` using Section 8 before creating another with that name.
+Use VM port `80` for one lab web container at a time. If you are repeating this part, [stop and remove your earlier `week6-api`](#8-stop-and-remove-this-container) before creating another with that name. If `courses-api` from the SQLite tutorial is running, use `docker stop courses-api` to free the port and keep its saved data. You can start it again after removing `week6-api`.
 
 ```bash
 docker run -d --name week6-api -p 80:8000 week6-fastapi-app:1
 docker ps
-docker logs week6-api
 ```
 
 `-d` runs in the background, `--name` names the container, and `-p 80:8000` publishes **VM port 80 → container port 8000**. The existing Google Cloud HTTP rule allows traffic to VM port 80. No rule for VM port 8000 is needed. See [Docker's port-publishing explanation](https://docs.docker.com/get-started/docker-concepts/running-containers/publishing-ports/).
@@ -156,7 +163,8 @@ docker logs week6-api
 Check the API from the **VM terminal**:
 
 ```bash
-curl -i http://127.0.0.1/health
+curl --retry 10 --retry-all-errors --retry-delay 1 -i http://127.0.0.1/health
+docker logs week6-api
 ```
 
 Expect an HTTP `200` response and:
@@ -165,7 +173,11 @@ Expect an HTTP `200` response and:
 {"status":"ok"}
 ```
 
-If `curl` is not installed, run `sudo apt update` and then `sudo apt install curl`, and repeat the check. If the app is still starting, inspect its logs and retry. Here `127.0.0.1` means the VM because the command runs in its SSH terminal.
+Docker can publish the port before Uvicorn starts listening. The retry flags give the API time to start if the first request is refused or reset. Check the logs if the API still fails to respond. In the SSH terminal, `127.0.0.1` reaches the VM itself. If `curl` is missing, run `sudo apt update` and then `sudo apt install curl`.
+
+![Docker lists week6-api running and curl returns HTTP 200 with status ok](../assets/fastapi-container-health.png)
+
+*The container publishes VM port 80 to container port 8000. The health endpoint responds with HTTP 200.*
 
 ## 6. Test from your computer
 
@@ -181,17 +193,21 @@ Use `http`, without `https` or `:8000`: Docker publishes the app on HTTP's defau
 
 In Postman on your computer, send `GET` requests to the first two URLs. Confirm both the `200` status and their JSON bodies. Save any screenshot you need for your lab notes before cleanup.
 
+![FastAPI Swagger UI showing GET slash and GET health](../assets/fastapi-swagger.png)
+
+*The `/docs` page lists the two endpoints in this image.*
+
 ## 7. Diagnose a failed check
 
-| Symptom | What to check |
-| --- | --- |
-| Container is absent from `docker ps` | Run `docker ps -a` to find stopped containers, then `docker logs week6-api` to read the application error. |
-| Name `week6-api` is already in use | Inspect the old container. If it is your earlier attempt, stop it if running and remove it before repeating `docker run`. A stopped container still reserves its name. |
-| Host port 80 is already allocated | Inspect `docker ps` for your previous lab web container. Stop only that container before retrying. If no container explains the conflict, ask the tutor to help identify the host process using port 80. |
-| VM-side curl works but your computer cannot connect | Check the current external IP, `http` URL, and the VM's existing Allow HTTP setting. The working local request confirms the app and Docker port mapping respond on the VM. |
-| VM-side curl fails | Check container status and logs first. Confirm Uvicorn uses `0.0.0.0:8000` and the run command uses `-p 80:8000`. |
+<details>
+<summary>🟨 Common pitfalls</summary>
 
-If a failed `docker run` leaves a `Created` or stopped container behind, remove that failed `week6-api` after inspection before retrying. If you edit the source, rebuild the image, stop/remove the old container, and run a new one; editing the host file does not change code already copied into an image.
+- **The new container exited or the VM-side request fails.** Run `docker ps -a` and `docker logs week6-api`. Check that Uvicorn listens on `0.0.0.0:8000` and the run command uses `-p 80:8000`.
+- **The container name or port is already in use.** Use `docker ps -a` to identify your earlier lab container. Stop it if it is running. Remove your old or failed `week6-api` with `docker rm week6-api` before reusing that name. If no container explains the port conflict, ask the tutor to help identify the host process.
+- **The VM-side request works and your browser still fails.** Copy the current external IP from the VM row. Use `http://YOUR_VM_EXTERNAL_IP/health` and check the VM's **Allow HTTP traffic** setting. If your browser changes the URL to HTTPS, use Postman with the explicit HTTP URL.
+- **An edit to `main.py` never appears in the response.** Rebuild the image, stop and remove the old container, then create a new container from the rebuilt image.
+
+</details>
 
 ## 8. Stop and remove this container
 
