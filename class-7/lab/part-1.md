@@ -1,299 +1,318 @@
 # Week 7 Lab 1 — Deploy FastAPI on Kubernetes with GKE
 
-[Week 7 overview](../README.md)
+[Week 7 overview](../README.md) · [Week 6 Docker lab](../../class-6/README.md)
 
-Use Google Kubernetes Engine (GKE) to run a small FastAPI app. You will build a Docker image, store it in Artifact Registry, and use `kubectl` to deploy and test it.
+Deploy a small FastAPI app, test it, run two copies and publish an update. By the end you should be able to follow an image from the Dockerfile to a running Pod and explain how a browser request reaches FastAPI.
 
-| Kubernetes term | What it means in this lab |
+In Week 6 you ran `docker build`, `docker tag` and `docker push` on a VM. Here **Cloud Build** builds an image from the supplied Dockerfile, tags it and pushes it to **Artifact Registry**. Artifact Registry is Google's image registry, the counterpart to Docker Hub in this lab. **Kubernetes** pulls that image and keeps the application running according to your YAML files.
+
+```mermaid
+flowchart LR
+    A[FastAPI source and Dockerfile] --> B[Cloud Build]
+    B --> C[Tagged image in Artifact Registry]
+    C --> D[FastAPI container in a GKE Pod]
+```
+
+| Term | What it means in this lab |
 | --- | --- |
-| Cluster | The control plane and the worker nodes that run your app. In GKE Autopilot, Google manages the nodes and provisions capacity as Pods need it. |
-| Pod | The smallest unit Kubernetes runs. Each FastAPI Pod in this lab runs one container. |
-| Deployment | Keeps the requested number of FastAPI Pods running and replaces them when you change the image. |
-| Service | Gives clients one address for the app, even as the Pods behind it change. |
+| Cluster | The control plane that decides what should run, plus one or more worker machines that run it. Google Kubernetes Engine (GKE) manages the control plane. |
+| Node | A worker machine. Your Standard cluster starts with one VM in one zone. |
+| Pod | The unit Kubernetes runs on a node. Each FastAPI Pod in this lab holds one container. |
+| Deployment | Tells Kubernetes which image to run and how many copies, called replicas, to maintain. |
+| Service | Gives clients a stable address and finds matching Pods by label, even as Pods are replaced. |
 
-## 1. Open Cloud Shell and select your project
+Use the **Google Cloud Console** for the browser steps and **Cloud Shell** for the commands. Cloud Shell is the terminal in the Console, with `gcloud` and `kubectl` already installed. `gcloud` works with Google Cloud resources. `kubectl` works with the Kubernetes cluster you connect it to. Check the project picker when following a Console link.
 
-1. Sign in to the [Google Cloud console](https://console.cloud.google.com/) and select your course project. It needs billing and permissions to enable APIs, create a GKE cluster and an Artifact Registry repository, and submit Cloud Build jobs.
-2. Click **Activate Cloud Shell** in the top toolbar. Wait for the terminal and choose **Authorize** if asked.
-3. Use this first Cloud Shell tab for setup, deployment and cleanup. Replace `YOUR_PROJECT_ID` with the **Project ID** from the project selector. Replace `YOUR_LAB_SUFFIX` with a short identifier unique to you in the project, using lowercase letters and digits, for example `alex417`. Save the project ID, region and suffix so you can reuse them when you reconnect or clean up.
+Use the names from your own project throughout the lab. The screenshots show a demonstration project. The cluster, its worker and the optional public endpoint can use cloud credit; leave time for [cleanup](#9-clean-up).
 
-```bash
-export PROJECT_ID=YOUR_PROJECT_ID
-export REGION=europe-west1
-export LAB_SUFFIX=YOUR_LAB_SUFFIX
-export CLUSTER="lab7-gke-${LAB_SUFFIX}"
-export REPOSITORY="lab7-containers-${LAB_SUFFIX}"
-export IMAGE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/fastapi"
+## 1. Select your project and enable the APIs
 
-gcloud projects describe "$PROJECT_ID" --format='value(projectId)'
-kubectl version --client
-printf 'Cluster: %s\nRepository: %s\n' "$CLUSTER" "$REPOSITORY"
-```
+1. Open the Google Cloud Console and use the project picker at the top to select your course project. Record its **Project ID**, which may differ from the display name. [Open the Google Cloud Console](https://console.cloud.google.com/).
+2. Choose a short suffix unique to you in this project, such as `alex417`. Use lowercase letters and numbers. With that suffix, your repository will be `lab7-containers-alex417` and your cluster will be `lab7-gke-alex417`. Record your two names so you can find them during cleanup.
+3. Open **APIs & Services → Library**. An API lets tools such as the Console and `gcloud` use a Google Cloud service. Search for **Compute Engine API**, **Kubernetes Engine API**, **Artifact Registry API** and **Cloud Build API**. Open each result and click **Enable**. If you see **Manage**, the API is already enabled. [Open the API Library](https://console.cloud.google.com/apis/library).
 
-Check that `gcloud` prints your project ID and the names end with the suffix you chose.
+![Artifact Registry API details with the Enable button visible](../assets/console-02-apis.jpg)
 
-![Google Cloud Shell session showing the course demonstration project and kubectl version](../assets/01-setup.png)
+*Use **Enable** here for Artifact Registry and repeat for the other three APIs.*
 
-*This setup capture shows Cloud Shell over SSH. The test cluster and repository use the suffix `-1115`. Use your course project ID and the resource names you set above.*
+If the project is missing or enabling an API fails, check the signed-in Google account and project picker. Ask your tutor to check your access or billing if the error persists.
 
-Enable the APIs for Kubernetes, Compute Engine, Artifact Registry and Cloud Build.
+## 2. Create the Docker repository
 
-```bash
-gcloud services enable \
-  container.googleapis.com compute.googleapis.com \
-  artifactregistry.googleapis.com cloudbuild.googleapis.com \
-  --project="$PROJECT_ID"
+Go to **Artifact Registry → Repositories**, click **Create repository** and enter the settings below. Replace `YOUR_SUFFIX` with your own suffix, then click **Create**. [Open Artifact Registry](https://console.cloud.google.com/artifacts).
 
-gcloud services list --enabled --project="$PROJECT_ID" \
-  --filter='config.name:(container.googleapis.com compute.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com)' \
-  --format='value(config.name)'
-```
+| Setting | Value |
+| --- | --- |
+| Name | `lab7-containers-YOUR_SUFFIX` |
+| Format | **Docker** |
+| Mode | **Standard** |
+| Location type | **Region** |
+| Region | **europe-west1 (Belgium)** |
 
-![Terminal output listing the four enabled Google Cloud APIs](../assets/02-apis.png)
+![Artifact Registry repository form showing Standard mode and regional location europe-west1](../assets/console-03-repository.jpg)
 
-*The test project has all four lab APIs enabled.*
+*Use a regional Docker repository in `europe-west1`. The screenshot shows the demonstration project.*
 
-<details>
-<summary>🟨 Common pitfalls</summary>
+Confirm your repository appears in the list. It will hold the image that GKE pulls later. If the name already exists, check whether it is your own lab repository and confirm its format and region before reusing it.
 
-- **Project missing or permission denied.** Run `gcloud auth list` and `gcloud projects list` to confirm the account and project ID. If project access works but API enablement is denied, ask your course admin to enable the four APIs or grant permission to enable them.
-- **New tab or a restarted shell.** Shell variables are tab-specific. Repeat the export block with the **same** project, region and suffix. If you chose a different cluster name later, restore that `CLUSTER` value too. Return to `~/week7-cc/class-7/lab` or the directory you chose. If you already created the cluster, rerun `get-credentials` from [step 3](#3-create-and-connect-to-a-gke-autopilot-cluster).
+## 3. Create and connect to a GKE Standard cluster
 
-</details>
+1. Open **Kubernetes Engine → Clusters** and click **Create**. In **Create a cluster**, click **Configure** beside **Standard: You manage your cluster**. [Open GKE clusters](https://console.cloud.google.com/kubernetes/list).
 
-> [!WARNING]
-> GKE and related services can use your cloud credit. Keep this lab's resources until you have captured your checks, then follow [Cleanup](#7-cleanup).
+![GKE cluster setup showing the control to switch to Standard](../assets/console-04-mode.jpg)
 
-## 2. Build the Docker image and push it to Artifact Registry
+2. Under **Cluster basics**, set the name to `lab7-gke-YOUR_SUFFIX`. Set **Location type** to **Zonal**, choose `europe-west1-b` and use the **Regular** release channel. A region is an area such as `europe-west1`. A zone is a location inside it such as `europe-west1-b`. Keep **Default node locations** set to **Default** so the nodes use this zone.
 
-Clone the course repo into a new folder from your Cloud Shell home directory. Use the same branch as this guide. If you are viewing a review branch, add `--branch BRANCH_NAME` to the clone command, using the name shown on GitHub. If you already have a current copy, open its `class-7/lab` directory and run the `ls` check. Use this directory for the remaining file-based commands.
+![GKE Standard cluster creation form with the cluster name and zonal location](../assets/console-04-create-standard.jpg)
 
-```bash
-cd ~
-git clone --depth 1 https://github.com/warestack/cc.git week7-cc && cd week7-cc/class-7/lab
-ls app/Dockerfile k8s/deployment.yaml k8s/service.yaml
-```
+3. Under **Node Pools → default-pool**, set **Number of nodes** to **1**. Keep **Enable cluster auto-scaler** unchecked and **Node pool default node locations** set to **Cluster default**. This pool is the group of worker nodes that share the same configuration.
 
-Confirm that `ls` prints all three paths before continuing. If a path is missing, check the recovery note at the end of this step.
+![Default GKE node pool settings for a one-node lab cluster](../assets/console-04-node-pool.jpg)
 
-Open [`app/main.py`](app/main.py) and the [`Dockerfile`](app/Dockerfile). FastAPI defines `/` and `/health`. The Dockerfile installs the Python dependencies and starts Uvicorn on port `8080` inside the container. FastAPI generates interactive documentation at `/docs`.
+4. Open **default-pool → Nodes**. In **Machine configuration** choose the **E2** series under **General purpose**. In **Machine type**, choose **e2-standard-2** from the **Standard** group. Set **Boot disk type** to **Balanced persistent disk** and **Boot disk size (GB)** to **30**.
 
-Create a **Docker** repository in Artifact Registry. The registry stores the tagged image so GKE can pull it when starting a Pod. If creation reports that the name already exists, check the recovery note at the end of this step before building.
+![Node settings showing E2, e2-standard-2, Balanced persistent disk and 30 GB](../assets/console-04-node-settings.jpg)
 
-```bash
-gcloud artifacts repositories create "$REPOSITORY" \
-  --repository-format=docker \
-  --location="$REGION" \
-  --project="$PROJECT_ID"
+5. Use the **default** network if it is available for your course project, or follow the network settings supplied by your tutor. Keep the remaining defaults and click **Create**. [Google's zonal cluster documentation](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/creating-a-zonal-cluster).
 
-gcloud artifacts repositories describe "$REPOSITORY" \
-  --location="$REGION" --project="$PROJECT_ID"
-```
+Wait for the cluster's status to show a green check mark. This can take several minutes. Check the cluster name, zone and node count in the list. You can open the cluster details to check that the mode is **Standard**.
 
-![Artifact Registry describes the repository as format DOCKER in europe-west1](../assets/03-registry.png)
+![GKE Clusters list with a ready lab cluster](../assets/console-05-cluster-ready.jpg)
 
-*Check for `format: DOCKER` in the repository details.*
+*Find your own lab cluster by the name you recorded.*
 
-Submit the app directory to Cloud Build. It runs the Docker build and pushes the image with the `v1` tag.
+On your cluster's row, open **⋮ → Connect** and click **Run in Cloud Shell**. If the terminal does not open, copy the generated command, click **Activate Cloud Shell** in the top toolbar and paste it there. Press **Enter** to run it. If Cloud Shell asks you to authorise access, click **Authorize**. The command retrieves connection details for your project, zone and cluster and stores them in the configuration used by `kubectl`.
+
+![GKE Connect dialog displaying the generated command and Run in Cloud Shell](../assets/console-06-connect.jpg)
+
+*Use the command generated for your cluster. Its project ID, zone and cluster name identify the target. If you copy the command by hand, leave out the leading `$`; it represents the terminal prompt.*
+
+In that Cloud Shell tab, run:
 
 ```bash
-gcloud builds submit ./app \
-  --tag="${IMAGE}:v1" \
-  --region="$REGION" \
-  --project="$PROJECT_ID"
-
-gcloud artifacts docker images list "$IMAGE" --include-tags --project="$PROJECT_ID"
-```
-
-Wait for the build's `SUCCESS` status and check that the image list shows `v1` before continuing. If you already built `v1` in an earlier session, run the image list command to confirm the tag and continue with it.
-
-![Cloud Build reports SUCCESS and Artifact Registry lists the v1 tag and image digest](../assets/04-image.png)
-
-*The `v1` tag points to the image digest produced by the build.*
-
-<details>
-<summary>🟨 Common pitfalls</summary>
-
-- **`week7-cc` already exists or `./app` is missing.** Run `cd ~/week7-cc/class-7/lab`, then `pwd` and `ls app/Dockerfile k8s/deployment.yaml`. If your checkout is on the branch containing this guide but is out of date, run `git -C ~/week7-cc pull --ff-only` and check the paths again. Use a fresh checkout in a new folder if you are reading the guide on another branch.
-- **The Docker repository already exists.** Use the `describe` command above to verify its name, region and `DOCKER` format. If it belongs to you from an earlier attempt, continue. If it belongs to someone else, return to step 1, choose a different suffix and repeat its export block.
-- **Cloud Build reports permission denied.** Read the first error. If submission is denied, ask your admin to check your access to submit builds or upload the source archive, depending on the error. If the build starts but cannot fetch the source or push the image, ask them to check the build service account's access. [Cloud Build troubleshooting](https://docs.cloud.google.com/build/docs/troubleshooting)
-
-</details>
-
-## 3. Create and connect to a GKE Autopilot cluster
-
-Create a regional Autopilot cluster. This can take several minutes.
-
-```bash
-gcloud container clusters create-auto "$CLUSTER" \
-  --location="$REGION" --project="$PROJECT_ID"
-
-gcloud container clusters describe "$CLUSTER" \
-  --location="$REGION" --project="$PROJECT_ID" \
-  --format='yaml(name,location,status,autopilot.enabled)'
-```
-
-Check for `status: RUNNING` and `autopilot.enabled: true`. If creation reported an existing cluster, check the recovery note at the end of this step before connecting. You can also find the cluster under **Kubernetes Engine → Clusters** in the Google Cloud console.
-
-![Cluster details show Autopilot enabled and status RUNNING in europe-west1](../assets/05-cluster.png)
-
-*The cluster is ready to accept `kubectl` commands.*
-
-Connect `kubectl` by downloading the cluster connection details. The current **context** tells you which cluster your `kubectl` commands will target.
-
-```bash
-gcloud container clusters get-credentials "$CLUSTER" \
-  --location="$REGION" --project="$PROJECT_ID" &&
-  kubectl config set-context --current --namespace=default
-
 kubectl config current-context
-kubectl get namespaces
 kubectl get nodes
 ```
 
-Check that the context includes your project, region and cluster. The app uses the `default` namespace on the lab cluster. Autopilot may report `No resources found` for nodes before you deploy. It provisions nodes when workloads need them.
+The first command should show your project ID, zone and cluster name. The second contacts the cluster and should list one worker with status `Ready`. After confirming the target, set the context to use `default`, the namespace or group of Kubernetes resources used throughout this lab:
 
-![Cluster credentials generated, current gke context selected, namespaces listed, and no nodes yet](../assets/06-context.png)
+```bash
+kubectl config set-context --current --namespace=default
+```
 
-*Listing namespaces confirms that `kubectl` can reach the cluster before the first workload starts.*
+Use the same Cloud Shell terminal for the following steps.
 
 <details>
-<summary>🟨 Common pitfalls</summary>
+<summary>Common pitfalls</summary>
 
-- **Cluster creation fails or the name is already in use.** Run the `describe` command above. Reuse your own cluster if it is `RUNNING` with Autopilot enabled. If it is someone else's cluster, set a unique `CLUSTER` name and record it so you can restore that value in a new session. Keep the `REPOSITORY` and `IMAGE` values from your successful build. For billing, quota or network errors, share the first error with your admin. If the project uses a custom VPC, ask for the approved `--network` and `--subnetwork` values.
-- **`kubectl` targets the wrong cluster or cannot connect.** Check `echo "$PROJECT_ID / $REGION / $CLUSTER"` and rerun `get-credentials` above. For a missing credentials plugin on your computer, install `gke-gcloud-auth-plugin` and rerun the command. [GKE cluster access for kubectl](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/cluster-access-for-kubectl)
+- **The command shows a different cluster.** Return to your cluster row and repeat **Connect → Run in Cloud Shell**. Check the context before applying any files.
+- **Cluster creation fails.** Read the actual error. Check the region, zone, billing and that the default pool has one node. Ask your tutor about a permission, network or quota error before trying other settings.
+- **The Cloud Shell panel disconnects.** Click **Reconnect** and run the Connect command again if needed. Return to your lab folder before running file-based commands.
 
 </details>
 
-## 4. Deploy FastAPI
+## 4. Build and deploy FastAPI
 
-Read the two Kubernetes YAML files in `k8s/`. The [Deployment](k8s/deployment.yaml) asks for one Pod and checks `/health` before marking it ready. The [Service](k8s/service.yaml) selects Pods labelled `app: fastapi`. It routes traffic from Service port `80` to container port `8080`. Its `ClusterIP` address is internal to the cluster.
+### Open the lab files
 
-The first command replaces `LAB7_IMAGE` with the full image address before sending the Deployment YAML to Kubernetes.
+Run these commands in Cloud Shell. They clone the course source into a folder called `week7-cc` in your Cloud Shell home directory.
 
 ```bash
-sed "s|LAB7_IMAGE|${IMAGE}:v1|" k8s/deployment.yaml | kubectl apply -f -
-kubectl apply -f k8s/service.yaml
+cd ~
+git clone --depth 1 https://github.com/warestack/cc.git week7-cc
+cd ~/week7-cc/class-7/lab
+pwd
+ls -a app/ k8s/
 ```
 
-Once both apply commands succeed, wait for the rollout and check the app's resources.
+The output should list `main.py`, `Dockerfile` and `requirements.txt` in `app/`, and `deployment.yaml` and `service.yaml` in `k8s/`. If your tutor gave you a GitHub branch for this lab, add `--branch BRANCH_NAME` after `--depth 1`, substituting that branch's name. If you are resuming this attempt, skip the clone and return to your existing lab folder. If you are starting again and `week7-cc` already exists, use a fresh folder name such as `week7-cc-retry` in the clone and `cd` commands.
+
+Open [`app/main.py`](app/main.py) and [`app/Dockerfile`](app/Dockerfile) in the repository or Cloud Shell Editor. The first `@app.get(...)` route handles `GET /` and the second handles `GET /health`. FastAPI turns the Python dictionaries into JSON and provides interactive documentation at `/docs`. The Dockerfile installs the pinned Python dependencies, copies the application and starts Uvicorn listening on `0.0.0.0:8080` inside the container. Compare its structure with the Week 6 Dockerfile. [Week 6 Dockerfile walkthrough](../../class-6/lab/part-2.md#3-write-the-dockerfile).
+
+### Build and publish version 1
+
+Replace `your-project-id` and `lab7-containers-your-suffix` below with the exact values you recorded. Keep the rest of the block as written. These variables are values for this terminal session. Set them again if you start a new session.
 
 ```bash
-kubectl rollout status deployment/fastapi --timeout=15m
-kubectl get deployment/fastapi service/fastapi
+PROJECT_ID=your-project-id
+REPOSITORY=lab7-containers-your-suffix
+REGION=europe-west1
+IMAGE_BASE="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/fastapi"
+printf '%s\n' "${IMAGE_BASE}:v1"
+```
+
+The printed reference contains a registry hostname, your project ID, your repository, the image name `fastapi` and the tag `v1`. Save it for the Deployment. This plays the same role as `USERNAME/week6-courses-api:1` did on Docker Hub. The tag is a readable version name. The digest identifies the exact published image. [Week 6 image names and tags](../../class-6/lab/docker-hub.md#1-understand-image-names).
+
+From `class-7/lab`, upload the `app/` build context to Cloud Build:
+
+```bash
+gcloud builds submit ./app --tag="${IMAGE_BASE}:v1" \
+  --project="$PROJECT_ID" --region="$REGION"
+```
+
+Wait for `SUCCESS`. The build uses `app/Dockerfile` and publishes the result under the full tag. You can find its build ID and status in **Cloud Build → History**. In **Artifact Registry → Repositories**, open your repository, select **fastapi** and find `v1` in the **Tags** column. Open the version in that row to see its full `sha256:…` digest. Record the image reference and digest, as you did in Week 6.
+
+![Artifact Registry version list for the fastapi image includes the v1 and v2 tags](../assets/console-07-fastapi-image.jpg)
+
+*The completed demonstration shows both tags. At this stage, your own repository needs `v1`. You build `v2` in step 7.*
+
+### Configure and apply the manifests
+
+A Kubernetes manifest is a YAML file declaring the configuration you want. Review the two files before you apply them.
+
+| File | What to look for |
+| --- | --- |
+| [`k8s/deployment.yaml`](k8s/deployment.yaml) | `replicas: 1` requests one Pod. The Pod template supplies the image and the label `app: fastapi`. The readiness probe checks `/health` before the Pod receives Service traffic. If the liveness check fails repeatedly, Kubernetes restarts the container. |
+| [`k8s/service.yaml`](k8s/service.yaml) | The `ClusterIP` Service has an internal address. The selector `app: fastapi` matches the Pod label. The Service listens on port `80` and forwards to the named `http` port, which is `8080` in the Deployment. |
+
+In the Cloud Shell toolbar, click **Open Editor** (it may be labelled **Editor**). Use the Explorer to open the `week7-cc/class-7/lab` folder from your home directory. If needed, use **File → Open Folder**. Open `k8s/deployment.yaml`, replace only `LAB7_IMAGE` with your full image reference ending in `/fastapi:v1`, and save. Leave the indentation and `replicas: 1` as they are. Your line will have this form, with your own project and repository:
+
+```yaml
+          image: europe-west1-docker.pkg.dev/YOUR_PROJECT_ID/YOUR_REPOSITORY/fastapi:v1
+```
+
+Return to the Cloud Shell terminal. From `class-7/lab`, check the context and the saved image line before applying both files.
+
+```bash
+kubectl config current-context
+grep 'image:' k8s/deployment.yaml
+```
+
+If the context is your cluster and the image points to your repository, continue:
+
+```bash
+kubectl apply -f k8s/
+kubectl rollout status deployment/fastapi --timeout=10m
 kubectl get pods -l app=fastapi
+kubectl get service fastapi
 ```
 
-The first Pod can take a few minutes while Autopilot provisions a node. Continue when the Deployment reports `1/1` ready, the Pod is `Running` with `1/1` ready, and the Service type is `ClusterIP`.
+Expect a successful rollout, one Pod with `1/1` and `Running`, and a `ClusterIP` Service named `fastapi` with port `80/TCP`. Open **Kubernetes Engine → Workloads** and find the `fastapi` Deployment on your cluster in the `default` namespace. The **Pods** column should show **1/1**.
 
-![The FastAPI Deployment and Pod are ready, and ClusterIP Service is present on port 80](../assets/07-workload.png)
+![GKE Workloads lists the fastapi Deployment with one ready Pod](../assets/console-08-fastapi-one.jpg)
 
-*Kubernetes reports one ready Pod and an internal Service on port `80`.*
+*The Workloads page shows one ready replica out of one requested.*
 
 <details>
-<summary>🟨 Common pitfalls</summary>
+<summary>Common pitfalls</summary>
 
-- **The Pod stays `Pending` or rollout times out.** Run `kubectl describe pods -l app=fastapi` and read **Events**. If GKE is provisioning a node, give it a few more minutes and rerun `kubectl rollout status deployment/fastapi --timeout=15m`.
-- **`ErrImagePull` or `ImagePullBackOff`.** Check **Events** and run `gcloud artifacts docker images list "$IMAGE" --include-tags --project="$PROJECT_ID"` to confirm the full URI and `v1` tag. Apply the Deployment using the `sed` command above so the manifest gets the real image URI. If events show permission denied, ask your admin for Artifact Registry Reader on the repository for the GKE node service account. [GKE node service account setup](https://docs.cloud.google.com/kubernetes-engine/security/configure-node-service-accounts)
-- **The container keeps restarting.** Run `kubectl logs deployment/fastapi --previous`. Check that Uvicorn starts and listens on container port `8080`. Pod events show whether the `/health` probe failed.
+- **Cloud Build reports a failed upload or push.** Check the project ID, region and repository name. Open the build in **Cloud Build → History** if it has a build ID and read the first error. Ask your tutor to check source upload, build service account or Artifact Registry permissions if the error says permission denied. [Cloud Build troubleshooting](https://docs.cloud.google.com/build/docs/troubleshooting).
+- **The terminal reports a log streaming error.** Check **Cloud Build → History** for the actual build result and continue after the build succeeds and the tag appears.
+- **The Pod is Pending, shows ImagePullBackOff, or keeps restarting.** Run `kubectl describe pods -l app=fastapi` and read **Events** near the bottom. Check node readiness for a scheduling error. For an image pull error, compare the image line with the registry tag exactly. Ask your tutor to check the GKE node service account's registry access if the event says permission denied. For a restart, run `kubectl logs deployment/fastapi` and look for a startup error.
+- **The Editor cannot find the file.** From `class-7/lab`, use `cloudshell edit k8s/deployment.yaml` to open it directly. Save before applying.
 
 </details>
 
-## 5. Open the API
+## 5. Test the API in your browser
 
-Keep this command running in your first Cloud Shell terminal. It opens Cloud Shell port `8080`. Kubernetes chooses a Pod behind the Service and uses the mapping from Service port `80` to Pod port `8080`.
+In Week 6, Docker's `-p 80:8000` mapped the VM's port `80` to the container's port `8000`. This week, the internal Service maps port `80` to the FastAPI container's port `8080`. Open a temporary tunnel from Cloud Shell to check the app before you give it a public address.
+
+| Where | Port | What it does |
+| --- | --- | --- |
+| Cloud Shell | `8080` | Receives the browser requests from Web Preview. |
+| Kubernetes Service | `80` | The port you give to `kubectl port-forward` when naming the Service. |
+| FastAPI container | `8080` | The destination port where Uvicorn handles the request. |
 
 ```bash
 kubectl port-forward service/fastapi 8080:80
 ```
 
-When you see `Forwarding from 127.0.0.1:8080`, click **+ Add Cloud Shell Session** to open a second terminal tab on the same Cloud Shell VM. Run the checks there.
+Leave this command running. Here `8080:80` means **Cloud Shell port 8080 → Service port 80**. Kubernetes uses the Service to select one Pod and forwards the tunnel to that Pod's `8080` port.
 
-```bash
-curl -fsS http://127.0.0.1:8080/
-echo
-curl -fsS http://127.0.0.1:8080/health
-echo
-```
+1. In the Cloud Shell toolbar, click **Web Preview → Preview on port 8080**. This opens a new browser tab through Google's preview proxy.
+2. Check the response at the base URL. It should contain `{"message":"Hello from FastAPI on Kubernetes"}`. Set the URL path to `/health`, keeping the same hostname, and check for `{"status":"ok"}`.
+3. Replace `/health` with `/docs`, expand **GET /health**, then click **Try it out → Execute**. Confirm the status code is `200` and the response body contains `"status": "ok"`.
 
-```text
-{"message":"Hello from FastAPI on Kubernetes"}
-{"status":"ok"}
-```
+![FastAPI Swagger UI reports HTTP 200 and status ok for GET /health](../assets/console-12-api-docs.jpg)
 
-![Kubernetes port-forward opens on localhost and both FastAPI curl requests return JSON](../assets/08-port-forward.png)
+*The documentation shows the response code and JSON body. Your Web Preview address is specific to your Cloud Shell session.*
 
-*Both routes return the expected JSON through the tunnel.*
-
-For the browser check, click **Web Preview → Preview on port 8080** in Cloud Shell. Add `/docs` to the preview URL to open Swagger UI. Expand **GET /health**, click **Try it out**, then click **Execute** to see the HTTP `200` response.
-
-![FastAPI Swagger UI shows HTTP 200 and a status of ok for GET /health](../assets/09-api-docs.png)
-
-*This screenshot uses a local port-forward. In Cloud Shell, Web Preview opens a proxy hostname and Swagger UI sends the same `GET /health` request.*
+Capture the result for your lab notes, then return to the Cloud Shell terminal and press **Ctrl+C** to stop the tunnel. The Pods and Service will keep running.
 
 <details>
-<summary>🟨 Common pitfalls</summary>
+<summary>Common pitfalls</summary>
 
-- **`curl` says connection refused or the preview stops loading.** Run curl in the second **Cloud Shell** tab. Keep `kubectl port-forward` running in the first tab. If its selected Pod was replaced, run `kubectl get pods -l app=fastapi`, wait for a ready Pod and restart the forward. If you ran the forward on your own computer, browse to `http://127.0.0.1:8080/docs` on that computer.
-- **`address already in use`.** Stop the earlier port-forward with **Ctrl+C** in its tab or choose a free local port with `kubectl port-forward service/fastapi 8081:80`. Use `8081` in your curl URLs and choose **Web Preview → Change port** for the browser check. Keep the Service port after the colon at `80`.
+- **The browser preview fails.** Check that the port-forward is still running. If its Pod was replaced, wait for a ready Pod and run the forward again. If you open a second terminal tab from the same Cloud Shell toolbar, you can check directly with `curl -i http://127.0.0.1:8080/health`.
+- **The preview menu is missing.** In a second Cloud Shell terminal tab, run `printf 'https://8080-%s/docs\n' "$WEB_HOST"` and open the printed address while the forward runs. [Cloud Shell preview URLs](https://docs.cloud.google.com/shell/docs/using-web-preview).
+- **Port 8080 is in use.** Stop a previous port-forward, or run `kubectl port-forward service/fastapi 8081:80` and select **Web Preview → Change port** to enter `8081`.
 
 </details>
 
-Return to the first terminal and press **Ctrl+C** to close the port-forward before continuing.
+## 6. Scale to two replicas
 
-## 6. Scale the app and roll out a new version
+In Cloud Shell Editor open `k8s/deployment.yaml`. Change the existing `replicas: 1` under the Deployment's `spec` to `replicas: 2` and save. Keep the `v1` image reference in place.
 
-This practice app is stateless, so you can run identical copies. Ask the Deployment for two replicas and wait for both Pods to show `1/1` ready.
+```yaml
+spec:
+  replicas: 2
+```
+
+Reapply the Deployment and check it:
 
 ```bash
-kubectl scale deployment/fastapi --replicas=2
+kubectl apply -f k8s/deployment.yaml
 kubectl rollout status deployment/fastapi --timeout=10m
-kubectl get pods -l app=fastapi
+kubectl get pods -l app=fastapi -o wide
+kubectl get endpointslices -l kubernetes.io/service-name=fastapi
 ```
 
-![Kubernetes lists two FastAPI Pods, both Running and ready](../assets/10-scale.png)
+Both Pods should be `Running` with `1/1` under `READY`. The `-o wide` output shows each Pod's IP and worker node. Both Pods can run on the same worker in this lab. **Horizontal scaling** adds application replicas. This exercise leaves the worker count at one.
 
-*The Deployment has created a second ready Pod.*
+The EndpointSlice output should include both Pod IPs under `ENDPOINTS`. EndpointSlices track the addresses and availability of Pods for a Service. Compare the addresses with the preceding Pod output. If you see only one address, wait a few seconds and run the EndpointSlice command again. A browser refresh through the port-forward still goes to the single Pod selected for that tunnel.
 
-Copy the app to a temporary folder, then change the greeting in the copy. Build a new tag and update the Deployment to use it.
+Refresh **Kubernetes Engine → Workloads** and check **2/2** in the **Pods** column for `fastapi`.
+
+![GKE Workloads lists the fastapi Deployment with two ready Pods](../assets/console-09-fastapi-two.jpg)
+
+*The same Deployment now shows two ready replicas out of two requested.*
+
+If the count stays at one, check that you saved and applied the same manifest. For a Pod that stays Pending, run `kubectl describe pods -l app=fastapi` and check **Events** for the scheduling reason.
+
+If you chose practice option A, do the [Pod replacement exercise](exercise.md) now, while your two replicas are running. Then return for the version 2 update.
+
+## 7. Roll out version 2
+
+1. In Cloud Shell Editor, open `app/main.py`. In the `home()` function, change the return line as shown and save the file.
+
+   ```python
+       return {"message": "Hello from FastAPI v2 on Kubernetes"}
+   ```
+
+2. From `class-7/lab`, build and publish with a new tag. If you opened a new terminal, set the variables from [step 4](#build-and-publish-version-1) first.
 
 ```bash
-V2_DIR="$(mktemp -d)"
-cp -R app "$V2_DIR/app"
-sed 's/Hello from FastAPI on Kubernetes/Hello from FastAPI v2 on Kubernetes/' \
-  app/main.py > "$V2_DIR/app/main.py"
-
-gcloud builds submit "$V2_DIR/app" \
-  --tag="${IMAGE}:v2" \
-  --region="$REGION" \
-  --project="$PROJECT_ID"
+gcloud builds submit ./app --tag="${IMAGE_BASE}:v2" \
+  --project="$PROJECT_ID" --region="$REGION"
 ```
 
-Wait for Cloud Build to report `SUCCESS`, then update the Deployment.
+Wait for `SUCCESS` and confirm that Artifact Registry shows `v2`. In `k8s/deployment.yaml`, change the image tag from `:v1` to `:v2`, keep `replicas: 2`, and save. Apply and check the update:
 
 ```bash
-kubectl set image deployment/fastapi fastapi="${IMAGE}:v2"
+kubectl apply -f k8s/deployment.yaml
 kubectl rollout status deployment/fastapi --timeout=10m
-kubectl get deployment/fastapi
+kubectl get replicasets -l app=fastapi
+kubectl describe deployment fastapi
 ```
 
-Kubernetes starts Pods with the new image and retires the old Pods during a rolling update. Start the port-forward again and repeat the curl commands from [step 5](#5-open-the-api). The root route should now return `{"message":"Hello from FastAPI v2 on Kubernetes"}` and `/health` should still return `{"status":"ok"}`. Press **Ctrl+C** in the forwarding terminal when you finish.
+The default **RollingUpdate** strategy adds Pods with the new image and retires the old Pods as the replacement becomes ready. The ReplicaSets, which manage groups of matching Pods for each revision, should show the new one with two ready replicas and the old one with zero. Check the `Image:` line in the Deployment output for `:v2`.
 
-![Version 2 builds successfully, the Deployment shows 2/2 ready, and the forwarded API returns the v2 greeting](../assets/11-rollout.png)
+Restart the port-forward and open Web Preview again:
 
-*Both replicas are ready after the update. The forwarded API returns the `v2` greeting.*
+```bash
+kubectl port-forward service/fastapi 8080:80
+```
 
-<details>
-<summary>🟨 Common pitfalls</summary>
+The base URL now returns `{"message":"Hello from FastAPI v2 on Kubernetes"}`. Use `/docs` to check that `GET /health` still returns `200` with `{"status":"ok"}`. Capture the changed response and stop the tunnel with **Ctrl+C**.
 
-- **The old greeting remains or you resumed after `v2`.** Check `Image:` in `kubectl describe deployment fastapi`. Applying the original manifest in step 4 restores `v1` and one replica. To resume an existing `v2` rollout, check its status, then start a fresh forward to a ready Pod. For a further code change, use a fresh tag in both the build and `set image` commands. Pushing new content to the same tag leaves the Deployment's image setting unchanged. [Kubernetes image updates](https://kubernetes.io/docs/concepts/containers/images/#updating-images)
-- **The new rollout fails.** Inspect the Pod events as in step 4. If you need to restore the previous Deployment revision, run `kubectl rollout undo deployment/fastapi` and then `kubectl rollout status deployment/fastapi --timeout=10m`.
+![Browser response from the updated FastAPI app showing the v2 greeting](../assets/console-13-fastapi-v2.jpg)
 
-</details>
+If you see the old message, check the `v2` build status, the saved image tag and the rollout result. Start a fresh tunnel after the rollout completes. If you used `8081` in step 5, you can reuse that port for the tunnel and preview here.
 
-### Optional public LoadBalancer exercise
+## 8. Try a public LoadBalancer
 
-The [coursework deployment](../../assignment/03-testing-and-deployment.md#kubernetes-deployment-requirements) uses a LoadBalancer Service. Try it with this demo app. Google Cloud provisions a public HTTP endpoint that can incur charges while it runs. Use demo data and follow cleanup after the check.
+Do this exercise if your course project permits a public load balancer. A `LoadBalancer` Service asks GKE to provision a Google Cloud load balancer with an external IP. Anyone who can reach that IP can call this demo API over HTTP. Use the supplied app and remove the public Service after testing.
+
+Create a second Service that selects the same two Pods. It publishes port `80` and uses port `8080` in the containers:
 
 ```bash
 kubectl expose deployment fastapi --name=fastapi-public \
@@ -301,84 +320,82 @@ kubectl expose deployment fastapi --name=fastapi-public \
 kubectl get service fastapi-public --watch
 ```
 
-Wait for an address under `EXTERNAL-IP`, then press **Ctrl+C** to leave the watch. Replace `EXTERNAL_IP` with that address.
+Wait for a value in `EXTERNAL-IP` and press **Ctrl+C** to stop watching. In the Cloud Console, open **Kubernetes Engine → Networking → Gateways, Services and Ingress** and select the **Services** tab. Find `fastapi-public` on your cluster. Its row should show **External load balancer**, an address under **Endpoints** and **2/2** under **Pods**.
+
+![GKE Services lists fastapi-public as an external load balancer with two ready Pods](../assets/console-11-load-balancer.jpg)
+
+*The demonstration IP is obscured. Use the external IP in your own Service row or in the terminal's `EXTERNAL-IP` column.*
+
+In a browser tab, visit `http://EXTERNAL_IP/` and `http://EXTERNAL_IP/health`, using your Service's actual IP. You should see the version 2 message and then `{"status":"ok"}`. Use `http://`. If the browser forces HTTPS, check via Cloud Shell while substituting your real IP in the command:
 
 ```bash
-curl -fsS http://EXTERNAL_IP/health
-echo
+curl -i --max-time 10 http://EXTERNAL_IP/health
 ```
 
-Expect `{"status":"ok"}`.
+Expect HTTP `200`. This request works without a port-forward because the public address belongs to the load balancer. Both Pods return identical responses, so use their logs to see which one served each request.
 
-![The public LoadBalancer Service has an external IP and the health request returns ok](../assets/12-load-balancer.png)
-
-*The external IP reaches the API on HTTP port `80`.*
+If the IP remains `<pending>` after several minutes, check **Events** in the Service details or run `kubectl describe service fastapi-public`. A public address can be blocked by policy or quota. If the IP appears but requests time out, wait briefly for the load balancer to finish setting up and retry over HTTP.
 
 <details>
-<summary>🟨 Common pitfalls</summary>
+<summary>See how requests reach the two Pods (optional)</summary>
 
-- **`EXTERNAL-IP` stays `<pending>`.** Run `kubectl describe service fastapi-public` and look under **Events** for provisioning progress or a project restriction. You can finish the lab with the port-forward checks and proceed to cleanup if the public Service remains unavailable.
-- **There is an IP but the connection is refused or times out.** The IP can appear while Google Cloud is still configuring the load balancer. Wait a minute and retry using `http://` and the external IP in the Service output.
+In Cloud Shell, replace `your-external-ip` with the Service's actual IPv4 address. Run the block in one terminal. The loop makes 20 separate HTTP requests. Each URL includes a marker you can find in the access logs.
+
+```bash
+EXTERNAL_IP=your-external-ip
+RUN_ID=$(date +%s)
+
+for request in {1..20}; do
+  curl --fail --silent --show-error --max-time 10 \
+    --output /dev/null --write-out '%{http_code}\n' \
+    "http://${EXTERNAL_IP}/health?lab7-check=${RUN_ID}-${request}"
+done
+```
+
+Expect 20 lines that each say `200`. Now find this run's log entries and count them by Pod:
+
+```bash
+kubectl logs -l app=fastapi --prefix=true --tail=-1 \
+  | grep -F "lab7-check=${RUN_ID}-" \
+  | awk '{print $1}' \
+  | sort | uniq -c
+```
+
+Each line shows a request count and a Pod name. The demonstration returned HTTP `200` for all 20 requests. One Pod handled 13 and the other handled 7. Your split can differ. A single successful response shows the public endpoint works. The log counts show which Pods handled the batch.
 
 </details>
 
-## 7. Cleanup
-
-Capture the ready Pods and the API responses for your lab record. If a port-forward is still running, close it with **Ctrl+C**. Check the names against the values you saved when you created your lab resources. If you deployed the app, look up the Kubernetes context for that cluster.
+After collecting evidence, delete the public Service even if it is still pending. Wait for deletion to complete before deleting the cluster.
 
 ```bash
-printf '%s / %s / %s / %s\n' "$PROJECT_ID" "$REGION" "$CLUSTER" "$REPOSITORY"
-LAB_CONTEXT="gke_${PROJECT_ID}_${REGION}_${CLUSTER}"
-kubectl config get-contexts "$LAB_CONTEXT"
+kubectl delete service fastapi-public --wait=true --timeout=10m
+kubectl get services
 ```
 
-Use that context to delete any public Service first, then the internal Service and Deployment. Wait for the public Service deletion to finish so GKE can remove the load balancer.
+## 9. Clean up
 
-```bash
-kubectl --context="${LAB_CONTEXT:?Run the context check above first}" --namespace=default \
-  delete service/fastapi-public --ignore-not-found --timeout=5m
-kubectl --context="${LAB_CONTEXT:?Run the context check above first}" --namespace=default \
-  delete service/fastapi deployment/fastapi --ignore-not-found
-```
+Save your evidence first, including the deployed image tag, the successful health check, two ready Pods and the version 2 response. If you tried the public LoadBalancer, confirm the `fastapi-public` Service is gone. If any port-forward is still running, stop it with **Ctrl+C**.
 
-Delete the cluster and Docker repository you created for this lab. The repository deletion also removes its stored images and tags. Confirm each deletion when prompted.
+1. Confirm the Console project picker shows your course project. Open **Kubernetes Engine → Clusters**, find your lab cluster by its exact name, use **⋮ → Delete** and confirm. Wait for the cluster to disappear from the list. Deleting the cluster also removes its worker node and the Deployment and Service inside it.
+2. Open **Artifact Registry → Repositories**, select only the Docker repository you created for the lab, then click **Delete** and confirm. This removes its stored images and tags.
+3. Refresh both lists and confirm that your exact cluster and repository names are gone. If deletion is blocked, read the displayed error. Ask your tutor about a permission issue or turn off deletion protection if it was enabled on your disposable lab cluster.
 
-```bash
-gcloud container clusters delete "$CLUSTER" \
-  --location="$REGION" --project="$PROJECT_ID"
+![GKE Clusters list after the demonstration cluster was deleted](../assets/console-10-cleanup.jpg)
 
-gcloud artifacts repositories delete "$REPOSITORY" \
-  --location="$REGION" --project="$PROJECT_ID"
-```
+*Other clusters may remain visible in a shared project. Verify the disappearance of your exact lab cluster.*
 
-List resources in your project and check that your cluster and repository are gone.
+Cloud Build can store uploaded source archives in a project staging bucket. On a shared course project, leave the bucket and enabled APIs in place. If your tutor has asked you to remove individual build archives, identify your own objects by the exact `gs://…` paths printed when you submit your builds.
 
-```bash
-gcloud container clusters list --project="$PROJECT_ID"
-gcloud artifacts repositories list --location="$REGION" --project="$PROJECT_ID"
-```
+### Checkpoint
 
-![CLI output confirming the FastAPI resources, GKE cluster, and Artifact Registry repository were deleted](../assets/13-cleanup.png)
+- [ ] I built and published a tagged image and can find it in Artifact Registry.
+- [ ] I used `kubectl` to verify the node, Deployment, Pods and Service in my lab cluster.
+- [ ] I saw HTTP `200` and `{"status":"ok"}` through the Cloud Shell preview.
+- [ ] I matched two Pod IPs to the Service endpoints after scaling.
+- [ ] I built `v2`, completed the rollout and checked the new response in my browser.
+- [ ] I can explain how a temporary preview differs from a public LoadBalancer endpoint.
+- [ ] I confirmed my lab cluster, repository and any public Service are gone.
 
-*The cluster and repository are gone from the test project.*
+Use your saved evidence and the supplied manifests for [Homework 1](../homework/homework-1.md) after cleanup.
 
-Cloud Build can retain source archives and logs in Cloud Storage. In a shared course project, ask the project owner about the retention policy for those files.
-
-<details>
-<summary>🟨 Common pitfalls</summary>
-
-- **You stopped partway through the lab.** If your cluster still exists and the context is missing, rerun `get-credentials` from step 3 and check the context again. If you never deployed the app, skip the `kubectl delete` commands. If the cluster is already gone, continue with the Artifact Registry commands.
-- **A delete command says `NOT_FOUND`.** Check the project, region and names with `echo "$PROJECT_ID / $REGION / $CLUSTER / $REPOSITORY"`. Use the two list commands above to confirm the resources you created are absent. If you changed tabs, rerun the exports from step 1 with your original values.
-
-</details>
-
-### Checklist
-
-- [ ] Artifact Registry shows the FastAPI Docker image tagged `v1`.
-- [ ] `kubectl` connects to my Autopilot cluster and shows the ready Deployment, Pod and Service.
-- [ ] The forwarded API returns the expected greeting and a healthy status.
-- [ ] The Deployment runs two ready Pods and the rolled-out image returns the `v2` greeting.
-- [ ] If I tried the LoadBalancer, its public address returned the health response.
-- [ ] My GKE cluster and Artifact Registry repository have been deleted.
-
-[Create a GKE Autopilot cluster](https://docs.cloud.google.com/kubernetes-engine/docs/how-to/creating-an-autopilot-cluster) · [Build a Docker image with Cloud Build](https://docs.cloud.google.com/build/docs/build-push-docker-image) · [Use Cloud Shell Web Preview](https://docs.cloud.google.com/shell/docs/using-web-preview)
+[Cloud Shell Web Preview](https://docs.cloud.google.com/shell/docs/using-web-preview) · [Kubernetes Deployments](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/) · [Kubernetes Services](https://kubernetes.io/docs/concepts/services-networking/service/)
