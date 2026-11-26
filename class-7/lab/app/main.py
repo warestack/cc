@@ -5,7 +5,7 @@ app = FastAPI(title="FastAPI on Kubernetes")
 
 @app.get("/")
 def home():
-    return {"message": "Hello from FastAPI on Kubernetes"}
+    return {"message": "Hello from FastAPI v2 on Kubernetes"}
 
 
 @app.get("/health")
